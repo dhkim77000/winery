@@ -322,10 +322,28 @@ if __name__ == '__main__':
     with open('/opt/ml/wine/data/urls.pkl', 'rb') as f: urls = pickle.load(f)
     urls = list(urls)
 
-    def list_chunk(lst, n):
-        return [lst[i:i+n] for i in range(0, len(lst), n)]
+    def split_list(lst, n):
+        # Calculate the length of each sublist
+        sublist_length = len(lst) // n
+        # Determine the remaining elements
+        remaining_elements = len(lst) % n
+        # Initialize the starting index
+        index = 0
+        # Create sublists
+        sublists = []
+        for i in range(n):
+            # Calculate the sublist size
+            size = sublist_length + (1 if i < remaining_elements else 0)
+            # Extract sublist from the original list
+            sublist = lst[index:index+size]
+            # Add the sublist to the result
+            sublists.append(sublist)
+            # Update the starting index for the next sublist
+            index += size
+        return sublists
 
-    urls_for_me = list_chunk(urls, 5)[my_idx]
+    urls_for_me = split_list(urls, n)[my_idx]
+
     try:
         with open('/opt/ml/wine/data/review_done.pkl', 'rb') as f: done  = pickle.load(f)
     except: done = set()
