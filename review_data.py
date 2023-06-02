@@ -144,7 +144,8 @@ def close_chat(driver):
 def get_reaction(review):
     try:
         reaction_area_class = "communityReview__userActions--2RDK9"
-        reaction_area = review.find_element(By.CLASS_NAME, reaction_area_class.replace(' ',''))
+        
+        reaction_area = WebDriverWait(review, 2).until(EC.visibility_of_element_located((By.CLASS_NAME, reaction_area_class.replace(' ',''))))
         reaction_info = reaction_area.find_elements(By.TAG_NAME, 'a')
         
         if len(reaction_info) == 2:
@@ -162,7 +163,7 @@ def get_reaction(review):
 def get_user_info(review):
     try:
         user_info_class = "communityReview__textInfo--7SzS6"
-        user_area = review.find_element(By.CLASS_NAME, user_info_class.replace(' ',''))
+        user_area = WebDriverWait(review, 3).until(EC.visibility_of_element_located((By.CLASS_NAME, user_info_class.replace(' ',''))))
         user_info = user_area.find_elements(By.TAG_NAME, 'a')
 
         if len(user_info) == 2:
@@ -183,11 +184,12 @@ def get_user_info(review):
 def get_text_rate(review):
     try:
         text_class = "communityReview__reviewText--2bfLj"
-        text = review.find_element(By.CLASS_NAME, text_class.replace(' ','')).text
+        text = WebDriverWait(review, 2).until(EC.visibility_of_element_located((By.CLASS_NAME, text_class.replace(' ','')))).text
     except: text = None
     
     try:
         rating_class = "userRating_ratingNumber__cMtKU"
+        WebDriverWait(review, 2).until(EC.visibility_of_element_located((By.CLASS_NAME, rating_class.replace(' ',''))))
         rating = float(review.find_element(By.CLASS_NAME, rating_class.replace(' ','')).text)
     except: rating = None
     
@@ -207,11 +209,14 @@ def get_review_info(review):
     return data
 
 def get_all_reviews(reviews, wine_url):
+
     review_datas = []
     for review in tqdm(reviews):
+
         review_dict = get_review_info(review)
         review_dict['wine_url'] = wine_url
         review_datas.append(review_dict)
+        time.sleep(0.2)
     return review_datas
    
 def find_all_reviews(driver):
@@ -221,13 +226,13 @@ def find_all_reviews(driver):
     print('-----Finding-----')
     pbar = tqdm(total=50)
 
-    while stop_count < 5:
+    while stop_count < 7:
         ActionChains(driver).scroll_by_amount(0, 10000).perform()
         review_area = driver.find_element(By.CLASS_NAME, 'allReviews__reviews--EpUem'.replace(' ',''))
         reviews = driver.find_elements(By.CLASS_NAME, "communityReviewItem__reviewCard--1RupJ".replace(' ',''))
         if len(reviews) == prv:
             stop_count += 1
-            time.sleep(1.5)
+            time.sleep(2)
         else:
             stop_count = 0
         time.sleep(0.3)
@@ -252,7 +257,7 @@ def wine_interaction(driver, url):
     if click_more_review(driver):
         
         driver.set_window_size(360, 1080)
-        driver.execute_script("document.body.style.zoom='40%'")
+        driver.execute_script("document.body.style.zoom='30%'")
  
         reviews = find_all_reviews(driver)
         
@@ -320,7 +325,6 @@ if __name__ == '__main__':
 
 
     with open('/opt/ml/wine/data/urls.json', 'r') as f: urls = json.load(f)
-    urls = list(urls)
 
     def split_list(lst, n):
         # Calculate the length of each sublist
