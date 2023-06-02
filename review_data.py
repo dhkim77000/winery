@@ -280,9 +280,7 @@ def main(driver, urls, done, df):
 #------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------
 def write_data(write_file, datas):
-    
-    for data in datas:
-        write_file = pd.concat([write_file, pd.Series(data)], ignore_index=True)
+    write_file = pd.concat([write_file,  pd.DataFrame(datas)], ignore_index=True)
     return write_file
 
 
@@ -321,7 +319,7 @@ if __name__ == '__main__':
     my_idx = int(sys.argv[-1])
 
 
-    with open('/opt/ml/wine/data/urls.pkl', 'rb') as f: urls = pickle.load(f)
+    with open('/opt/ml/wine/data/urls.json', 'r') as f: urls = json.load(f)
     urls = list(urls)
 
     def split_list(lst, n):
