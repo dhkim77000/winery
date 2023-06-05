@@ -224,9 +224,9 @@ def find_all_reviews(driver):
     prv = 0
 
     print('-----Finding-----')
-    pbar = tqdm(total=50)
+    pbar = tqdm(total=300)
 
-    while stop_count < 7:
+    while stop_count < 5:
         ActionChains(driver).scroll_by_amount(0, 10000).perform()
         review_area = driver.find_element(By.CLASS_NAME, 'allReviews__reviews--EpUem'.replace(' ',''))
         reviews = driver.find_elements(By.CLASS_NAME, "communityReviewItem__reviewCard--1RupJ".replace(' ',''))
@@ -238,7 +238,7 @@ def find_all_reviews(driver):
         time.sleep(0.3)
         prv = len(reviews)
         pbar.update(1)
-
+        print(prv)
     pbar.close()
     print(f'-----Find {len(reviews)} reviews-----')
 
@@ -257,7 +257,7 @@ def wine_interaction(driver, url):
     if click_more_review(driver):
         
         driver.set_window_size(360, 1080)
-        driver.execute_script("document.body.style.zoom='30%'")
+        driver.execute_script("document.body.style.zoom='20%'")
  
         reviews = find_all_reviews(driver)
         
@@ -278,6 +278,8 @@ def main(driver, urls, done, df):
             df = write_data(df, review)
             df.to_csv('/opt/ml/wine/data/review_df.csv', encoding = 'utf-8-sig',index= False)
             with open('/opt/ml/wine/data/review_done.pkl','wb') as f: pickle.dump(done,f)
+
+            time.sleep(5)
 
     df = write_data(df, review)
     df.to_csv('/opt/ml/wine/data/review_df.csv', encoding = 'utf-8-sig',index= False)
