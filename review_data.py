@@ -273,9 +273,9 @@ def main(driver, urls, done, df):
         if url not in done:
     
             review = wine_interaction(driver, url)
-            done.add(url)
             print('----------------------Saving----------------------')
             df = write_data(df, review)
+            done.add(url)
             df.to_csv('/opt/ml/wine/data/review_df.csv', encoding = 'utf-8-sig',index= False)
             with open('/opt/ml/wine/data/review_done.pkl','wb') as f: pickle.dump(done,f)
 
