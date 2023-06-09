@@ -237,6 +237,7 @@ def find_all_reviews(driver):
             stop_count = 0
         time.sleep(0.3)
         prv = len(reviews)
+        if prv >= 2000: break
         pbar.update(1)
         print(prv)
     pbar.close()
@@ -245,7 +246,11 @@ def find_all_reviews(driver):
     return reviews
 #------------------------------------------------------------------------------------------------
 def wine_interaction(driver, url):
-    driver.get(url)
+    try:
+        driver.get(url)
+    except:
+        driver = get_driver(chrome_options, url)
+    
     selenium_scroll_down(driver)
     time.sleep(2)
     close_chat(driver)
