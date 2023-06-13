@@ -11,6 +11,10 @@ from joblib import Parallel, delayed
 import json
 import os
 from tqdm import tqdm
+from pyspark.sql import SparkSession
+import os, pdb
+from datetime import datetime
+import pickle
 
 def drop_columns(df):
     to_drop = ['Red Fruit','Tropical','Tree Fruit','Oaky',
@@ -35,7 +39,7 @@ def fill_na(df):
     with open('/opt/ml/wine/code/data/meta_data/dict_columns.json','r',encoding='utf-8') as f:  
         col = json.load(f)
         df[col] = df[col].fillna('{}')
-    with open('/opt/ml/wine/code/data/meta_data/list_columns.json','r',encoding='utf-8') as f:  
+    with open('/opt/ml/wine/code/data/meta_data/seq_columns.json','r',encoding='utf-8') as f:  
         col = json.load(f)
         df[col] = df[col].fillna('[]')
     return df
@@ -56,12 +60,12 @@ def feature_mapper(df, column):
     feature2idx = {f:i for i, f in enumerate(unique_val)}
     idx2feature = {i:f for i, f in enumerate(unique_val)}
 
-    if not os.path.exists('/opt/ml/wine/code/meta_data/'): 
-        os.makedirs('/opt/ml/wine/code/meta_data/')
+    if not os.path.exists('/opt/ml/wine/code/data/feature_map/'): 
+        os.makedirs('/opt/ml/wine/code/data/feature_map/')
 
-    with open(f'/opt/ml/wine/code/feature_map/{column}2idx.json','w',encoding='utf-8') as f:  
+    with open(f'/opt/ml/wine/code/data/feature_map/{column}2idx.json','w',encoding='utf-8') as f:  
         json.dump(feature2idx, f, ensure_ascii=False)
-    with open(f'/opt/ml/wine/code/feature_map/idx2{column}.json','w',encoding='utf-8') as f:  
+    with open(f'/opt/ml/wine/code/data/feature_map/idx2{column}.json','w',encoding='utf-8') as f:  
         json.dump(idx2feature, f, ensure_ascii=False)
 
     return feature2idx, idx2feature
@@ -77,12 +81,12 @@ def list_feature_mapper(df, column):
     feature2idx = {f:i for i, f in enumerate(unique_val)}
     idx2feature = {i:f for i, f in enumerate(unique_val)}
 
-    if not os.path.exists('/opt/ml/wine/code/meta_data/'): 
-        os.makedirs('/opt/ml/wine/code/meta_data/')
+    if not os.path.exists('/opt/ml/wine/code/data/feature_map/'): 
+        os.makedirs('/opt/ml/wine/code/data/feature_map/')
 
-    with open(f'/opt/ml/wine/code/feature_map/{column}2idx.json','w',encoding='utf-8') as f:  
+    with open(f'/opt/ml/wine/code/data/feature_map/{column}2idx.json','w',encoding='utf-8') as f:  
         json.dump(feature2idx, f, ensure_ascii=False)
-    with open(f'/opt/ml/wine/code/feature_map/idx2{column}.json','w',encoding='utf-8') as f:  
+    with open(f'/opt/ml/wine/code/data/feature_map/idx2{column}.json','w',encoding='utf-8') as f:  
         json.dump(idx2feature, f, ensure_ascii=False)
 
     return df, feature2idx, idx2feature
@@ -120,12 +124,12 @@ def note_mapper(df, note_col):
     feature2idx = {f:i for i, f in enumerate(unique_val)}
     idx2feature = {i:f for i, f in enumerate(unique_val)}
 
-    if not os.path.exists('/opt/ml/wine/code/meta_data/'): 
-        os.makedirs('/opt/ml/wine/code/meta_data/')
+    if not os.path.exists('/opt/ml/wine/code/data/feature_map/'): 
+        os.makedirs('/opt/ml/wine/code/data/feature_map/')
 
-    with open(f'/opt/ml/wine/code/feature_map/{note}2idx.json','w',encoding='utf-8') as f:  
+    with open(f'/opt/ml/wine/code/data/feature_map/{note}2idx.json','w',encoding='utf-8') as f:  
         json.dump(feature2idx, f, ensure_ascii=False)
-    with open(f'/opt/ml/wine/code/feature_map/idx2{note}.json','w',encoding='utf-8') as f:  
+    with open(f'/opt/ml/wine/code/data/feature_map/idx2{note}.json','w',encoding='utf-8') as f:  
         json.dump(idx2feature, f, ensure_ascii=False)
 
     return feature2idx, idx2feature
@@ -138,6 +142,8 @@ def expand_notes(df):
     i = 0
     for note_col in tqdm(notes):
 
+
+        
         note_df = []
 
         feature2idx, idx2feature = note_mapper(df, note_col)
@@ -151,7 +157,7 @@ def expand_notes(df):
             note_df.append(row_data)
         
         columns = [idx2feature[i] for i in range(len(idx2feature))]
-        note_df = pd.DataFrame(note_df, columns=columns)
+        note_df = pd.DataFrame(note_df, columns=columns, index = df.index)
 
         if i == 0:
             result = note_df
@@ -179,7 +185,8 @@ def crawl_review_to_csv(df):
     
     df = df[df['user_url'].isna()== False]
     tqdm.pandas()
-    df['date'] = df['date'].progress_apply(lambda x: pd.to_datetime(x))
+    df.loc[:,'date'] = df.loc[:,'date'].progress_apply(lambda x: pd.to_datetime(x))
+
     return df
 
 def parallel(func, df, num_cpu):
@@ -196,9 +203,132 @@ def parallel(func, df, num_cpu):
         else:
             result = pd.concat([result, data], axis = 0)
 
+    for c in result.columns:
+        if 'Unnamed:' in c:
+            result.drop(c, axis = 1, inplace= True)  
+
+
+    if 'user_url' in result.columns:
+
+        urls = result['user_url'].unique()
+        user2idx = {v:k for k,v in enumerate(urls)}
+        idx2user = {k:v for k,v in enumerate(urls)}
+
+        with open(f'/opt/ml/wine/code/data/feature_map/user2idx.json','w',encoding='utf-8') as f:  
+            json.dump(user2idx, f, ensure_ascii=False)
+        with open(f'/opt/ml/wine/code/data/feature_map/idx2user.json','w',encoding='utf-8') as f:  
+            json.dump(idx2user, f, ensure_ascii=False)
+
+    else:
+        urls = result['url'].unique()
+        item2idx = {v:k for k,v in enumerate(urls)}
+        idx2item = {k:v for k,v in enumerate(urls)}
+
+        with open(f'/opt/ml/wine/code/data/feature_map/item2idx.json','w',encoding='utf-8') as f:  
+            json.dump(item2idx, f, ensure_ascii=False)
+        with open(f'/opt/ml/wine/code/data/feature_map/idx2item.json','w',encoding='utf-8') as f:  
+            json.dump(idx2item, f, ensure_ascii=False)
+    
     return result
 
-if __name__ == '__main__':
+def to_recbole_columns(columns):
+
+    meta_data_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'meta_data')
+
+    float_path = os.path.join(meta_data_folder, 'float_columns.json' )
+    token_path = os.path.join(meta_data_folder, 'token_columns.json' )
+    seq_path = os.path.join(meta_data_folder, 'seq_columns.json' )
+
+    with open(float_path,'r',encoding='utf-8') as f:  float_columns = set(json.load(f))
+    with open(token_path,'r',encoding='utf-8') as f:  token_columns = set(json.load(f))
+    with open(seq_path,'r',encoding='utf-8') as f:  seq_columns = set(json.load(f))
+
+    recbole_columns = []
+    df = []
+    for c in columns:
+        if c in float_columns: recbole_columns.append(f'{c}:float')
+        elif c in token_columns: recbole_columns.append(f'{c}:token')
+        elif c in seq_columns: recbole_columns.append(f'{c}:token_seq')
+        else:
+            df.append(c)
+            recbole_columns.append(f'{c}:float')
+    
+
+    print("{df[:5]}... are defaulely assigned to token type")
+
+    return recbole_columns
+
+def load_index_file():
+
+    mapper_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'feature_map')
+
+    item2idx_path = 'item2idx.json'
+    item2idx_path = os.path.join(mapper_folder, item2idx_path)
+    idx2item_path = 'idx2item.json'
+    idx2item_path = os.path.join(mapper_folder, idx2item_path)
+
+    user2idx_path = 'user2idx.json'
+    user2idx_path = os.path.join(mapper_folder, user2idx_path)
+    idx2user_path = 'idx2user.json'
+    idx2user_path = os.path.join(mapper_folder, idx2user_path)
+
+    try:
+        with open(item2idx_path,'r',encoding='utf-8') as f:  item2idx = json.load(f)    
+        with open(user2idx_path,'r',encoding='utf-8') as f:  user2idx = json.load(f)
+        with open(idx2item_path,'r',encoding='utf-8') as f:  idx2item = json.load(f)
+        with open(idx2user_path,'r',encoding='utf-8') as f:  idx2user = json.load(f)
+    except:
+        train_rating, item2idx, user2idx, idx2item, idx2user = prepare_dataset()
+   
+
+    return item2idx, user2idx, idx2item, idx2user
+
+
+def load_data_file():
+    data_path = '/opt/ml/wine/data'
+    # train load
+    train_data = pd.read_csv(os.path.join(data_path, 'train_rating.csv'))
+    user_data = pd.read_csv(os.path.join(data_path, 'review_data.csv'))
+    item_data = pd.read_csv(os.path.join(data_path, 'item_data.csv')).loc[:, 'user_url']
+
+    return train_data, user_data, item_data
+
+def save_atomic_file(train_data, user_data, item_data):
+    dataset_name = 'train_data'
+    # train_data 컬럼명 변경
+    train_data.columns = to_recbole_columns(train_data.columns)
+    user_data.columns = to_recbole_columns(user_data.columns)
+    item_data.columns = to_recbole_columns(item_data.columns)
+
+    # to_csv
+    outpath = f"dataset/{dataset_name}"
+    os.makedirs(outpath, exist_ok=True)
+    train_data.to_csv(os.path.join(outpath,"train_data.inter"),sep='\t',index=False, encoding='utf-8-sig')
+    train_data.to_csv(os.path.join(outpath,"train_data.item"),sep='\t',index=False, encoding='utf-8-sig')
+
+
+def afterprocessing(sub,train):
+    # 날짜를 datetime 형식으로 변환
+    new_train = train.copy()
+    new_train['time'] = new_train['time'].apply(lambda x: datetime.fromtimestamp(x))
+
+    # 유저별 영화시청 마지막년도 추출
+    user_mv_idx= new_train.groupby('user')['time'].max().reset_index()
+    user_mv_idx['lastyear'] = user_mv_idx['time'].apply(lambda x : x.year)
+    user_mv_idx.drop('time',inplace = True ,axis=1)
+
+    # 영화 개봉년도와 유저시청년도 합친 데이터프레임 구축
+    years = pd.read_csv("/opt/ml/input/data/train/years.tsv",sep = '\t')
+    sub = pd.merge(sub,years, on = ['item'] , how = 'left')
+    sub = pd.merge(sub,user_mv_idx,on =['user'],how ='left')
+
+    # 늦게 개봉한 영화 제외하고 상위 10개 추출
+    sub = sub[sub['lastyear'] >= sub['year']]
+    sub = sub.groupby('user').head(10)[['user','item']]
+    return sub
+
+
+def prepare_dataset():
     num_cpu = os.cpu_count()
 
     crawled_item_data = pd.read_csv('/opt/ml/wine/data/wine_df.csv')
@@ -207,5 +337,31 @@ if __name__ == '__main__':
     item_data = parallel(crawl_item_to_csv, crawled_item_data,  num_cpu)
     review_data = parallel(crawl_review_to_csv, crawled_review_data,  num_cpu)
 
-    item_data.to_csv('/opt/ml/wine/data/item_data.csv', encoding='utf-8-sig')
-    review_data.to_csv('/opt/ml/wine/data/review_data.csv', encoding='utf-8-sig')
+
+    item2idx, user2idx, idx2item, idx2user = load_index_file()
+
+    item_data.loc[:, 'url'] = item_data.loc[:, 'url'].map(item2idx)
+
+    review_data.loc[:, 'wine_url'] = review_data.loc[:, 'wine_url'].map(item2idx)
+    review_data.loc[:, 'user_url'] = review_data.loc[:, 'user_url'].map(item2idx)
+
+
+    item_data.to_csv('/opt/ml/wine/data/item_data.csv', encoding='utf-8-sig', index=False)
+    review_data.to_csv('/opt/ml/wine/data/review_data.csv', encoding='utf-8-sig', index=False)
+    
+    print(f'Total {len(item_data)} items, {len(review_data)} interactions')
+
+    review_data.rename(columns={'rating': 'user_rating','date': 'timestamp'}, inplace=True)
+
+
+
+    train_rating = pd.merge(review_data.loc[:,['user_url','user_rating','timestamp','wine_url']],
+                            item_data.loc[:, 'url'],
+                            left_on = 'wine_url', right_on = 'url', how = 'inner')
+
+    train_rating.to_csv('/opt/ml/wine/data/train_rating.csv', encoding='utf-8-sig', index=False, header=True)
+
+    return train_rating, item2idx, user2idx, idx2item, idx2user
+
+if __name__ == '__main__':
+    prepare_dataset()
