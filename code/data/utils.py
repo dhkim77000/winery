@@ -20,9 +20,9 @@ def drop_columns(df):
     to_drop = ['Red Fruit','Tropical','Tree Fruit','Oaky',
                'Ageing','Black Fruit','Citrus','Dried Fruit','Earthy',
                'Floral','Microbio','Spices', 'Vegetal',
-               'Unnamed: 58', 'None_child', 'Unnamed: 60', 'Unnamed: 61', 
-               'Unnamed: 62', 'Unnamed: 63', 'Unnamed: 64']
-    
+               'Unnamed: 58', 'None_child', 'None_count', "None",
+                'Unnamed: 60', 'Unnamed: 61', 'Unnamed: 62', 'Unnamed: 63', 'Unnamed: 64']
+
     for c in to_drop:
         try:
             df.drop(c, axis = 1, inplace= True)  
@@ -254,7 +254,7 @@ def to_recbole_columns(columns):
             recbole_columns.append(f'{c}:float')
     
 
-    print("{df[:5]}... are defaulely assigned to token type")
+    print(f"{df[:5]}... are defaulely assigned to float type")
 
     return recbole_columns
 
@@ -284,29 +284,6 @@ def load_index_file():
     return item2idx, user2idx, idx2item, idx2user
 
 
-def load_data_file():
-    data_path = '/opt/ml/wine/data'
-    # train load
-    train_data = pd.read_csv(os.path.join(data_path, 'train_rating.csv'))
-    user_data = pd.read_csv(os.path.join(data_path, 'review_data.csv'))
-    item_data = pd.read_csv(os.path.join(data_path, 'item_data.csv')).loc[:, 'user_url']
-
-    return train_data, user_data, item_data
-
-def save_atomic_file(train_data, user_data, item_data):
-    dataset_name = 'train_data'
-    # train_data 컬럼명 변경
-    train_data.columns = to_recbole_columns(train_data.columns)
-    user_data.columns = to_recbole_columns(user_data.columns)
-    item_data.columns = to_recbole_columns(item_data.columns)
-
-    # to_csv
-    outpath = f"dataset/{dataset_name}"
-    os.makedirs(outpath, exist_ok=True)
-    train_data.to_csv(os.path.join(outpath,"train_data.inter"),sep='\t',index=False, encoding='utf-8-sig')
-    train_data.to_csv(os.path.join(outpath,"train_data.item"),sep='\t',index=False, encoding='utf-8-sig')
-
-
 def afterprocessing(sub,train):
     # 날짜를 datetime 형식으로 변환
     new_train = train.copy()
@@ -328,40 +305,7 @@ def afterprocessing(sub,train):
     return sub
 
 
-def prepare_dataset():
-    num_cpu = os.cpu_count()
+def feature_engineering():
+    ### 추가
+    return 
 
-    crawled_item_data = pd.read_csv('/opt/ml/wine/data/wine_df.csv')
-    crawled_review_data = pd.read_csv('/opt/ml/wine/data/review_df.csv')
-
-    item_data = parallel(crawl_item_to_csv, crawled_item_data,  num_cpu)
-    review_data = parallel(crawl_review_to_csv, crawled_review_data,  num_cpu)
-
-
-    item2idx, user2idx, idx2item, idx2user = load_index_file()
-
-    item_data.loc[:, 'url'] = item_data.loc[:, 'url'].map(item2idx)
-
-    review_data.loc[:, 'wine_url'] = review_data.loc[:, 'wine_url'].map(item2idx)
-    review_data.loc[:, 'user_url'] = review_data.loc[:, 'user_url'].map(item2idx)
-
-
-    item_data.to_csv('/opt/ml/wine/data/item_data.csv', encoding='utf-8-sig', index=False)
-    review_data.to_csv('/opt/ml/wine/data/review_data.csv', encoding='utf-8-sig', index=False)
-    
-    print(f'Total {len(item_data)} items, {len(review_data)} interactions')
-
-    review_data.rename(columns={'rating': 'user_rating','date': 'timestamp'}, inplace=True)
-
-
-
-    train_rating = pd.merge(review_data.loc[:,['user_url','user_rating','timestamp','wine_url']],
-                            item_data.loc[:, 'url'],
-                            left_on = 'wine_url', right_on = 'url', how = 'inner')
-
-    train_rating.to_csv('/opt/ml/wine/data/train_rating.csv', encoding='utf-8-sig', index=False, header=True)
-
-    return train_rating, item2idx, user2idx, idx2item, idx2user
-
-if __name__ == '__main__':
-    prepare_dataset()
