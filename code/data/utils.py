@@ -134,54 +134,68 @@ def note_mapper(df, note_col):
 
     return feature2idx, idx2feature
 
-def expand_notes(df):
+def expand_notes(df, args):
     notes = ['Red Fruit','Tropical','Tree Fruit','Oaky',
         'Ageing','Black Fruit','Citrus','Dried Fruit','Earthy',
         'Floral','Microbio','Spices', 'Vegetal']
     
     i = 0
-    for note_col in tqdm(notes):
+    if args.expand_notes:
+        for note_col in tqdm(notes):
 
+            note_df = []
 
+            feature2idx, idx2feature = note_mapper(df, note_col)
+
+            for note_dic in tqdm(df[note_col.replace(' ','_') + '_child']):
+                row_data = [0 for i in range(len(feature2idx))]
+
+                for note in note_dic:
+                    row_data[feature2idx[note]] = note_dic[note]
+    
+                note_df.append(row_data)
+            
+            columns = [idx2feature[i] for i in range(len(idx2feature))]
+            note_df = pd.DataFrame(note_df, columns=columns, index = df.index)
+
+            if i == 0:
+                result = note_df
+                i += 1
+            else:
+                result = pd.concat([result, note_df], axis=1)
+
+            df.drop(note_col.replace(' ','_') + '_child', axis = True, inplace = True)
+
+        df = pd.concat([df, result], axis=1)
         
-        note_df = []
+    else:
+        for note_col in tqdm(notes):
 
-        feature2idx, idx2feature = note_mapper(df, note_col)
+            note_array = []
 
-        for note_dic in tqdm(df[note_col.replace(' ','_') + '_child']):
-            row_data = [0 for i in range(len(feature2idx))]
+            feature2idx, idx2feature = note_mapper(df, note_col)
 
-            for note in note_dic:
-                row_data[feature2idx[note]] = note_dic[note]
-  
-            note_df.append(row_data)
-        
-        columns = [idx2feature[i] for i in range(len(idx2feature))]
-        note_df = pd.DataFrame(note_df, columns=columns, index = df.index)
+            for note_dic in tqdm(df[note_col.replace(' ','_') + '_child']):
+                row_data = [0 for i in range(len(feature2idx))]
 
-        if i == 0:
-            result = note_df
-            i += 1
-        else:
-            result = pd.concat([result, note_df], axis=1)
-
-        df.drop(note_col.replace(' ','_') + '_child', axis = True, inplace = True)
-
-    df = pd.concat([df, result], axis=1)
+                for note in note_dic:
+                    row_data[feature2idx[note]] = note_dic[note]
+                note_array.append(row_data)
+            
+            df[note_col.replace(' ','_') + '_seq'] = note_array
+            df.drop(note_col.replace(' ','_') + '_child', axis = 1, inplace = True)
     return df
-  
 
-
-def crawl_item_to_csv(df):
+def crawl_item_to_csv(df, args):
     df = fill_na(df)
     df = drop_columns(df)
     map_all_single_features(df)
     df = map_all_list_features(df)
-    df = expand_notes(df)
+    df = expand_notes(df, args)
 
     return df
 
-def crawl_review_to_csv(df):
+def crawl_review_to_csv(df, args):
     
     df = df[df['user_url'].isna()== False]
     tqdm.pandas()
@@ -189,13 +203,13 @@ def crawl_review_to_csv(df):
 
     return df
 
-def parallel(func, df, num_cpu):
+def parallel(func, df, args, num_cpu):
 
     df_chunks = np.array_split(df, num_cpu)
 
     print('Parallelizing with ' +str(num_cpu)+'cores')
     with Parallel(n_jobs = num_cpu, backend="multiprocessing") as parallel:
-        results = parallel(delayed(func)(df_chunks[i]) for i in range(num_cpu))
+        results = parallel(delayed(func)(df_chunks[i], args) for i in range(num_cpu))
 
     for i,data in enumerate(results):
         if i == 0:
@@ -236,10 +250,12 @@ def to_recbole_columns(columns):
     meta_data_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'meta_data')
 
     float_path = os.path.join(meta_data_folder, 'float_columns.json' )
+    float_seq_path = os.path.join(meta_data_folder, 'float_seq_columns.json' )
     token_path = os.path.join(meta_data_folder, 'token_columns.json' )
     seq_path = os.path.join(meta_data_folder, 'seq_columns.json' )
 
     with open(float_path,'r',encoding='utf-8') as f:  float_columns = set(json.load(f))
+    with open(float_seq_path,'r',encoding='utf-8') as f:  float_seq_columns = set(json.load(f))
     with open(token_path,'r',encoding='utf-8') as f:  token_columns = set(json.load(f))
     with open(seq_path,'r',encoding='utf-8') as f:  seq_columns = set(json.load(f))
 
@@ -249,6 +265,7 @@ def to_recbole_columns(columns):
         if c in float_columns: recbole_columns.append(f'{c}:float')
         elif c in token_columns: recbole_columns.append(f'{c}:token')
         elif c in seq_columns: recbole_columns.append(f'{c}:token_seq')
+        elif c in float_seq_columns: recbole_columns.append(f'{c}:float_seq')
         else:
             df.append(c)
             recbole_columns.append(f'{c}:float')
