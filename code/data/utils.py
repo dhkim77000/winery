@@ -51,11 +51,22 @@ def str2list(x):
             list = [x]
         else: 
             list = ast.literal_eval(x)
+
     else: list = []
-    
-    return list
+
+    return [str(s).replace(' ','') for s in list]
+
 
 def feature_mapper(df, column):
+
+    def space_remover(x):
+        try:
+            return str(x).replace(' ','_')
+        except:
+            print(column, x)
+            return x
+    df.loc[:,column] = df.loc[:,column].apply(lambda x: space_remover(x))
+
     unique_val = df[column].unique()
     feature2idx = {f:i for i, f in enumerate(unique_val)}
     idx2feature = {i:f for i, f in enumerate(unique_val)}
@@ -275,30 +286,7 @@ def to_recbole_columns(columns):
 
     return recbole_columns
 
-def load_index_file():
 
-    mapper_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'feature_map')
-
-    item2idx_path = 'item2idx.json'
-    item2idx_path = os.path.join(mapper_folder, item2idx_path)
-    idx2item_path = 'idx2item.json'
-    idx2item_path = os.path.join(mapper_folder, idx2item_path)
-
-    user2idx_path = 'user2idx.json'
-    user2idx_path = os.path.join(mapper_folder, user2idx_path)
-    idx2user_path = 'idx2user.json'
-    idx2user_path = os.path.join(mapper_folder, idx2user_path)
-
-    try:
-        with open(item2idx_path,'r',encoding='utf-8') as f:  item2idx = json.load(f)    
-        with open(user2idx_path,'r',encoding='utf-8') as f:  user2idx = json.load(f)
-        with open(idx2item_path,'r',encoding='utf-8') as f:  idx2item = json.load(f)
-        with open(idx2user_path,'r',encoding='utf-8') as f:  idx2user = json.load(f)
-    except:
-        train_rating, item2idx, user2idx, idx2item, idx2user = prepare_dataset()
-   
-
-    return item2idx, user2idx, idx2item, idx2user
 
 
 def afterprocessing(sub,train):
