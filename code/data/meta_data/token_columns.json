@@ -1,1 +1,1 @@
-["country", "region", "winery", "winetype", "vintage", "house", "wine_style"]
+["country", "region", "winery", "winetype", "vintage", "house", "wine_style", "item_id", "user_id", "name"]
