@@ -42,6 +42,12 @@ def fill_na(df):
     with open('/opt/ml/wine/code/data/meta_data/seq_columns.json','r',encoding='utf-8') as f:  
         col = json.load(f)
         df[col] = df[col].fillna('[]')
+
+    with open('/opt/ml/wine/code/data/meta_data/float_columns.json','r',encoding='utf-8') as f:  
+        col = json.load(f)
+        col = [c for c in col if '_count' in c]
+        df[col] = df[col].fillna(0)
+
     return df
 
 
@@ -158,12 +164,13 @@ def expand_notes(df, args):
 
             feature2idx, idx2feature = note_mapper(df, note_col)
 
-            for note_dic in tqdm(df[note_col.replace(' ','_') + '_child']):
+            for total_count, note_dic in tqdm(zip(df[note_col+'_count'], df[note_col.replace(' ','_') + '_child'])):
                 row_data = [0 for i in range(len(feature2idx))]
 
-                for note in note_dic:
-                    row_data[feature2idx[note]] = note_dic[note]
-    
+                if total_count != 0:
+                    for note in note_dic:
+                        row_data[feature2idx[note]] = note_dic[note] / total_count
+
                 note_df.append(row_data)
             
             columns = [idx2feature[i] for i in range(len(idx2feature))]
@@ -186,11 +193,12 @@ def expand_notes(df, args):
 
             feature2idx, idx2feature = note_mapper(df, note_col)
 
-            for note_dic in tqdm(df[note_col.replace(' ','_') + '_child']):
+            for total_count, note_dic in tqdm(zip(df[note_col+'_count'], df[note_col.replace(' ','_') + '_child'])):
                 row_data = [0 for i in range(len(feature2idx))]
 
-                for note in note_dic:
-                    row_data[feature2idx[note]] = note_dic[note]
+                if total_count != 0:
+                    for note in note_dic:
+                        row_data[feature2idx[note]] = note_dic[note] / total_count
                 note_array.append(row_data)
             
             df[note_col.replace(' ','_') + '_seq'] = note_array

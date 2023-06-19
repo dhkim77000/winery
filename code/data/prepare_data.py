@@ -64,8 +64,10 @@ def prepare_dataset(args):
     review_data.drop_duplicates(inplace = True)
     ####추가
     feature_engineering()
-
-    item_data.to_csv('/opt/ml/wine/data/item_data.csv', encoding='utf-8-sig', index=False)
+    if args.expand_notes:
+        item_data.to_csv('/opt/ml/wine/data/item_data_expand.csv', encoding='utf-8-sig', index=False)
+    else:
+        item_data.to_csv('/opt/ml/wine/data/item_data.csv', encoding='utf-8-sig', index=False)
     review_data.to_csv('/opt/ml/wine/data/review_data.csv', encoding='utf-8-sig', index=False)
 
     user_data = review_data.groupby('user_id').agg(count=('rating', 'count'), mean=('rating', 'mean')).reset_index()
@@ -124,8 +126,10 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--expand_notes", default=False, type=bool)
+    parser.add_argument("--prepare_recbole", default=True, type=bool)
     args = parser.parse_args()
 
 
     prepare_dataset(args)
-    prepare_recbole_dataset()
+    if args.prepare_recbole:
+        prepare_recbole_dataset()
