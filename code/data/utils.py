@@ -87,11 +87,14 @@ def feature_mapper(df, column):
 
     return feature2idx, idx2feature
 
-def list_feature_mapper(df, column):
+def list_feature_mapper(args, df, column):
 
     df[column] = df[column].apply(lambda x: str2list(x))
-
     exploded = df[column].explode(column)
+    
+    if args.prepare_recbole:
+        df[column] = df[column].apply(lambda x: " ".join(x))
+
     unique_val = set(list(exploded))
     feature_dic = {}
 
@@ -114,10 +117,10 @@ def map_all_single_features(df):
         feature_mapper(df, c)
     return  
 
-def map_all_list_features(df):
+def map_all_list_features(df,args):
     list_columns = ['grape','pairing']
     for c in list_columns:
-        df ,_ ,_ = list_feature_mapper(df, c)
+        df ,_ ,_ = list_feature_mapper(args, df, c)
     return df 
 
 
@@ -194,14 +197,16 @@ def expand_notes(df, args):
             feature2idx, idx2feature = note_mapper(df, note_col)
 
             for total_count, note_dic in tqdm(zip(df[note_col+'_count'], df[note_col.replace(' ','_') + '_child'])):
-                row_data = [0 for i in range(len(feature2idx))]
+                row_data = [str(0) for i in range(len(feature2idx))]
 
                 if total_count != 0:
                     for note in note_dic:
-                        row_data[feature2idx[note]] = note_dic[note] / total_count
+                        row_data[feature2idx[note]] = str(note_dic[note] / total_count)
                 note_array.append(row_data)
             
-            df[note_col.replace(' ','_') + '_seq'] = note_array
+            note_seq = note_col.replace(' ','_') + '_seq'
+            df[note_seq] = note_array
+            df[note_seq] = df[note_seq].apply(lambda x: " ".join(x))
             df.drop(note_col.replace(' ','_') + '_child', axis = 1, inplace = True)
     return df
 
@@ -209,7 +214,7 @@ def crawl_item_to_csv(df, args):
     df = fill_na(df)
     df = drop_columns(df)
     map_all_single_features(df)
-    df = map_all_list_features(df)
+    df = map_all_list_features(df, args)
     df = expand_notes(df, args)
 
     return df
