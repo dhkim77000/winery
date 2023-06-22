@@ -224,7 +224,7 @@ def find_all_reviews(driver):
     prv = 0
 
     print('-----Finding-----')
-    pbar = tqdm(total=300)
+    pbar = tqdm(total=100)
 
     while stop_count < 5:
         ActionChains(driver).scroll_by_amount(0, 10000).perform()
@@ -237,7 +237,7 @@ def find_all_reviews(driver):
             stop_count = 0
         time.sleep(0.3)
         prv = len(reviews)
-        if prv >= 2000: break
+        if prv >= 300: break
         pbar.update(1)
         print(prv)
     pbar.close()
@@ -245,6 +245,15 @@ def find_all_reviews(driver):
 
     return reviews
 #------------------------------------------------------------------------------------------------
+def get_stars(driver):
+    try:
+        class_name = 'RatingsFilter__pill--2V08n'
+        stars = driver.find_element(By.CLASS_NAME, class_name)
+        class_name = 'RatingsFilter__container--kWVlc'
+        stars = stars.find_elements(By.CLASS_NAME, class_name)
+        return stars
+    except: return None
+
 def wine_interaction(driver, url):
     try:
         driver.get(url)
@@ -263,11 +272,18 @@ def wine_interaction(driver, url):
         
         driver.set_window_size(360, 1080)
         driver.execute_script("document.body.style.zoom='20%'")
- 
+        stars = get_stars(driver)
+
         reviews = find_all_reviews(driver)
-        
         review_data = get_all_reviews(reviews, url)
         
+        print("-------Finding under rating 3-------")
+        if stars:
+            for i in [-1,-2,-3]:
+                driver.execute_script("arguments[0].click();", stars[i])
+                time.sleep(0.5)
+            reviews = find_all_reviews(driver)
+            review_data.extend(get_all_reviews(reviews, url))
         return review_data
     
     else: return []
