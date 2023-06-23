@@ -195,10 +195,12 @@ def get_text_rate(review):
     
     return text, rating   
 #------------------------------------------------------------------------------------------------
-def get_review_info(review):
+def get_review_info(review, stop_count):
     data = {}
     text, rating = get_text_rate(review)
     user_url, review_date = get_user_info(review)
+    if user_url == None:
+        stop_count += 1
     like, bad = get_reaction(review)
     data['text'] = text
     data['rating'] = rating
@@ -206,17 +208,20 @@ def get_review_info(review):
     data['date'] = review_date
     data['like'] = like
     data['bad'] = bad
-    return data
+    return data, stop_count
 
 def get_all_reviews(reviews, wine_url):
 
     review_datas = []
+    stop_count = 0
     for review in tqdm(reviews):
 
-        review_dict = get_review_info(review)
+        review_dict, stop_count = get_review_info(review, stop_count)
         review_dict['wine_url'] = wine_url
         review_datas.append(review_dict)
         time.sleep(0.2)
+        if stop_count > 5: break
+    
     return review_datas
    
 def find_all_reviews(driver):
@@ -237,7 +242,7 @@ def find_all_reviews(driver):
             stop_count = 0
         time.sleep(0.3)
         prv = len(reviews)
-        if prv >= 300: break
+        if prv >= 500: break
         pbar.update(1)
         print(prv)
     pbar.close()
@@ -268,22 +273,21 @@ def wine_interaction(driver, url):
         ActionChains(driver).scroll_by_amount(0, 1000).perform()
         time.sleep(0.5)
 
+    recent_class ="anchor_anchor__m8Qi- menu__menuItem--1aKOP".replace(' ','.')
+
     if click_more_review(driver):
         
         driver.set_window_size(360, 1080)
         driver.execute_script("document.body.style.zoom='20%'")
-        stars = get_stars(driver)
+        #stars = get_stars(driver)
+        try: driver.find_element(By.CLASS_NAME, recent_class).click()
+        except: 1
 
         reviews = find_all_reviews(driver)
         review_data = get_all_reviews(reviews, url)
         
         print("-------Finding under rating 3-------")
-        if stars:
-            for i in [-1,-2,-3]:
-                driver.execute_script("arguments[0].click();", stars[i])
-                time.sleep(0.5)
-            reviews = find_all_reviews(driver)
-            review_data.extend(get_all_reviews(reviews, url))
+        
         return review_data
     
     else: return []

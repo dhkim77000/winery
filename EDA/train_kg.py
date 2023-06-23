@@ -218,7 +218,7 @@ if __name__ == "__main__":
     parser.add_argument("--scalar_share", default=0.5, type=float)
     parser.add_argument("--self_loop_dropout", default=0.2, type=float)
     parser.add_argument("--drop_out", default=0.4, type=float)
-    parser.add_argument("--epochs", default=1000, type=int)
+    parser.add_argument("--epochs", default=20, type=int)
     parser.add_argument("--margin", default=0.5, type=float)
     parser.add_argument("--model", default='ComplEx', type=str)
     parser.add_argument("--loss", default='margin', type=str)
