@@ -18,6 +18,31 @@ from datetime import datetime
 import pickle
 import argparse
 
+def load_index_file():
+
+    mapper_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'feature_map')
+
+    item2idx_path = 'item2idx.json'
+    item2idx_path = os.path.join(mapper_folder, item2idx_path)
+    idx2item_path = 'idx2item.json'
+    idx2item_path = os.path.join(mapper_folder, idx2item_path)
+
+    user2idx_path = 'user2idx.json'
+    user2idx_path = os.path.join(mapper_folder, user2idx_path)
+    idx2user_path = 'idx2user.json'
+    idx2user_path = os.path.join(mapper_folder, idx2user_path)
+
+    try:
+        with open(item2idx_path,'r',encoding='utf-8') as f:  item2idx = json.load(f)    
+        with open(user2idx_path,'r',encoding='utf-8') as f:  user2idx = json.load(f)
+        with open(idx2item_path,'r',encoding='utf-8') as f:  idx2item = json.load(f)
+        with open(idx2user_path,'r',encoding='utf-8') as f:  idx2user = json.load(f)
+    except:
+        train_rating, item2idx, user2idx, idx2item, idx2user = prepare_dataset()
+   
+
+    return item2idx, user2idx, idx2item, idx2user
+
 
 def prepare_dataset(args):
     num_cpu = os.cpu_count()
@@ -39,8 +64,10 @@ def prepare_dataset(args):
     review_data.drop_duplicates(inplace = True)
     ####추가
     feature_engineering()
-
-    item_data.to_csv('/opt/ml/wine/data/item_data.csv', encoding='utf-8-sig', index=False)
+    if args.expand_notes:
+        item_data.to_csv('/opt/ml/wine/data/item_data_expand.csv', encoding='utf-8-sig', index=False)
+    else:
+        item_data.to_csv('/opt/ml/wine/data/item_data.csv', encoding='utf-8-sig', index=False)
     review_data.to_csv('/opt/ml/wine/data/review_data.csv', encoding='utf-8-sig', index=False)
 
     user_data = review_data.groupby('user_id').agg(count=('rating', 'count'), mean=('rating', 'mean')).reset_index()
@@ -94,12 +121,15 @@ def save_atomic_file(train_data, user_data, item_data):
     item_data.to_csv(os.path.join(outpath,"train_data.item"),sep='\t',index=False, encoding='utf-8-sig')
     user_data.to_csv(os.path.join(outpath,"train_data.user"),sep='\t',index=False, encoding='utf-8-sig')
 
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--expand_notes", default=False, type=bool)
+    parser.add_argument("--prepare_recbole", default=True, type=bool)
     args = parser.parse_args()
 
 
     prepare_dataset(args)
-    prepare_recbole_dataset()
+    if args.prepare_recbole:
+        prepare_recbole_dataset()

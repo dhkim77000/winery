@@ -292,15 +292,19 @@ if __name__ == '__main__':
 
     user_urls = set()
 
-    for i in range(6):
-        if i != 0:
-            url = pd.read_csv(f'/opt/ml/wine/data/review_df{i}.csv', encoding = 'utf-8-sig').loc[:,'user_url']
+    for i in tqdm(range(6)):
+
+        if i == 0:
+            url = pd.read_csv(f'/opt/ml/wine/data/review_df0.csv', encoding = 'utf-8-sig').loc[:,'user_url']
         else:
-            url = pd.read_csv(f'/opt/ml/wine/data/review_df.csv', encoding = 'utf-8-sig').loc[:,'user_url']
+            url = pd.read_csv(f'/opt/ml/wine/data/review_df{i}.csv', encoding = 'utf-8-sig').loc[:,'user_url']
         url.dropna(inplace = True)
+
         user_urls = user_urls.union(set(list(url)))
 
     urls_for_me = split_list(list(user_urls), 5)[my_idx]
+
+        
 
     try:
         with open('/opt/ml/wine/data/user_done.pkl', 'rb') as f: done  = pickle.load(f)
