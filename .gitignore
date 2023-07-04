@@ -6,3 +6,6 @@
 *.npy
 *.html
 *.json
+*.pt
+*.gz
+*.pth
