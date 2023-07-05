@@ -29,7 +29,7 @@ def merge(args):
     bf = len(data)
     data.drop_duplicates(inplace = True)
     af = len(data)
-    data.to_csv(f'/opt/ml/wine/data/review_df.csv', encoding = 'utf-8-sig', index= False)
+    data.to_csv(f'/opt/ml/wine/data/review_df_total.csv', encoding = 'utf-8-sig', index= False)
     print(f"Before drop duplicates {bf}, After {af}")
     
 if __name__ == "__main__":

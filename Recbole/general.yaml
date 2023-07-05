@@ -1,22 +1,31 @@
 
-    USER_ID_FIELD: user_id
-    ITEM_ID_FIELD: item_id
-    TIME_FIELD: timestamp
+data_path: /opt/ml/wine/dataset/
 
-    load_col:
-        inter: [user_id, item_id, timestamp]
+USER_ID_FIELD: user_id
+ITEM_ID_FIELD: item_id
+RATING_FIELD : user_rating
 
-    show_progress : False
-    epochs : 10
-    device : torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    eval_args:
-        split: {'RS': [9, 1, 0]}
-        group_by: user
-        order: RO
-        mode: full
-    metrics: ['Recall', 'MRR', 'NDCG', 'Hit', 'Precision', 'MAP']
-    topk: 10
-    valid_metric: Recall@10
+load_col:
+    user : [user_id, count, mean]
+    inter: [user_id, item_id, user_rating]
+    item : [country, region, winery, winetype, grape, vintage, house, price, rating, num_votes, star5, star4, star3, star2, star1, pairing, wine_style, Red Fruit_count, Tropical_count, Tree Fruit_count, Oaky_count, Ageing_count, Black Fruit_count, Citrus_count, Dried Fruit_count, Earthy_count, Floral_count, Microbio_count, Spices_count,Vegetal_count, Red_Fruit_seq, Tropical_seq, Tree_Fruit_seq, Oaky_seq, Ageing_seq, Black_Fruit_seq,Citrus_seq, Dried_Fruit_seq, Earthy_seq, Floral_seq, Microbio_seq, Spices_seq, Vegetal_seq, item_id]
+threshold: {'rating': 4}
+
+normalize_all: True
+show_progress : False
+epochs : 10
+device : torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+epochs: 500
+train_batch_size: 1024
+eval_batch_size: 1024
+eval_args:
+  split: {'RS':[0.8,0.1,0.1]}
+  order: RO
+  group_by: ~
+  mode: labeled
+train_neg_sample_args: ~
+metrics: ['AUC', 'LogLoss']
+valid_metric: AUC
 
 
-    
