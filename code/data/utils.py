@@ -35,18 +35,20 @@ def drop_columns(df):
 def fill_na(df):
     with open('/opt/ml/wine/code/data/meta_data/string_columns.json','r',encoding='utf-8') as f:  
         col = json.load(f)
-        df[col] = df[col].fillna('')
+        df[col] = df[col].fillna('Empty')
     with open('/opt/ml/wine/code/data/meta_data/dict_columns.json','r',encoding='utf-8') as f:  
         col = json.load(f)
         df[col] = df[col].fillna('{}')
     with open('/opt/ml/wine/code/data/meta_data/seq_columns.json','r',encoding='utf-8') as f:  
         col = json.load(f)
-        df[col] = df[col].fillna('[]')
+        df[col] = df[col].fillna("[]")
 
     with open('/opt/ml/wine/code/data/meta_data/float_columns.json','r',encoding='utf-8') as f:  
         col = json.load(f)
-        col = [c for c in col if '_count' in c]
-        df[col] = df[col].fillna(0)
+        #col = [c for c in col if '_count' in c]
+        for c in col:
+            if c in df.columns: df[c] = df[c].fillna(0)
+    
 
     return df
 
@@ -57,8 +59,8 @@ def str2list(x):
             list = [x]
         else: 
             list = ast.literal_eval(x)
-
-    else: list = []
+            if len(list) == 0: list = ['Empty']
+    else: list = ['Empty']
 
     return [str(s).replace(' ','') for s in list]
 
@@ -236,6 +238,7 @@ def parallel(func, df, args, num_cpu):
         results = parallel(delayed(func)(df_chunks[i], args) for i in range(num_cpu))
 
     for i,data in enumerate(results):
+        data.dropna(inplace = True)
         if i == 0:
             result = data
         else:
@@ -257,7 +260,7 @@ def parallel(func, df, args, num_cpu):
         with open(f'/opt/ml/wine/code/data/feature_map/idx2user.json','w',encoding='utf-8') as f:  
             json.dump(idx2user, f, ensure_ascii=False)
 
-    else:
+    elif  'url' in result.columns:
         urls = result['url'].unique()
         item2idx = {v:k for k,v in enumerate(urls)}
         idx2item = {k:v for k,v in enumerate(urls)}
@@ -266,7 +269,7 @@ def parallel(func, df, args, num_cpu):
             json.dump(item2idx, f, ensure_ascii=False)
         with open(f'/opt/ml/wine/code/data/feature_map/idx2item.json','w',encoding='utf-8') as f:  
             json.dump(idx2item, f, ensure_ascii=False)
-    
+
     return result
 
 def to_recbole_columns(columns):
@@ -321,6 +324,7 @@ def afterprocessing(sub,train):
     sub = sub[sub['lastyear'] >= sub['year']]
     sub = sub.groupby('user').head(10)[['user','item']]
     return sub
+
 
 
 def feature_engineering():
