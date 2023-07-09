@@ -2,14 +2,14 @@ from fastapi import APIRouter
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from starlette import status
-
-from database import get_db
-from server.crud import create_user
-from server.schema import UserCreate
-from pydantic import parse_obj_as
+from psycopg2.extensions import connection
 from fastapi import FastAPI, Form, Request
 from fastapi.templating import Jinja2Templates
 
+from crud import create_user
+from schema import UserCreate
+from database import get_db, get_conn
+import pdb
 import uvicorn
 
 app = FastAPI()
@@ -21,18 +21,18 @@ router = APIRouter(
 
 @router.get("/register")
 async def get_login_form(request: Request):
-    return templates.TemplateResponse('register_form.html', data={'request': request})
+    return templates.TemplateResponse('register_form.html', context={'request': request})
 
 @router.post("/register", status_code=status.HTTP_204_NO_CONTENT)
 async def user_create(request: Request,
                        email: str = Form(...), 
                        password: str = Form(...), 
                        password2: str = Form(...),
-                       db: Session = Depends(get_db)):
+                       db: connection = Depends(get_conn)):
 
     # Create a new user instance
     user = UserCreate(email=email, password1=password, password2 = password2)
-
-    create_user(db=db, user_create=user)
-
+    
+    await create_user(db=db, user_create=user)
+    pdb.set_trace()
     return templates.TemplateResponse("success.html", {"request": request, "email": email})

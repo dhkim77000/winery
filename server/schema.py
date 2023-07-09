@@ -10,7 +10,7 @@ from datetime import datetime
 
 class UserCreate(BaseModel):
 
-    id : UUID = Field(default_factory=UUID)
+    id : UUID = Field(default_factory=uuid4)
     email: EmailStr
     password1: str
     password2: str
@@ -25,4 +25,4 @@ class UserCreate(BaseModel):
     def passwords_match(cls, v, values):
         if 'password1' in values and v != values['password1']:
             raise ValueError('비밀번호가 일치하지 않습니다')
-        return v
+        
