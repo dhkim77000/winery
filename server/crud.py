@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -11,11 +11,23 @@ from passlib.context import CryptContext
 from psycopg2.extras import execute_values, register_uuid
 from schema import UserCreate
 from models import User, create_user_table
+import pdb
 from psycopg2.extensions import connection
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Create SQLAlchemy engine and session
 
+
+async def check_email_exist(email, cur):
+
+    cur.execute("SELECT * FROM public.user WHERE email = %s", (email,))
+    result = cur.fetchone()
+
+    if result is not None:
+        return True
+    else:
+        return False
+    
 
 async def create_user(db: connection, user_create: UserCreate):
     create_user_table(db)
@@ -29,8 +41,14 @@ async def create_user(db: connection, user_create: UserCreate):
         VALUES %s;
         """
     values = [(db_user.id, db_user.email, db_user.password)]
-    print(insert_user_query)
+    
     # Execute the query
     with db.cursor() as cur:
-        execute_values(cur, insert_user_query, values)
-        db.commit()
+        exist = await check_email_exist(user_create.email, cur)
+        if exist:
+            raise HTTPException(status_code=404, detail=f"이미 존재하는 이메일입니다.")
+        else:
+            print(insert_user_query)
+            execute_values(cur, insert_user_query, values)
+            db.commit()
+    
