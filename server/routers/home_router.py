@@ -22,6 +22,7 @@ router = APIRouter(
 # 홈 화면
 @router.get("/", response_class=HTMLResponse)
 async def get_home(request: Request):
+    
     return templates.TemplateResponse("success.html", {"request": request})
 
 

@@ -12,10 +12,32 @@ from psycopg2.extras import execute_values, register_uuid
 from schema import UserCreate
 from models import User, create_user_table
 import pdb
+from fastapi.security import OAuth2PasswordRequestForm
 from psycopg2.extensions import connection
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Create SQLAlchemy engine and session
+
+async def get_user(db: connection, email: str):
+    
+
+    with db.cursor() as cur:
+        cur.execute("SELECT * FROM public.user WHERE email = %s", (email,))
+        result = cur.fetchone()
+
+    if result is None:
+        raise HTTPException(status_code=404, detail=f"존재하지 않는 이메일입니다.")
+    else:
+        user = User(
+            id=result[0],
+            email=result[1],
+            password=result[2],
+        )
+        return user
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
 
 
 async def check_email_exist(email, cur):

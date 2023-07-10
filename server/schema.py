@@ -8,6 +8,10 @@ from pydantic import EmailStr, validator
 
 from datetime import datetime
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    id: UUID
 
 class UserCreate(BaseModel):
 
