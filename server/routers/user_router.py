@@ -24,22 +24,17 @@ router = APIRouter(
 async def get_register_form(request: Request):
     return templates.TemplateResponse('register_form.html', context={'request': request})
 
-@router.post("/register", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/register", status_code=status.HTTP_303_SEE_OTHER)
 async def user_create(request: Request,
                        email: str = Form(...), 
                        password: str = Form(...), 
-                       password2: str = Form(...),
+                       confirm_password: str = Form(...),
                        db: connection = Depends(get_conn)):
 
     # Create a new user instance
-    user = UserCreate(email=email, password1=password, password2 = password2)
+    user = UserCreate(email=email, password1=password, password2 = confirm_password)
     
     await create_user(db=db, user_create=user)
 
-    redirect_url = request.url_for('to_home')
-    return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    return Response(status_code=303, headers={"Location": "/home"})
 
-
-@router.get('/home')
-async def to_home(request: Request):
-    return templates.TemplateResponse("success.html", {"request": request})
