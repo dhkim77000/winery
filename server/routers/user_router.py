@@ -54,7 +54,6 @@ async def user_login(request: Request,
             "uid": user.id
             }
         
-        response = JSONResponse(content=response_data, status_code=303, headers={"Location": "/home"})
         return response_data
     else:
         # User does not exist or password is incorrect
@@ -80,7 +79,7 @@ async def user_create(request: Request,
     
     await create_user(db=db, user_create=user)
 
-    return Response(status_code=303, headers={"Location": "/home"})
+    return 
 
 
 
