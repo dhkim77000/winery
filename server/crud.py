@@ -11,7 +11,7 @@ from passlib.context import CryptContext
 from psycopg2.extras import execute_values, register_uuid
 from schema import UserCreate, WinePost
 #from models import User, Wine,create_user_table, create_wine_table
-from models import User,create_user_table
+from models import User,create_user_table,create_wine_table
 import pdb
 from fastapi.security import OAuth2PasswordRequestForm
 from psycopg2.extensions import connection

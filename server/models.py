@@ -18,6 +18,7 @@ def create_user_table(db):
         db.commit()
 
 
+
 def create_wine_table(db_connect):
     create_table_query = """
 
