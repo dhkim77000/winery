@@ -21,7 +21,7 @@ SECRET_KEY = "4ab2fce7a6bd79e1c014396315ed322dd6edb1c5d975c6b74a2904135172c03c"
 ALGORITHM = "HS256"
 
 app = FastAPI()
-templates = Jinja2Templates(directory='/opt/ml/wine/server/templates')
+templates = Jinja2Templates(directory='/opt/ml/api/server/templates')
 
 router = APIRouter(
     prefix="/login",
@@ -43,7 +43,7 @@ async def user_login(request: Request,
         # User exists and password is correct
         # make access token
         data = {
-            "sub": user.id,
+            "sub": str(user.id),
             "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         }
         access_token = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
@@ -51,10 +51,10 @@ async def user_login(request: Request,
         response_data =  {
             "access_token": access_token,
             "token_type": "bearer",
-            "uid": user.id
+            "uid": str(user.id)
             }
         
-        return response_data
+        return JSONResponse(content=response_data)
     else:
         # User does not exist or password is incorrect
         return HTTPException(
@@ -79,7 +79,7 @@ async def user_create(request: Request,
     
     await create_user(db=db, user_create=user)
 
-    return 
+    return JSONResponse(content={"message": "회원가입이 완료되었습니다."})
 
 
 

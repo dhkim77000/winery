@@ -11,3 +11,4 @@
 *.pth
 *.zip
 *.log
+*.pyc
