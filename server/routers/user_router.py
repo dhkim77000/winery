@@ -7,10 +7,10 @@ from fastapi import FastAPI, Form, Request, Response
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi import HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
-from jose import jwt
+from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
+from jose import jwt , JWTError
 from datetime import timedelta, datetime
-from crud import create_user, get_user, verify_password
+from crud import create_user, get_user, verify_password , add_mbti_feature
 from schema import UserCreate
 from database import get_db, get_conn
 import pdb
@@ -19,7 +19,7 @@ import uvicorn
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 SECRET_KEY = "4ab2fce7a6bd79e1c014396315ed322dd6edb1c5d975c6b74a2904135172c03c"
 ALGORITHM = "HS256"
-
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/")
 app = FastAPI()
 templates = Jinja2Templates(directory='/opt/ml/api/server/templates')
 
@@ -54,14 +54,11 @@ async def user_login(request: Request,
             "uid": str(user.id)
             }
         
-        return JSONResponse(content=response_data)
+        return response_data
     else:
         # User does not exist or password is incorrect
-        return HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="비밀번호가 일치하지 않거나 존재하지 않는 이메일입니다.",
-            headers={"Location": "/login"},
-        )
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
 
 @router.get("/register")
 async def get_register_form(request: Request):
