@@ -9,8 +9,9 @@ from pydantic import BaseModel
 from sqlalchemy import func
 from passlib.context import CryptContext
 from psycopg2.extras import execute_values, register_uuid
-from schema import UserCreate
-from models import User, create_user_table
+from schema import UserCreate, WinePost
+#from models import User, Wine,create_user_table, create_wine_table
+from models import User,create_user_table
 from psycopg2.extensions import connection
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -33,4 +34,49 @@ async def create_user(db: connection, user_create: UserCreate):
     # Execute the query
     with db.cursor() as cur:
         execute_values(cur, insert_user_query, values)
+        db.commit()
+
+async def create_wine(db: connection, wine_get: WinePost):
+    create_wine_table(db)
+    register_uuid()
+    db_wine = Wine(id=wine_get.id,
+                   winetype=wine_get.winetype,
+                   Red_Fruit=wine_get.Red_Fruit,Tropical=wine_get.Tropical,
+                   Tree_Fruit=wine_get.Tree_Fruit,Oaky=wine_get.Oaky,
+                   Ageing=wine_get.Ageing,Black_Fruit=wine_get.Black_Fruit,
+                   Citrus=wine_get.Citrus,Dried_Fruit=wine_get.Dried_Fruit,
+                   Earthy=wine_get.Earthy,Floral=wine_get.Floral,
+                   Microbio=wine_get.Microbio,Spices=wine_get.Spices,
+                   Vegetal=wine_get.Vegetal,Light=wine_get.Light,
+                   Bold=wine_get.Bold,Smooth=wine_get.Smooth,
+                   Tannic=wine_get.Tannic,Dry=wine_get.Dry,
+                   Sweet=wine_get.Sweet,Soft=wine_get.Soft,
+                   Gentle=wine_get.Gentle,
+                   Acidic=wine_get.Acidic,Fizzy=wine_get.Fizzy)
+
+
+    insert_wine_query = f"""
+    INSERT INTO "{db_wine.__tablename__}"
+        (id,winetype,Red_Fruit,Tropical,Tree_Fruit,,Oaky,Ageing,
+        Black_Fruit,Citrus,Dried_Fruit,Earthy,Floral,Microbio,Spices,Vegetal,Light,Bold,Smooth,Tannic,Dry,Sweet,Soft,Acidic,Fizzy,Gentle)
+        VALUES %s;
+        """
+    values = [(db_wine.id,
+                   db_wine.winetype,
+                   db_wine.Red_Fruit,db_wine.Tropical,
+                   db_wine.Tree_Fruit,db_wine.Oaky,
+                   db_wine.Ageing,db_wine.Black_Fruit,
+                   db_wine.Citrus,db_wine.Dried_Fruit,
+                   db_wine.Earthy,db_wine.Floral,
+                   db_wine.Microbio,db_wine.Spices,
+                   db_wine.Vegetal,db_wine.Light,
+                   db_wine.Bold,db_wine.Smooth,
+                   db_wine.Tannic,db_wine.Dry,
+                   db_wine.Sweet,db_wine.Soft,
+                   db_wine.Gentle,
+                   db_wine.Acidic,db_wine.Fizzy)]
+    print(insert_wine_query)
+    # Execute the query
+    with db.cursor() as cur:
+        execute_values(cur, insert_wine_query, values)
         db.commit()

@@ -5,6 +5,8 @@ import psycopg2
 
 
 SQLALCHEMY_DATABASE_URL = "postgresql://dhkim:wine123@localhost:5432/server_db"
+#SQLALCHEMY_DATABASE_URL = "postgresql://myuser:mypassword@localhost:5432/server_db"
+
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush= True, bind=engine)
 
@@ -17,6 +19,18 @@ def get_conn():
         host="localhost",
         port=5432,
         database="server_db",
+
+
+        # '''
+        # CREATE USER dhkim WITH ENCRYPTED PASSWORD 'wine123';
+        # GRANT ALL PRIVILEGES ON DATABASE server_db TO dhkim;
+        # psql -U dhkim -d server_db
+        # '''
+        # user="myuser",
+        # password="mypassword",
+        # host="localhost",
+        # port=5432,
+        # database="mydatabase",
     )
     return conn
 

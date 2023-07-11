@@ -13,7 +13,7 @@ import pdb
 import uvicorn
 
 app = FastAPI()
-templates = Jinja2Templates(directory='/opt/ml/wine/server/templates')
+templates = Jinja2Templates(directory='/opt/ml/server/winery/server/template')
 
 router = APIRouter(
     prefix="/login",
@@ -21,7 +21,7 @@ router = APIRouter(
 
 @router.get("/register")
 async def get_login_form(request: Request):
-    return templates.TemplateResponse('register_form.html', context={'request': request})
+    return templates.TemplateResponse('/register_form.html', context={'request': request})
 
 @router.post("/register", status_code=status.HTTP_204_NO_CONTENT)
 async def user_create(request: Request,
@@ -35,4 +35,4 @@ async def user_create(request: Request,
     
     await create_user(db=db, user_create=user)
     pdb.set_trace()
-    return templates.TemplateResponse("success.html", {"request": request, "email": email})
+    return templates.TemplateResponse("/success.html", {"request": request, "email": email})
