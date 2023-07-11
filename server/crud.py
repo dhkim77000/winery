@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -12,11 +12,45 @@ from psycopg2.extras import execute_values, register_uuid
 from schema import UserCreate, WinePost
 #from models import User, Wine,create_user_table, create_wine_table
 from models import User,create_user_table
+import pdb
+from fastapi.security import OAuth2PasswordRequestForm
 from psycopg2.extensions import connection
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Create SQLAlchemy engine and session
 
+async def get_user(db: connection, email: str):
+    
+
+    with db.cursor() as cur:
+        cur.execute("SELECT * FROM public.user WHERE email = %s", (email,))
+        result = cur.fetchone()
+
+    if result is None:
+        raise HTTPException(status_code=404, detail=f"존재하지 않는 이메일입니다.")
+    else:
+        user = User(
+            id=result[0],
+            email=result[1],
+            password=result[2],
+        )
+        return user
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+async def check_email_exist(email, cur):
+
+    cur.execute("SELECT * FROM public.user WHERE email = %s", (email,))
+    result = cur.fetchone()
+
+    if result is not None:
+        return True
+    else:
+        return False
+    
 
 async def create_user(db: connection, user_create: UserCreate):
     create_user_table(db)
@@ -30,11 +64,16 @@ async def create_user(db: connection, user_create: UserCreate):
         VALUES %s;
         """
     values = [(db_user.id, db_user.email, db_user.password)]
-    print(insert_user_query)
+    
     # Execute the query
     with db.cursor() as cur:
-        execute_values(cur, insert_user_query, values)
-        db.commit()
+        exist = await check_email_exist(user_create.email, cur)
+        if exist:
+            raise HTTPException(status_code=404, detail=f"이미 존재하는 이메일입니다.")
+        else:
+            print(insert_user_query)
+            execute_values(cur, insert_user_query, values)
+            db.commit()
 
 async def create_wine(db: connection, wine_get: WinePost):
     create_wine_table(db)
@@ -80,3 +119,4 @@ async def create_wine(db: connection, wine_get: WinePost):
     with db.cursor() as cur:
         execute_values(cur, insert_wine_query, values)
         db.commit()
+    
