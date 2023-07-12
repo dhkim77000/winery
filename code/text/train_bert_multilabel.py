@@ -34,28 +34,15 @@ from dataset import TextDatasetForNextSentencePrediction
 from transformers import BertConfig, BertForPreTraining
 from tokenizers import BertWordPieceTokenizer
 import argparse
-
+from model import BERTClass
 from dataset import MultilabelDataset
 
 # Creating the customized model, by adding a drop out and a dense layer on top of distil bert to get the final output for the model. 
 
-class BERTClass(torch.nn.Module):
-    def __init__(self, num_labels):
-        super(BERTClass, self).__init__()
-        self.l1 = transformers.BertModel.from_pretrained('bert-base-uncased')
-        self.l2 = torch.nn.Dropout(0.3)
-        self.l3 = torch.nn.Linear(768, num_labels)
-    
-    def forward(self, ids, mask, token_type_ids):
-        _, output_1= self.l1(ids, attention_mask = mask, token_type_ids = token_type_ids)
-        output_2 = self.l2(output_1)
-        output = self.l3(output_2)
-        return output
-
 def loss_fn(outputs, targets):
     return torch.nn.BCEWithLogitsLoss()(outputs, targets)
 
-def train(args):
+def train(args, model, optimizer):
     model.train()
     for data in tqdm(training_loader, 0):
         ids = data['ids'].to(args.device, dtype = torch.long)
@@ -76,8 +63,9 @@ def train(args):
 
         del token_type_ids, ids, mask, outputs, loss, data
         gc.collect()
+    return model
 
-def validation(args, epoch):
+def validation(args, model, epoch):
     model.eval()
     fin_targets=[]
     fin_outputs=[]
@@ -96,9 +84,9 @@ def validation(args, epoch):
 
     return fin_outputs, fin_targets
 
-def run(args):
+def run(args, model, optimizer):
     for epoch in range(args.epochs):
-        train(args, model, epoch)
+        model = train(args, model, optimizer)
         outputs, targets = validation(args, model, epoch)
 
         outputs = np.array(outputs) >= 0.5
@@ -107,7 +95,7 @@ def run(args):
         f1_score_macro = metrics.f1_score(targets, outputs, average='macro')
         print(f"Accuracy Score : {accuracy}, F1 Score (Micro) : {f1_score_micro}, F1 Score (Macro) : {f1_score_macro}")
     
-    return 
+    return model
 
 
 def main(args):
@@ -151,7 +139,7 @@ def main(args):
 
     optimizer = torch.optim.Adam(params =  model.parameters(), lr=args.lr)
 
-    model = run(args)
+    model = run(args, model, optimizer)
     
     torch.save(model.state_dict(), os.path.join(args.model_out_path + 'model_state_dict.pt') )
 
@@ -176,7 +164,7 @@ if __name__ == '__main__':
     parser.add_argument("--attn_d_prob", default=0.1, type=float)
     
 #######Train#############################################################################
-    parser.add_argument("--n_epochs", default=50, type=int)
+    parser.add_argument("--epochs", default=50, type=int)
     parser.add_argument("--batch_size", default=32, type=int)
     parser.add_argument("--lr", default=1e-05, type=float)
     parser.add_argument("--logging_steps", default=100, type=int)
