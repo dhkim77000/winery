@@ -120,7 +120,7 @@ def main(args):
     test_dataset = data.drop(train_dataset.index).reset_index(drop=True)
     train_dataset = data.reset_index(drop=True)
 
-    print("FULL Dataset: {}".format(new_df.shape))
+    print("FULL Dataset: {}".format(data.shape))
     print("TRAIN Dataset: {}".format(train_dataset.shape))
     print("TEST Dataset: {}".format(test_dataset.shape))
 
