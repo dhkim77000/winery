@@ -36,7 +36,7 @@ def get_embedding(df):
     review_vectors = {}
     tokenizer = BertTokenizerFast(
         vocab_file='/opt/ml/wine/code//text/models/review_tokenizer-vocab.txt',
-        max_len=128,
+        max_len=256,
         do_lower_case=True,
     )
     model = BertModel.from_pretrained('/opt/ml/wine/code/text/models/model_output')
@@ -48,19 +48,20 @@ def get_embedding(df):
 
             review_vector = []
             for text in reviews:
-                encoded_input = tokenizer.encode_plus(
-                    text, 
-                    add_special_tokens=True, 
-                    return_tensors='pt')
-                model_output = model(**encoded_input)
-                embeddings = model_output.last_hidden_state
-                sentence_embedding = torch.mean(embeddings[0], dim=0)
-                review_vector.append(sentence_embedding)
-                del embeddings
-                del model_output
-                del encoded_input
-                gc.collect()
-            
+                try:
+                    encoded_input = tokenizer.encode_plus(
+                        text, 
+                        add_special_tokens=True, 
+                        return_tensors='pt')
+                    model_output = model(**encoded_input)
+                    embeddings = model_output.last_hidden_state
+                    sentence_embedding = torch.mean(embeddings[0], dim=0)
+                    review_vector.append(sentence_embedding)
+                    del embeddings
+                    del model_output
+                    del encoded_input
+                    gc.collect()
+                except: 1
             mean_vector = torch.mean(torch.stack(review_vector), dim=0).numpy()
             del review_vector
             del sentence_embedding

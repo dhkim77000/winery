@@ -263,10 +263,7 @@ def find_taste(driver, info):
 #------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------
 def write_data(write_file, datas):
-    
-    for data in datas:
-        write_file = write_file.append(data, ignore_index = True)
-    
+    write_file = pd.concat([write_file,  pd.DataFrame(datas)], ignore_index=True)
     return write_file
 
 def get_data(driver, urls, done, df):

@@ -32,6 +32,7 @@ from dataset import TextDatasetForNextSentencePrediction
 from transformers import BertConfig, BertForPreTraining
 from tokenizers import BertWordPieceTokenizer
 import argparse
+from sklearn import metrics
 
 
 def main(args):
