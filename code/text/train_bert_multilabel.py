@@ -2,6 +2,7 @@ from typing import Union, Tuple, List
 from torch import cuda
 import numpy as np
 import random
+import transformers
 import pandas as pd
 from datetime import datetime, date
 from tqdm.notebook import tqdm
@@ -57,10 +58,10 @@ def loss_fn(outputs, targets):
 def train(args):
     model.train()
     for data in tqdm(training_loader, 0):
-        ids = data['ids'].to(device, dtype = torch.long)
-        mask = data['mask'].to(device, dtype = torch.long)
+        ids = data['ids'].to(args.device, dtype = torch.long)
+        mask = data['mask'].to(args.device, dtype = torch.long)
         token_type_ids = data['token_type_ids'].to(device, dtype = torch.long)
-        targets = data['targets'].to(device, dtype = torch.float)
+        targets = data['targets'].to(args.device, dtype = torch.float)
 
         outputs = model(ids, mask, token_type_ids)
 
@@ -82,10 +83,10 @@ def validation(args, epoch):
     fin_outputs=[]
     with torch.no_grad():
         for _, data in enumerate(testing_loader, 0):
-            ids = data['ids'].to(device, dtype = torch.long)
-            mask = data['mask'].to(device, dtype = torch.long)
-            token_type_ids = data['token_type_ids'].to(device, dtype = torch.long)
-            targets = data['targets'].to(device, dtype = torch.float)
+            ids = data['ids'].to(args.device, dtype = torch.long)
+            mask = data['mask'].to(args.device, dtype = torch.long)
+            token_type_ids = data['token_type_ids'].to(args.device, dtype = torch.long)
+            targets = data['targets'].to(args.device, dtype = torch.float)
             outputs = model(ids, mask, token_type_ids)
             fin_targets.extend(targets.cpu().detach().numpy().tolist())
             fin_outputs.extend(torch.sigmoid(outputs).cpu().detach().numpy().tolist())
@@ -159,7 +160,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_output_path", default='/opt/ml/wine/code/text/models/model_output', type=str)
     parser.add_argument("--data", default='data/text_with_notelabel.csv', type=str)
-    parser.add_argument("--cuda'", default = 'cuda' if cuda.is_available() else 'cpu', type=str)
+    parser.add_argument("--device", default = 'cuda' if cuda.is_available() else 'cpu', type=str)
 #######Data#############################################################################
     parser.add_argument("--max_len", default=156, type=int)
     parser.add_argument("--train_size", default=0.8, type=float)
