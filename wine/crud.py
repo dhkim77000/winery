@@ -11,7 +11,7 @@ from passlib.context import CryptContext
 from psycopg2.extras import execute_values, register_uuid
 from schema import UserCreate, WinePost
 #from models import User, Wine,create_user_table, create_wine_table
-from models import User,create_user_table,create_wine_table
+from models import User, Wine, create_user_table,create_wine_table
 import pdb
 from fastapi.security import OAuth2PasswordRequestForm
 from psycopg2.extensions import connection
@@ -47,12 +47,33 @@ async def get_wine_data(db: connection, wine_id):
     if result is None:
         raise HTTPException(status_code=404, detail=f"존재하지 않는 와인입니다.")
     else:
-        wine = result
-        #wine = Wine(
-        #    id=result[0],
-        #    email=result[1],
-        #    password=result[2],
-        #)
+        wine = Wine(
+            id = result[0],
+            winetype = result[1],
+            Red_Fruit = result[2],
+            Tropical = result[3],
+            Tree_Fruit = result[4],
+            Oaky = result[5],
+            Ageing = result[6],
+            Black_Fruit = result[7],
+            Citrus = result[8],
+            Dried_Fruit = result[9],
+            Earthy = result[10],
+            Floral = result[11],
+            Microbio = result[12],
+            Spices = result[13],
+            Vegetal = result[14],
+            Light = result[15],
+            Bold = result[16],
+            Smooth = result[17],
+            Tannic = result[18],
+            Dry = result[19],
+            Sweet = result[20],
+            Soft = result[21],
+            Acidic = result[22],
+            Fizzy = result[23],
+            Gentle = result[24],
+        )
         return wine
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:

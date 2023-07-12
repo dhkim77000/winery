@@ -1,5 +1,5 @@
 
-from sqlalchemy import Column, Boolean, String, Text
+from sqlalchemy import Column, Boolean, String, Text,Integer
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import UUID
 from database import Base
@@ -75,33 +75,32 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
 
-# class Wine(Base):
-#     __tablename__ = "wine"
-
-#     id = Column(UUID(as_uuid=True), primary_key=True, nullable=False, unique=True)
-#     winetype = Column(String, nullable=True)
-#     Red_Fruit = Column(int, nullable=True)
-#     Tropical = Column(int, nullable=True)
-#     Tree_Fruit = Column(int, nullable=True)
-#     Oaky = Column(int, nullable=True)
-#     Ageing = Column(int, nullable=True)
-#     Black_Fruit = Column(int, nullable=True)
-#     Citrus = Column(int, nullable=True)
-#     Dried_Fruit = Column(int, nullable=True)
-#     Earthy = Column(int, nullable=True)
-#     Floral = Column(int, nullable=True)
-#     Microbio = Column(int, nullable=True)
-#     Spices = Column(int, nullable=True)
-#     Vegetal = Column(int, nullable=True)
-#     Light = Column(int, nullable=True)
-#     Bold = Column(int, nullable=True)
-#     Smooth = Column(int, nullable=True)
-#     Tannic = Column(int, nullable=True)
-#     Dry = Column(int, nullable=True)
-#     Sweet = Column(int, nullable=True)
-#     Soft = Column(int, nullable=True)
-#     Acidic = Column(int, nullable=True)
-#     Fizzy = Column(int, nullable=True)
-#     Gentle = Column(int, nullable=True)
+class Wine(Base):
+    __tablename__ = "wine"
+    id = Column(UUID(as_uuid=True), primary_key=True, nullable=False, unique=True)
+    winetype = Column(String, nullable=True)
+    Red_Fruit = Column(Integer, nullable=True)
+    Tropical = Column(Integer, nullable=True)
+    Tree_Fruit = Column(Integer, nullable=True)
+    Oaky = Column(Integer, nullable=True)
+    Ageing = Column(Integer, nullable=True)
+    Black_Fruit = Column(Integer, nullable=True)
+    Citrus = Column(Integer, nullable=True)
+    Dried_Fruit = Column(Integer, nullable=True)
+    Earthy = Column(Integer, nullable=True)
+    Floral = Column(Integer, nullable=True)
+    Microbio = Column(Integer, nullable=True)
+    Spices = Column(Integer, nullable=True)
+    Vegetal = Column(Integer, nullable=True)
+    Light = Column(Integer, nullable=True)
+    Bold = Column(Integer, nullable=True)
+    Smooth = Column(Integer, nullable=True)
+    Tannic = Column(Integer, nullable=True)
+    Dry = Column(Integer, nullable=True)
+    Sweet = Column(Integer, nullable=True)
+    Soft = Column(Integer, nullable=True)
+    Acidic = Column(Integer, nullable=True)
+    Fizzy = Column(Integer, nullable=True)
+    Gentle = Column(Integer, nullable=True)
 
 
