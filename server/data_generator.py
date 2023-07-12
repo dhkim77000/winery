@@ -2,20 +2,21 @@ from fastapi import FastAPI
 from fastapi import FastAPI, Form, Request
 from psycopg2.extras import execute_values, register_uuid
 from psycopg2.extensions import connection
+from tqdm import tqdm
+
+
 import pandas as pd
 import os
 import time
 import csv
 import sys
+import pdb
+
 from uuid import UUID, uuid4
 import models, database, crud
-import pdb
-from tqdm import tqdm
 
-# Increase the field size limit
-csv.field_size_limit(sys.maxsize)
-data_path = "/opt/ml/api/server/data"
-def get_item_data(data_path):
+def get_item_data():
+    data_path = "/opt/ml/server/winery/data"
     data = pd.read_csv(os.path.join(data_path, "item_df_allfeature.csv"))
     # "grape"
     wine_column = ['winetype','Red Fruit', 'Tropical', 'Tree Fruit', 'Oaky',\
@@ -40,98 +41,12 @@ def get_item_data(data_path):
     #     df['rating'][data] = float(df['rating'][data])
     return df
 
-# ### CRUD create_wine module 세분화해서 가져오기 
-# def insert_data(conn, data):
-#     #pdb.set_trace()
-#     data['id'] = uuid4() 
-#     insert_row_query = f"""
-#     INSERT INTO wine
-#         (id,winetype, Red_Fruit , Tropical, Tree_Fruit, Oaky,
-#         Ageing, Black_Fruit, Citrus, Dried_Fruit, Earthy, Floral, 
-#         Microbio,Spices, Vegetal,Light, Bold, Smooth, Tannic,Dry,
-#         Sweet,Soft,Acidic,Fizzy,Gentle)
-#         VALUES (
-#             '{data.id}',
-#             '{data.winetype}',
-#             {data.Red_Fruit},
-#             {data['Tropical']},
-#             {data['Tree_Fruit']},
-#             {data['Oaky']},
-#             {data['Ageing']},
-#             {data['Black_Fruit']},
-#             {data['Citrus']},
-#             {data['Dried_Fruit']},
-#             {data['Earthy']},
-#             {data['Floral']},
-#             {data['Microbio']},
-#             {data['Spices']},
-#             {data['Vegetal']},
-#             {data['Light']},
-#             {data['Bold']},
-#             {data['Smooth']},
-#             {data['Tannic']},
-#             {data['Dry']},
-#             {data['Sweet']},
-#             {data['Soft']},
-#             {data['Fizzy']},
-#             {data['Acidic']},
-#             {data['Gentle']}
-#         );
-#     """
 
-#     with conn.cursor() as cur:
-#         cur.execute(insert_row_query)
-#         conn.commit()
 
-# def generate_data(conn, df):
-#     while len(df):
-#         register_uuid()
-#         insert_data(conn, df.sample(1).squeeze())
 
-def create_wine_table(db: connection, data_path: str):
-    create_table_query = """
-    CREATE TABLE IF NOT EXISTS "wine" (
-        id UUID PRIMARY KEY NOT NULL UNIQUE,
-        winetype VARCHAR(20),
-        Red_Fruit int,
-        Tropical int,
-        Tree_Fruit int,
-        Oaky int,
-        Ageing int,
-        Black_Fruit int,
-        Citrus int,
-        Dried_Fruit int,
-        Earthy int,
-        Floral int,
-        Microbio int,
-        Spices int,
-        Vegetal int,
-        Light int,
-        Bold int,
-        Smooth int,
-        Tannic int,
-        Dry int,
-        Sweet int,
-        Soft int,
-        Acidic int,
-        Fizzy int,
-        Gentle int
-    );
-    """
 
-    cur = db.cursor()
-    cur.execute(create_table_query)
-    db.commit()
-    # Check if wine table is empty
-    cur.execute("SELECT EXISTS (SELECT 1 FROM wine)")
-    is_empty = cur.fetchone()[0]
-
-    if is_empty:
-        print("Wine table already contains data. Skipping insertion.")
-        return
-
-    df = get_item_data(data_path)
-    total_rows = df.shape[0]
+def insert_wine_data(db=connection):
+   
 
     insert_query = """
     INSERT INTO "wine" (id, winetype, Red_Fruit, Tropical, Tree_Fruit, Oaky, Ageing, Black_Fruit, Citrus, Dried_Fruit, Earthy, Floral, Microbio, Spices, Vegetal, Light, Bold, Smooth, Tannic, Dry, Sweet, Soft, Acidic, Fizzy, Gentle)
@@ -175,22 +90,14 @@ def create_wine_table(db: connection, data_path: str):
     cur.close()
 
 
-def create_mbti_table(db: connection):
-    create_table_query = """
-    CREATE TABLE IF NOT EXISTS "mbti" (
-        mbti_id int PRIMARY KEY,
-        item text[]
-    );
-    """
-    cur = db.cursor()
-    cur.execute(create_table_query)
-    db.commit()
+def create_mbti_data(db):
+    models.create_mbiti_table(db)
     cur.execute("SELECT EXISTS (SELECT 1 FROM mbti)")
     is_empty = cur.fetchone()[0]
 
     if is_empty:
-        print("MBTI table already contains data. Skipping insertion.")
-        return
+        raise ValueError("MBTI table already contains data. Skipping insertion.")
+        
     # CSV 파일에서 데이터 읽어오기
     with open('/opt/ml/api/server/data/mbti_test.csv', 'r') as file:
         csv_data = csv.reader(file)
@@ -219,12 +126,23 @@ def create_mbti_table(db: connection):
 
 
 if __name__ == "__main__":
-
     # db 정보 받아오기
     conn = database.get_conn()
 
+    # generate wine db
+    models.create_wine_table(conn)
+    
+    # Check if wine table is empty
+    with conn.cursor() as cur:
+        cur.execute("SELECT EXISTS (SELECT 1 FROM wine)")
+        is_empty = cur.fetchone()[0]
+
+        if is_empty:
+            raise ValueError("Wine table already contains data. Skipping insertion.")
+
+    df = get_item_data()
+    total_rows = df.shape[0]
+
     # DB에 data넣기
-    create_wine_table(conn,data_path)
-    create_mbti_table(conn)
-
-
+    insert_wine_data(conn)
+    create_mbti_data(conn)
