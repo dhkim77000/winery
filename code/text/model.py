@@ -1,5 +1,6 @@
 
 import torch
+import transformers
 import torch.nn as nn
 from torch.nn.init import normal_
 from torch.utils.data import TensorDataset, DataLoader

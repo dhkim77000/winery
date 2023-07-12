@@ -1,6 +1,7 @@
 from typing import Union, Tuple, List
 from torch import cuda
 import numpy as np
+import ast
 import random
 import transformers
 import pandas as pd
@@ -42,9 +43,9 @@ from dataset import MultilabelDataset
 def loss_fn(outputs, targets):
     return torch.nn.BCEWithLogitsLoss()(outputs, targets)
 
-def train(args, model, optimizer):
+def train(args, model, optimizer, training_loader):
     model.train()
-    for data in tqdm(training_loader, 0):
+    for data in tqdm(training_loader):
         ids = data['ids'].to(args.device, dtype = torch.long)
         mask = data['mask'].to(args.device, dtype = torch.long)
         token_type_ids = data['token_type_ids'].to(device, dtype = torch.long)
@@ -65,12 +66,12 @@ def train(args, model, optimizer):
         gc.collect()
     return model
 
-def validation(args, model, epoch):
+def validation(args, model, epoch, testing_loader):
     model.eval()
     fin_targets=[]
     fin_outputs=[]
     with torch.no_grad():
-        for _, data in enumerate(testing_loader, 0):
+        for _, data in enumerate(testing_loader):
             ids = data['ids'].to(args.device, dtype = torch.long)
             mask = data['mask'].to(args.device, dtype = torch.long)
             token_type_ids = data['token_type_ids'].to(args.device, dtype = torch.long)
@@ -84,10 +85,10 @@ def validation(args, model, epoch):
 
     return fin_outputs, fin_targets
 
-def run(args, model, optimizer):
+def run(args, model, optimizer,training_loader,testing_loader):
     for epoch in range(args.epochs):
-        model = train(args, model, optimizer)
-        outputs, targets = validation(args, model, epoch)
+        model = train(args, model, optimizer, training_loader)
+        outputs, targets = validation(args, model, epoch,testing_loader)
 
         outputs = np.array(outputs) >= 0.5
         accuracy = metrics.accuracy_score(targets, outputs)
@@ -101,8 +102,10 @@ def run(args, model, optimizer):
 def main(args):
 
     data = pd.read_csv(args.data, encoding = 'utf-8')
-    try: data['label'] = data['label'].apply(ast.literal_eval)
-    except: pass
+    try: data['label'] = data['label'].apply(lambda x : ast.literal_eval(x))
+    except: 
+        import pdb
+        pdb.set_trace()
 
     train_size = args.train_size
     train_dataset = data.sample(frac=train_size,random_state=200)
@@ -139,7 +142,7 @@ def main(args):
 
     optimizer = torch.optim.Adam(params =  model.parameters(), lr=args.lr)
 
-    model = run(args, model, optimizer)
+    model = run(args, model, optimizer, training_loader, testing_loader)
     
     torch.save(model.state_dict(), os.path.join(args.model_out_path + 'model_state_dict.pt') )
 
