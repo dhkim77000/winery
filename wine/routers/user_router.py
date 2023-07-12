@@ -21,7 +21,7 @@ SECRET_KEY = "4ab2fce7a6bd79e1c014396315ed322dd6edb1c5d975c6b74a2904135172c03c"
 ALGORITHM = "HS256"
 
 app = FastAPI()
-templates = Jinja2Templates(directory='/opt/ml/server/winery/server/template')
+templates = Jinja2Templates(directory='/opt/ml/server/winery/wine/templates')
 
 router = APIRouter(
     prefix="/login",
@@ -37,6 +37,7 @@ async def user_login(request: Request,
                      email: str = Form(...),
                      password: str = Form(...),
                      db: connection = Depends(get_conn)):
+    
     # Check if the user exists in the database
     user = await get_user(db=db, email=email)
     if user and verify_password(password, user.password):

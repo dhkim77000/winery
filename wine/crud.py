@@ -36,6 +36,24 @@ async def get_user(db: connection, email: str):
             password=result[2],
         )
         return user
+    
+async def get_wine_data(db: connection, wine_id):
+    
+
+    with db.cursor() as cur:
+        cur.execute("SELECT * FROM wine WHERE id = %s", (wine_id,))
+        result = cur.fetchone()
+
+    if result is None:
+        raise HTTPException(status_code=404, detail=f"존재하지 않는 와인입니다.")
+    else:
+        wine = result
+        #wine = Wine(
+        #    id=result[0],
+        #    email=result[1],
+        #    password=result[2],
+        #)
+        return wine
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)

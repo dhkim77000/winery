@@ -18,6 +18,18 @@ def create_user_table(db):
         db.commit()
 
 
+def create_mbiti_table(db):
+    create_table_query = """
+    CREATE TABLE IF NOT EXISTS "mbti" (
+        mbti_id int PRIMARY KEY,
+        item text[]
+    );
+    """
+    print(create_table_query)
+    with db.cursor() as cur:
+        cur.execute(create_table_query)
+        db.commit()
+
 
 def create_wine_table(db_connect):
     create_table_query = """
