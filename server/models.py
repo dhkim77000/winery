@@ -30,6 +30,7 @@ def create_mbiti_table(db):
         db.commit()
 
 
+
 def create_wine_table(db_connect):
     create_table_query = """
 
@@ -76,7 +77,6 @@ class User(Base):
 
 # class Wine(Base):
 #     __tablename__ = "wine"
-
 #     id = Column(UUID(as_uuid=True), primary_key=True, nullable=False, unique=True)
 #     winetype = Column(String, nullable=True)
 #     Red_Fruit = Column(int, nullable=True)
