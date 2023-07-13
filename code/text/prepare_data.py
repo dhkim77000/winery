@@ -35,6 +35,7 @@ def main(args):
     review_df = pd.read_csv('/opt/ml/wine/data/review_df_total.csv',encoding = 'utf-8-sig').loc[:,['user_url','rating','text','wine_url']]
     print('-------------------Done-------------------')
     print()
+
     print('-------------------Processing review text-------------------')
 #########################REVIEW DATA#########################
     review_df = review_df[review_df['text'].isna()==False]
@@ -79,4 +80,16 @@ def main(args):
     del note_label
     gc.collect()
     labeled_data = pd.merge(labeled_data, price_label, on = 'wine_id', how = 'inner')
+    print('-------------------Done-------------------')
+    labeled_data.to_csv(args.save_path)
     
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    
+#######Train#############################################################################
+    parser.add_argument("--min_len", default=6, type=int)
+    parser.add_argument("--save_path", default="/opt/ml/wine/data/labeled_review.csv", type=str)
+     
+    args = parser.parse_args()
+    main(args)
