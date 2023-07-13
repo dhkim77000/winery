@@ -1,85 +1,66 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-// import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import Home from "./Home";
 import Login from "./Login";
 import Sign from "./Sign";
 
-// import Icon from 'react-native-vector-icons/MaterialIcons';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 import Recommend from "./Recommend";
 import Group from "./Group";
 
-// const Tab = createBottomTabNavigator();
+import {
+  StyleSheet,
+  Text,
+} from "react-native";
+
+const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigation() {
   return(
     <NavigationContainer>
-      <WholeStack />
+      <Stack.Navigator 
+        screenOptions={{
+          contentStyle: {backgroundColor: 'white'}
+        }}
+        initialRouteName="Login"
+      >
+        <Stack.Screen
+          name="Login"
+          component={Login}
+          //options={{ headerShown: false }}
+        ></Stack.Screen>
+        <Stack.Screen
+          name="Sign"
+          component={Sign}
+          //options={{ headerShown: false }}
+        ></Stack.Screen>
+        <Stack.Screen
+          name="TabNavi"
+          component={TabNavi}
+          options={{
+            headerRight: () => (
+              <Icon name="menu" color="#000000" size={22} style={{ paddingRight:10 }}/>
+            ),
+            headerTitle: 'WINERY',
+          }}
+          //options={{ headerShown: false }}
+        ></Stack.Screen>
+      </Stack.Navigator>
     </NavigationContainer>
   )
 }
 
-function WholeStack() {
-  return (
-    <Stack.Navigator 
-      screenOptions={{
-        contentStyle: {backgroundColor: 'white'}
-      }}
-      initialRouteName="Login"
-    >
-      <Stack.Screen
-        name="Login"
-        component={Login}
-        //options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Sign"
-        component={Sign}
-        //options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Home"
-        component={Home}
-        //options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Recommend"
-        component={Recommend}
-        //options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Group"
-        component={Group}
-        //options={{ headerShown: false }}
-      />
-    </Stack.Navigator>
-  )
-}
-
-/*
-<Stack.Screen
-        name="TabNavi"
-        options={{ headerShown: false }}
-      >
-        {() => (
-          <TabNavi />
-        )}
-      </Stack.Screen>
-      
 function TabNavi() {
-  return(
-    <Tab.Navigator 
+  return <Tab.Navigator 
       initialRouteName="Home"
-      screenOptions={({route}) => ({
+      screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarStyle: {
-
-        }
-      })}
+      }}
     >
       <Tab.Screen
         name="Recommend"
@@ -87,7 +68,7 @@ function TabNavi() {
         options={{
           title: '추천 페이지',
           tabBarIcon: () => (
-            <Icon name="heart" color={"white"} size={24} />
+            <Icon name="heart" color="#000000" size={24} />
           ),
         }}
       />
@@ -97,7 +78,7 @@ function TabNavi() {
         options={{
           title: '메인 페이지',
           tabBarIcon: () => (
-            <Icon name="home" color={"white"} size={24} />
+            <Icon name="home" color="#000000" size={24} />
           ),
         }}
       />
@@ -107,12 +88,10 @@ function TabNavi() {
         options={{
           title: '그룹 추천 페이지',
           tabBarIcon: () => (
-            <Icon name="people" color={"white"} size={24} />
+            <Icon name="people" color="#000000" size={24} />
           ),
         }}
       />
     </Tab.Navigator>
-  )
 }
-*/
 
