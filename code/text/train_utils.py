@@ -11,6 +11,7 @@ def loss_fn(outputs, targets):
 
 def train(args, model, optimizer, training_loader, epoch):
     model.train()
+    i = 0
     for data in tqdm(training_loader):
         ids = data['ids'].to(args.device, dtype = torch.long)
         mask = data['mask'].to(args.device, dtype = torch.long)
@@ -21,15 +22,17 @@ def train(args, model, optimizer, training_loader, epoch):
 
         optimizer.zero_grad()
         loss = loss_fn(outputs, targets)
-        if _%5000==0:
+        if i%5000==0:
             print(f'Epoch: {epoch}, Loss:  {loss.item()}')
         
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
+        
         del token_type_ids, ids, mask, outputs, loss, data
         gc.collect()
+        i += 1
+        
     return model
 
 def validation(args, model, epoch, testing_loader):

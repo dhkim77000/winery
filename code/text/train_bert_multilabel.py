@@ -60,7 +60,8 @@ def run(args, model, optimizer,training_loader,testing_loader):
 def main(args):
 
     data = pd.read_csv(args.data, encoding = 'utf-8')
-    try: data['label'] = data['label'].apply(lambda x : ast.literal_eval(x))
+    tqdm.pandas()
+    try: data['label'] = data['label'].progress_apply(ast.literal_eval)
     except: 
         import pdb
         pdb.set_trace()
@@ -126,7 +127,7 @@ if __name__ == '__main__':
     
 #######Train#############################################################################
     parser.add_argument("--epochs", default=50, type=int)
-    parser.add_argument("--batch_size", default=32, type=int)
+    parser.add_argument("--batch_size", default=128, type=int)
     parser.add_argument("--lr", default=1e-05, type=float)
     parser.add_argument("--logging_steps", default=100, type=int)
     parser.add_argument("--save_total_limit", default=2, type=int)

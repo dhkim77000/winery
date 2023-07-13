@@ -261,6 +261,7 @@ class MultilabelDataset(Dataset):
         inputs = self.tokenizer.encode_plus(
             comment_text,
             None,
+            truncation = True,
             add_special_tokens=True,
             max_length=self.max_len,
             pad_to_max_length=True,

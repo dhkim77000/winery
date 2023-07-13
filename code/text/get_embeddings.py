@@ -36,21 +36,22 @@ def get_embedding(df):
     review_vectors = {}
     tokenizer = BertTokenizerFast(
         vocab_file='/opt/ml/wine/code//text/models/review_tokenizer-vocab.txt',
-        max_len=256,
+        max_len=156,
         do_lower_case=True,
     )
     model = BertModel.from_pretrained('/opt/ml/wine/code/text/models/model_output')
     with torch.no_grad():
-        model.eval()
+
         for i in tqdm(range(len(df))):
             reviews = df['text'][i].split('.')
             id = df['wine_id'][i]
 
             review_vector = []
-            for text in reviews:
+            for text in tqdm(reviews):
                 try:
                     encoded_input = tokenizer.encode_plus(
                         text, 
+                        truncation = True,
                         add_special_tokens=True, 
                         return_tensors='pt')
                     model_output = model(**encoded_input)
