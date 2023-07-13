@@ -44,6 +44,7 @@ from train_utils import train, validation
 
 
 def run(args, model, optimizer,training_loader,testing_loader):
+    best_accuracy = 0
     for epoch in range(args.epochs):
         model = train(args, model, optimizer, training_loader, epoch)
         outputs, targets = validation(args, model, epoch,testing_loader)
@@ -53,6 +54,9 @@ def run(args, model, optimizer,training_loader,testing_loader):
         f1_score_micro = metrics.f1_score(targets, outputs, average='micro')
         f1_score_macro = metrics.f1_score(targets, outputs, average='macro')
         print(f"Accuracy Score : {accuracy}, F1 Score (Micro) : {f1_score_micro}, F1 Score (Macro) : {f1_score_macro}")
+        if accuracy > best_accuracy:
+            best_accuracy = accuracy
+            torch.save(model.state_dict(), os.path.join(args.model_out_path + 'model_state_dict_{epoch}.pt') )
     
     return model
 
@@ -126,7 +130,7 @@ if __name__ == '__main__':
     parser.add_argument("--attn_d_prob", default=0.1, type=float)
     
 #######Train#############################################################################
-    parser.add_argument("--epochs", default=50, type=int)
+    parser.add_argument("--epochs", default=5, type=int)
     parser.add_argument("--batch_size", default=128, type=int)
     parser.add_argument("--lr", default=1e-05, type=float)
     parser.add_argument("--logging_steps", default=100, type=int)

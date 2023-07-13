@@ -22,7 +22,7 @@ def train(args, model, optimizer, training_loader, epoch):
 
         optimizer.zero_grad()
         loss = loss_fn(outputs, targets)
-        if i%5000==0:
+        if i%1000==0:
             print(f'Epoch: {epoch}, Loss:  {loss.item()}')
         
         optimizer.zero_grad()
