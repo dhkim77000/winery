@@ -10,34 +10,30 @@ import {
 	Button,
 	TouchableOpacity,
 } from "react-native";
-import { postApi, getApi } from "./Api";
+import { postApi, getApi, isLoggedInVar } from "./Api";
 
 export default function Login({ navigation }) {
 	const { register, handleSubmit, setValue, watch } = useForm();
 	const passwordRef = useRef();
-	const [isLogIn, setIsLogIn] = useState(false);
 
 	const onNext = (nextOne) => {
 		nextOne?.current?.focus();
 	};
 	const onValid = async (data) => {
 		const regex = /\w+@\w+\.[\w,\.]+/;
+		console.log(data);
 		if (regex.test(data.email)) {
-			await postApi("temp/login/", data)
-				.then((response) => {
-					console.log(response.data.status)
-					if (response.data.status) {
-						setIsLogIn(true);
-					}
-				})
-				.catch((error) => {
-					alert(error.status);
-				});
-
-			if (isLogIn) {
-				navigation.navigate("Recommend");
-			} else {
-				alert("아이디/이메일을 찾을 수 없습니다");
+			try {
+				const response = await postApi("temp/login/", data);
+				console.log(response.data.status);
+				if (response.data.status) {
+					isLoggedInVar(true);
+				} else {
+					alert("회원정보를 찾을 수 없습니다");
+				}
+			} catch (error) {
+				alert(error)
+				console.log(error);
 			}
 		} else {
 			alert("이메일 형식이 맞지 않습니다");
