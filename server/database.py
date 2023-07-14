@@ -12,11 +12,11 @@ Base = declarative_base()
 
 def get_conn():
     conn = psycopg2.connect(
-        user="dhkim",
+        user="recommy",
         password="wine123",
         host="localhost",
         port=5432,
-        database="server_db",
+        database="winery",
     )
     return conn
 
