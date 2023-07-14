@@ -9,12 +9,12 @@ from fastapi.templating import Jinja2Templates
 from crud import create_user , get_user
 from schema import UserCreate
 from database import get_db, get_conn
-import pdb
+import pdb , os
 import uvicorn
 from fastapi.responses import RedirectResponse, HTMLResponse
 from crud import create_user, get_user, verify_password , add_mbti_feature
 app = FastAPI()
-templates = Jinja2Templates(directory='/opt/ml/api/server/templates')
+templates = Jinja2Templates(directory=os.path.dirname(os.getcwd())+'/templates')
 
 router = APIRouter(
     prefix="/home",
