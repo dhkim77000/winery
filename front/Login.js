@@ -15,28 +15,33 @@ import { postApi, getApi } from "./Api";
 export default function Login({ navigation }) {
 	const { register, handleSubmit, setValue, watch } = useForm();
 	const passwordRef = useRef();
+	const [isLogIn, setIsLogIn] = useState(false);
 
 	const onNext = (nextOne) => {
 		nextOne?.current?.focus();
 	};
 	const onValid = async (data) => {
-		postApi("temp/", data)
-			.then((response) => {
-				console.log("return value: ", response.data); // 응답 데이터 출력
-			})
-			.catch((error) => {
-				console.error(error);
-			});
+		const regex = /\w+@\w+\.[\w,\.]+/;
+		if (regex.test(data.email)) {
+			await postApi("temp/login/", data)
+				.then((response) => {
+					console.log(response.data.status)
+					if (response.data.status) {
+						setIsLogIn(true);
+					}
+				})
+				.catch((error) => {
+					alert(error.status);
+				});
 
-		// getApi("temp/")
-		// 	.then((response) => {
-		// 		console.log("포스팅 유무: ", response.data);
-		// 	})
-		// 	.catch((error) => {
-		// 		console.error(error);
-		// 	});
-
-		// await navigation.navigate("Recommend")
+			if (isLogIn) {
+				navigation.navigate("Recommend");
+			} else {
+				alert("아이디/이메일을 찾을 수 없습니다");
+			}
+		} else {
+			alert("이메일 형식이 맞지 않습니다");
+		}
 	};
 
 	useEffect(() => {

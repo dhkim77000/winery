@@ -9,7 +9,7 @@ export const getApi = (endpoint) => {
 	return api.get(endpoint); // 백엔드에서 제공하는 엔드포인트로 GET 요청을 보냅니다.
 };
 
-export const postApi = (endpoint, data) => {
+export const postApi = async (endpoint, data) => {
     // endpoint: login/, login/register/, home/ ...
-	return api.post(endpoint, data); // 엔드포인트로 POST 요청을 보냅니다.
+	return await api.post(endpoint, data); // 엔드포인트로 POST 요청을 보냅니다.
 };
