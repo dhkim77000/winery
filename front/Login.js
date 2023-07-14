@@ -9,6 +9,8 @@ import {
 	TextInput,
 	Button,
 	TouchableOpacity,
+	TouchableWithoutFeedback,
+	Keyboard,
 } from "react-native";
 import { postApi, getApi, isLoggedInVar } from "./Api";
 
@@ -32,7 +34,7 @@ export default function Login({ navigation }) {
 					alert("회원정보를 찾을 수 없습니다");
 				}
 			} catch (error) {
-				alert(error)
+				alert(error);
 				console.log(error);
 			}
 		} else {
@@ -50,6 +52,7 @@ export default function Login({ navigation }) {
 	}, [register]);
 
 	return (
+		<TouchableWithoutFeedback style={{ flex: 1 }} onPress={Keyboard.dismiss}>
 		<View style={styles.container}>
 			<Image style={styles.image} source={require("./assets/logo.png")} />
 			<StatusBar style="auto" />
@@ -82,6 +85,7 @@ export default function Login({ navigation }) {
 				<Text>LOGIN</Text>
 			</TouchableOpacity>
 		</View>
+		</TouchableWithoutFeedback>
 	);
 }
 

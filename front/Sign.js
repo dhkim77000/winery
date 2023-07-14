@@ -8,6 +8,7 @@ import {
   TextInput,
   Button,
   TouchableOpacity,
+  Keyboard,
 } from "react-native";
 
 export default function Sign() {
@@ -16,6 +17,7 @@ export default function Sign() {
 
 
   return (
+		<TouchableWithoutFeedback style={{ flex: 1 }} onPress={Keyboard.dismiss}>
     <View style={styles.container}> 
       <StatusBar style="auto" />
       <View style={styles.inputView}>
@@ -39,6 +41,7 @@ export default function Sign() {
         <Text>NEXT</Text> 
       </TouchableOpacity> 
     </View> 
+    </TouchableWithoutFeedback>
   );
 }
 const styles = StyleSheet.create({
