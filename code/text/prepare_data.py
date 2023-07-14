@@ -29,37 +29,45 @@ def main(args):
     with open('/opt/ml/wine/code/data/feature_map/item2idx.json','r') as f: item2idx = json.load(f)
     with open('/opt/ml/wine/data/price_vocab.json','r') as f: price_vocab = json.load(f)
     with open('/opt/ml/wine/data/note.json','r') as f: notes_data = json.load(f)
-    
+
     basic_info = pd.read_csv('/opt/ml/wine/data/basic_info_total.csv')
     wine_df = pd.read_csv('/opt/ml/wine/data/wine_df.csv')
-    review_df = pd.read_csv('/opt/ml/wine/data/review_df_total.csv',encoding = 'utf-8-sig').loc[:,['user_url','rating','text','wine_url']]
-    print('-------------------Done-------------------')
-    print()
-
-    print('-------------------Processing review text-------------------')
 #########################REVIEW DATA#########################
-    review_df = review_df[review_df['text'].isna()==False]
-    review_df['text'] = review_df['text'].apply(lambda x: x + '.' if x[-1] != '.' else x)
+    try:
+        review_df = pd.read_csv('/opt/ml/wine/data/review_df_cleaned.csv',encoding = 'utf-8-sig').loc[:,['user_url','rating','text','wine_url']]
+        review_df['wine_id'] = review_df['wine_id'].astype('int').astype('category')
+        if args.run:
+            print('-------------------Processing review text-------------------')
+            review_df = review_df[review_df['text'].isna()==False]
+            review_df['text'] = review_df['text'].apply(lambda x: x + '.' if x[-1] != '.' else x)
 
-    review_df['text'] = review_df['text'].apply(keep_english_and_digits)
-    review_df['wine_id'] = review_df['wine_url'].map(item2idx)
-    review_df = review_df[review_df['wine_id'].isna()==False]
-    review_df['wine_id'] = review_df['wine_id'].astype('int').astype('category')
+            review_df['text'] = review_df['text'].apply(keep_english_and_digits)
+            review_df['wine_id'] = review_df['wine_url'].map(item2idx)
+            review_df = review_df[review_df['wine_id'].isna()==False]
+            review_df['wine_id'] = review_df['wine_id'].astype('int').astype('category')
 
-    review_df['length'] = review_df['text'].apply(get_len_text)
-    review_df = review_df.loc[:, ['wine_id','text','length']]
+            review_df['length'] = review_df['text'].apply(get_len_text)
+            review_df = review_df.loc[:, ['wine_id','text','length']]
 
-    review_df = review_df.sort_values(['wine_id', 'length'])
-    review_df = merge_short_review(review_df, args.min_len)
-    gc.collect()
-#########################PRICE LABEL#########################
-    price_label = parallel_dataframe_2input(marking_price_data, review_df, price_vocab, 8)
-    price_label.to_csv(args.save_path+'price_label.csv', index = False)
-    gc.collect()
-#########################NOTE LABEL#########################
-    notes_data = get_notes_group(wine_df)
-    note_label = parallel_dataframe_2input(marking_note_data, review_df, notes_data, 8)
-    note_label.to_csv(args.save_path+'note_label.csv', index = False)
+            review_df = review_df.sort_values(['wine_id', 'length'])
+            review_df = merge_short_review(review_df, args.min_len)
+            review_df.to_csv('/opt/ml/wine/data/review_df_cleaned.csv',index = False)
+
+    except:
+        review_df = pd.read_csv('/opt/ml/wine/data/review_df_total.csv',encoding = 'utf-8-sig').loc[:,['user_url','rating','text','wine_url']]
+
+        review_df = review_df[review_df['text'].isna()==False]
+        review_df['text'] = review_df['text'].apply(lambda x: x + '.' if x[-1] != '.' else x)
+        review_df['text'] = review_df['text'].apply(keep_english_and_digits)
+        review_df['wine_id'] = review_df['wine_url'].map(item2idx)
+        review_df = review_df[review_df['wine_id'].isna()==False]
+        review_df['wine_id'] = review_df['wine_id'].astype('int').astype('category')
+        review_df['length'] = review_df['text'].apply(get_len_text)
+        review_df = review_df.loc[:, ['wine_id','text','length']]
+        review_df = review_df.sort_values(['wine_id', 'length'])
+        review_df = merge_short_review(review_df, args.min_len)
+        review_df.to_csv('/opt/ml/wine/data/review_df_cleaned.csv',index = False)
+    
     gc.collect()
 #########################WINE LABEL#########################  
     wine_label = wine_df.loc[:, ['url','winetype']].merge(basic_info, on='url')
@@ -70,6 +78,17 @@ def main(args):
     wine_label.to_csv(args.save_path+'wine_label.csv', index = False)
     wine_label, grape2idx, country2idx, winetype2idx = gen_labeled_data(wine_label)
     
+#########################NOTE LABEL#########################
+    notes_data = get_notes_group(wine_df)
+    note_label = parallel_dataframe_2input(marking_note_data, review_df, notes_data, 8)
+    note_label.to_csv(args.save_path+'note_label.csv', index = False)
+    gc.collect()
+
+    #########################PRICE LABEL#########################
+    price_label = parallel_dataframe_2input(marking_price_data, review_df, price_vocab, 8)
+    price_label.to_csv(args.save_path+'price_label.csv', index = False)
+    gc.collect()
+
     gc.collect()
     with open('/opt/ml/wine/code/feature_map/grape2idx.json','w') as f: json.dump(grape2idx, f)
     with open('/opt/ml/wine/code/feature_map/country2idx.json','w') as f: json.dump(country2idx, f)
@@ -92,6 +111,6 @@ if __name__ == '__main__':
 #######Train#############################################################################
     parser.add_argument("--min_len", default=6, type=int)
     parser.add_argument("--save_path", default="/opt/ml/wine/data/", type=str)
-     
+    parser.add_argument("--run", default=False, type=bool)
     args = parser.parse_args()
     main(args)
