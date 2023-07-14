@@ -165,4 +165,4 @@ if __name__ == "__main__":
 
     #DB에 data넣기
     insert_wine_data(conn)
-    create_mbti_data(conn)
+    #create_mbti_data(conn)

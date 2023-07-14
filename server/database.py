@@ -10,13 +10,23 @@ SessionLocal = sessionmaker(autocommit=False, autoflush= True, bind=engine)
 
 Base = declarative_base()
 
+# def get_conn():
+#     conn = psycopg2.connect(
+#         user="recommy",
+#         password="wine123",
+#         host="localhost",
+#         port=5432,
+#         database="winery",
+#     )
+#     return conn
+
 def get_conn():
     conn = psycopg2.connect(
-        user="recommy",
+        user="dhkim",
         password="wine123",
         host="localhost",
         port=5432,
-        database="winery",
+        database="server_db",
     )
     return conn
 
