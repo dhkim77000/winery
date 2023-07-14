@@ -113,7 +113,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_output_path", default='/opt/ml/wine/code/text/models/model_output', type=str)
-    parser.add_argument("--data", default='data/text_with_notelabel.csv', type=str)
+    parser.add_argument("--data", default='/opt/ml/wine/data/text_with_notelabel.csv', type=str)
     parser.add_argument("--device", default = 'cuda' if cuda.is_available() else 'cpu', type=str)
 #######Data#############################################################################
     parser.add_argument("--max_len", default=156, type=int)
