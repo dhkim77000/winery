@@ -68,7 +68,7 @@ def main(args):
     except Exception as e:
         print(e)
         print('-------------------Processing review text-------------------')
-        review_df = pd.read_csv('/opt/ml/wine/data/review_df_total.csv',encoding = 'utf-8-sig').loc[:,['user_url','rating','text','wine_url']]
+        review_df = pd.read_csv('/opt/ml/wine/data/review_df_total.csv',encoding = 'utf-8-sig')
 
         review_df = review_df[review_df['text'].isna()==False]
         review_df['text'] = review_df['text'].apply(lambda x: x + '.' if x[-1] != '.' else x)
