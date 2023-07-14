@@ -112,16 +112,16 @@ def marking_note_data(df, notes_data):
         
     return pd.DataFrame(data)
 
-def parallel_dataframe_2input(func, df, notes_data, num_cpu):
+def parallel_dataframe_2input(func, df, mapping_data, num_cpu):
     try:
-        for key in notes_data: notes_data[key] = set(notes_data[key])
+        for key in mapping_data: mapping_data[key] = set(mapping_data[key])
     except: pass
-    
+
     chunks = np.array_split(df, num_cpu)
 
     print('Parallelizing with ' +str(num_cpu)+'cores')
     with Parallel(n_jobs = num_cpu, backend="multiprocessing") as parallel:
-        results = parallel(delayed(func)(chunks[i], notes_data) for i in range(num_cpu))
+        results = parallel(delayed(func)(chunks[i], mapping_data) for i in range(num_cpu))
 
     for i,data in enumerate(results):
         if i == 0:
