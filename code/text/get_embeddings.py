@@ -30,12 +30,11 @@ import time
 import pickle
 import json
 from transformers import BertForMaskedLM, pipeline
-import cuda
+from torch import cuda
 
 def get_embedding(df):
 
-    device = 'cuda' if cuda.is_available() else 'cpu',
-
+    device = torch.device("cuda")
     df.reset_index(inplace = True)
     review_vectors = {}
     tokenizer = BertTokenizerFast(
@@ -59,7 +58,8 @@ def get_embedding(df):
                         truncation = True,
                         add_special_tokens=True, 
                         return_tensors='pt')
-                    encoded_input.to(device)
+                    for key in encoded_input:
+                        encoded_input[key] = encoded_input[key].to(device)
 
                     model_output = model(**encoded_input)
                     embeddings = model_output.last_hidden_state.detach().cpu()
