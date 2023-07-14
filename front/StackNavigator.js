@@ -26,7 +26,11 @@ function WholeStack() {
   return (
     <Stack.Navigator 
       screenOptions={{
-        contentStyle: {backgroundColor: 'white'}
+        contentStyle: {backgroundColor: 'white'},
+        headerBackTitleVisible: false,
+        headerTitle: false,
+        headerTransparent: true,
+        headerTintColor: "white",
       }}
       initialRouteName="Login"
     >
