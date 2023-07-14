@@ -26,9 +26,9 @@ from data_utils import *
 
 def main(args):
     print('-------------------Reading Datas-------------------')
-    with open('/opt/ml/wine/code/data/feature_map/item2idx.json','r') as f: item2idx = json.load(f)
-    with open('/opt/ml/wine/data/price_vocab.json','r') as f: price_vocab = json.load(f)
-    with open('/opt/ml/wine/data/note.json','r') as f: notes_data = json.load(f)
+    with open('/opt/ml/wine/code/feature_map/item2idx.json','r') as f: item2idx = json.load(f)
+    with open('/opt/ml/wine/code/feature_map/price_vocab.json','r') as f: price_vocab = json.load(f)
+    with open('/opt/ml/wine/code/feature_map/note.json','r') as f: notes_data = json.load(f)
 
     basic_info = pd.read_csv('/opt/ml/wine/data/basic_info_total.csv')
     wine_df = pd.read_csv('/opt/ml/wine/data/wine_df.csv')
@@ -78,7 +78,7 @@ def main(args):
     wine_label, grape2idx, country2idx, winetype2idx = gen_labeled_data(wine_label)
     wine_label.to_csv(args.save_path+'wine_label.csv', index = False)
 #########################NOTE LABEL#########################
-    notes_data = get_notes_group(wine_df)
+    #notes_data = get_notes_group(wine_df)
     note_label = parallel_dataframe_2input(marking_note_data, review_df, notes_data, 8)
     note_label.to_csv(args.save_path+'note_label.csv', index = False)
     gc.collect()
