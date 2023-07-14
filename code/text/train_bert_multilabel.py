@@ -42,6 +42,8 @@ from dataset import MultilabelDataset
 from train_utils import train, validation
 # Creating the customized model, by adding a drop out and a dense layer on top of distil bert to get the final output for the model. 
 
+def list2array(x):
+    return np.array(ast.literal_eval(x), dtype=np.int8)
 
 def run(args, model, optimizer,training_loader,testing_loader):
     best_accuracy = 0
@@ -62,13 +64,38 @@ def run(args, model, optimizer,training_loader,testing_loader):
 
 
 def main(args):
-
-    data = pd.read_csv(args.data, encoding = 'utf-8')
     tqdm.pandas()
-    try: data['label'] = data['label'].progress_apply(ast.literal_eval)
-    except: 
-        import pdb
-        pdb.set_trace()
+    if args.mode == 'total':
+        labeled_review = pd.read_csv('/opt/ml/wine/data/review_df_total.csv', 
+                           encoding = 'utf-8',
+                           usecols=['wine_id','text','price_label','note_label'])
+        labeled_review['note_label'] = labeled_review['note_label'].progress_apply(list2array)
+        labeled_review['price_label'] = labeled_review['price_label'].progress_apply(list2array)
+
+        labeled_review['label'] = np.concatenate([labeled_review['note_label'], 
+                                                  labeled_review['price_label']])
+        labeled_review.drop(['note_label','price_label'], axis = 1, inplace = True)
+
+#####################Wine
+        columns_to_load = ['wine_id','grape_label','winetype_label','country_label']
+        wine_label = pd.read_csv('/opt/ml/wine/data/wine_label.csv', 
+                                 encoding = 'utf-8',
+                                 usecols=columns_to_load)
+        
+        wine_label['grape_label'] = wine_label['grape_label'].progress_apply(list2array)
+        wine_label['winetype_label'] = wine_label['winetype_label'].progress_apply(list2array)
+        wine_label['country_label'] = wine_label['country_label'].progress_apply(list2array)
+
+        wine_label['label'] = np.concatenate([wine_label['grape_label'], 
+                                            wine_label['winetype_label'],
+                                            wine_label['country_label']])
+        wine_label.drop(['grape_label','winetype_label','country_label'], axis = 1, inplace = True)
+        
+        data = labeled_review
+
+    else:
+        data = pd.read_csv(args.data, encoding = 'utf-8')
+        data['label'] = data['label'].progress_apply(list2array)
 
     train_size = args.train_size
     train_dataset = data.sample(frac=train_size,random_state=200)
@@ -80,9 +107,12 @@ def main(args):
     print("TEST Dataset: {}".format(test_dataset.shape))
 
     tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
-
-    training_set = MultilabelDataset(train_dataset, tokenizer, args.max_len)
-    testing_set = MultilabelDataset(test_dataset, tokenizer, args.max_len)   
+    if args.mode == 'total':
+        training_set = MultilabelDataset(train_dataset, wine_label, tokenizer, args.max_len)
+        testing_set = MultilabelDataset(test_dataset, wine_label, tokenizer, args.max_len)
+    else:
+        training_set = MultilabelDataset(train_dataset, None, tokenizer, args.max_len)
+        testing_set = MultilabelDataset(test_dataset, None, tokenizer, args.max_len)   
     # Defining some key variables that will be used later on in the training
 
 
@@ -112,6 +142,7 @@ def main(args):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", default='total', type=str)
     parser.add_argument("--model_output_path", default='/opt/ml/wine/code/text/models/model_output', type=str)
     parser.add_argument("--data", default='/opt/ml/wine/data/text_with_notelabel.csv', type=str)
     parser.add_argument("--device", default = 'cuda' if cuda.is_available() else 'cpu', type=str)

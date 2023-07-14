@@ -278,3 +278,55 @@ class MultilabelDataset(Dataset):
             'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
             'targets': torch.tensor(self.targets[index], dtype=torch.float)
         }
+    
+
+class MultilabelDataset(Dataset):
+
+    def __init__(self, dataframe, wine_label, tokenizer, max_len):
+        self.tokenizer = tokenizer
+        self.data = dataframe
+        self.comment_text = dataframe.text
+        self.targets = self.data.label
+        self.max_len = max_len
+        self.wine_label = wine_label
+        if self.wine_label:
+            self.wine_id = self.data.wine_id
+
+    def __len__(self):
+        return len(self.comment_text)
+
+    def __getitem__(self, index):
+        comment_text = str(self.comment_text[index])
+        comment_text = " ".join(comment_text.split())
+
+        inputs = self.tokenizer.encode_plus(
+            comment_text,
+            None,
+            truncation = True,
+            add_special_tokens=True,
+            max_length=self.max_len,
+            pad_to_max_length=True,
+            return_token_type_ids=True
+        )
+        ids = inputs['input_ids']
+        mask = inputs['attention_mask']
+        token_type_ids = inputs["token_type_ids"]
+
+        if self.wine_label == None:
+            return {
+                'ids': torch.tensor(ids, dtype=torch.long),
+                'mask': torch.tensor(mask, dtype=torch.long),
+                'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
+                'targets': torch.tensor(self.targets[index], dtype=torch.float)
+            }
+        else:
+            review_labels = self.targets[index]
+            wine_ids = self.wine_id[index]
+            wine_labels = self.wine_label[self.wine_label['wine_id'].isin(wine_ids)]
+            targets = pd.Series([a + b for a, b in zip(review_labels, wine_labels)])    
+            return {
+                'ids': torch.tensor(ids, dtype=torch.long),
+                'mask': torch.tensor(mask, dtype=torch.long),
+                'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
+                'targets': torch.tensor(targets, dtype=torch.float)
+            }

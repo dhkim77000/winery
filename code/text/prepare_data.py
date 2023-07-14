@@ -95,8 +95,8 @@ def main(args):
     gc.collect()
 
     #########################PRICE LABEL#########################
-    price_label = parallel_dataframe_2input(marking_price_data, review_df, price_vocab, 8)
-    price_label.to_csv(args.save_path+'price_label.csv', index = False)
+    labeled_review = parallel_dataframe_2input(marking_price_data, review_df, price_vocab, 8)
+    labeled_review.to_csv(args.save_path+'labeled_review.csv', index = False)
     gc.collect()
 
     gc.collect()
@@ -104,15 +104,6 @@ def main(args):
     with open('/opt/ml/wine/code/feature_map/country2idx.json','w') as f: json.dump(country2idx, f)
     with open('/opt/ml/wine/code/feature_map/winetype2idx.json','w') as f: json.dump(winetype2idx, f)
 
-    labeled_data = pd.merge(review_df, wine_label, on = 'wine_id', how = 'inner')
-    del wine_label, review_df
-    gc.collect()
-    labeled_data = pd.merge(labeled_data, note_label, on = 'wine_id', how = 'inner')
-    del note_label
-    gc.collect()
-    labeled_data = pd.merge(labeled_data, price_label, on = 'wine_id', how = 'inner')
-    print('-------------------Done-------------------')
-    labeled_data.to_csv(args.save_path+'labeled_review.csv', index = False)
     
 if __name__ == '__main__':
 

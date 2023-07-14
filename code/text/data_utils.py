@@ -201,6 +201,7 @@ def marking_price_data(df, price_vocab):
     for i in tqdm(range(len(df))):
         tmp = {}
         tmp['wine_id'] = df.loc[i,'wine_id']
+        tmp['note_label'] = df.loc[i,'note_label']
         tmp['price_label'] = check_price_in_review(df.loc[i,'text'], price_vocab)
         data.append(tmp)
         

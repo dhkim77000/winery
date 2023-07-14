@@ -38,21 +38,6 @@ from sklearn import metrics
 def main(args):
     logger = logging.get_logger(__name__)
 
-    wp_tokenizer = BertWordPieceTokenizer(
-        clean_text=True,  
-        strip_accents=False,    
-        lowercase=True,
-    )
-
-    wp_tokenizer.train(
-        files=args.text_file,
-        vocab_size=args.vocab_size,  
-        min_frequency=args.min_frequency,
-        show_progress=True,
-        special_tokens=["[PAD]", "[UNK]", "[CLS]", "[SEP]", "[MASK]"],
-        wordpieces_prefix="##"
-    )
-
     if args.tokenizer == 'auto':
         tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
     elif args.tokenizer =='wp':
