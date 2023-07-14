@@ -113,8 +113,10 @@ def marking_note_data(df, notes_data):
     return pd.DataFrame(data)
 
 def parallel_dataframe_2input(func, df, notes_data, num_cpu):
-
-    for key in notes_data: notes_data[key] = set(notes_data[key])
+    try:
+        for key in notes_data: notes_data[key] = set(notes_data[key])
+    except: pass
+    
     chunks = np.array_split(df, num_cpu)
 
     print('Parallelizing with ' +str(num_cpu)+'cores')
