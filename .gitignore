@@ -13,7 +13,6 @@
 *.gz
 *.pth
 *.zip
-*.pyc
 *.wandb
 *.log
 *.txt
