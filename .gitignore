@@ -6,10 +6,15 @@
 *.npy
 *.html
 *.json
+*.lock
+*.bin
 *.pt
+*.tfevents.*
 *.gz
 *.pth
 *.zip
-*.log
 *.pyc
-
+*.wandb
+*.log
+*.txt
+*.pyc
