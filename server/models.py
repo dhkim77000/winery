@@ -30,7 +30,6 @@ def create_mbiti_table(db):
         cur.execute(create_table_query)
         db.commit()
 
-
 def create_wine_table(db_connect):
     create_table_query = """
 

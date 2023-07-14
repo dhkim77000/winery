@@ -16,8 +16,8 @@ from uuid import UUID, uuid4
 import models, database, crud
 
 def get_item_data():
-    data_path = "/opt/ml/server/winery/data"
-    data = pd.read_csv(os.path.join(data_path, "item_df_allfeature.csv"))
+    # data_path = "/opt/ml/api/server/data"
+    data = pd.read_csv(os.getcwd()+"/data/item_df_allfeature.csv")
     # "grape"
     wine_column = ['item_id','winetype','Red Fruit', 'Tropical', 'Tree Fruit', 'Oaky',\
         'Ageing', 'Black Fruit', 'Citrus', 'Dried Fruit', 'Earthy', 'Floral', \
@@ -117,9 +117,9 @@ def create_mbti_data(db):
 
     if is_empty:
         raise ValueError("MBTI table already contains data. Skipping insertion.")
-        
+
     # CSV 파일에서 데이터 읽어오기
-    with open('/opt/ml/server/winery/data/mbti_test.csv', 'r') as file:
+    with open(os.getcwd()+'/data/mbti_test.csv', 'r') as file:
         csv_data = csv.reader(file)
         next(csv_data)
 
@@ -149,20 +149,20 @@ if __name__ == "__main__":
     # db 정보 받아오기
     conn = database.get_conn()
 
-    # # generate wine db
-    # models.create_wine_table(conn)
+    # generate wine db
+    models.create_wine_table(conn)
     
-    # # Check if wine table is empty
-    # with conn.cursor() as cur:
-    #     cur.execute("SELECT EXISTS (SELECT 1 FROM wine)")
-    #     is_empty = cur.fetchone()[0]
+    # Check if wine table is empty
+    with conn.cursor() as cur:
+        cur.execute("SELECT EXISTS (SELECT 1 FROM wine)")
+        is_empty = cur.fetchone()[0]
 
-    #     if is_empty:
-    #         raise ValueError("Wine table already contains data. Skipping insertion.")
+        if is_empty:
+            raise ValueError("Wine table already contains data. Skipping insertion.")
 
-    # df = get_item_data()
-    # total_rows = df.shape[0]
+    df = get_item_data()
+    total_rows = df.shape[0]
 
-    # DB에 data넣기
-    #insert_wine_data(conn)
+    #DB에 data넣기
+    insert_wine_data(conn)
     create_mbti_data(conn)

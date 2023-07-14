@@ -33,10 +33,10 @@ async def add_user_winelist(db: connection, user_id: int):
     #     email = Column(String, nullable=False, unique=True)
     #     password = Column(String, nullable=False)
     # 여기에 wine_list 컬럼 추가
+        return
 
 
 async def get_user(db: connection, email: str):
-    
 
     with db.cursor() as cur:
         cur.execute("SELECT * FROM public.user WHERE email = %s", (email,))
@@ -157,6 +157,39 @@ async def create_user(db: connection, user_create: UserCreate):
             print(insert_user_query)
             execute_values(cur, insert_user_query, values)
             db.commit()
+    
+
+
+async def add_mbti_feature(email, mbti_id, db: connection):
+
+
+    # Check if 'mbti' and 'item' columns exist in the user table
+    cursor = db.cursor()
+    cursor.execute('SELECT column_name FROM information_schema.columns WHERE table_name = \'user\'')
+    columns = [column[0] for column in cursor.fetchall()]
+    if 'mbti' not in columns:
+        cursor.execute("ALTER TABLE public.user ADD COLUMN mbti TEXT")
+    if 'item' not in columns:
+        cursor.execute("ALTER TABLE public.user ADD COLUMN item TEXT")
+    db.commit()
+
+    # Find the corresponding MBTI item
+    cursor.execute('SELECT item FROM "mbti" WHERE mbti_id = %s', (mbti_id,))
+    item = cursor.fetchone()
+
+    if item:
+        item = item[0]
+        # Update the user table with the MBTI and item
+        cursor.execute('UPDATE public.user SET mbti = %s, item = %s WHERE email = %s', (mbti_id, item, email))
+        db.commit()
+    else:
+        print("Invalid mbti_id")
+
+    # Close the database connection
+    cursor.close()
+    db.close()
+
+    return item
 
 # async def create_wine(db: connection, wine_get: WinePost):
 #     create_wine_table(db)
