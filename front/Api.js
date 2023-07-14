@@ -1,7 +1,10 @@
+import { makeVar } from "@apollo/client";
 import axios from "axios";
 
+export const isLoggedInVar = makeVar(false);
+
 const api = axios.create({
-	baseURL: "http://34.125.168.27:8000/", // FastAPI 백엔드의 기본 URL을 여기에 입력합니다.
+	baseURL: "http://34.16.153.40:8000/", // FastAPI 백엔드의 기본 URL을 여기에 입력합니다.
 });
 
 export const getApi = (endpoint) => {
