@@ -1,5 +1,5 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 // import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import Home from "./Home";
@@ -11,56 +11,77 @@ import Sign from "./Sign";
 import Recommend from "./Recommend";
 import Group from "./Group";
 
+import { useReactiveVar } from "@apollo/client";
+
+import { isLoggedInVar } from "./Api";
+
 // const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigation() {
-  return(
-    <NavigationContainer>
-      <WholeStack />
-    </NavigationContainer>
-  )
+	const isLoggedIn = useReactiveVar(isLoggedInVar);
+	return (
+		<NavigationContainer>
+			{isLoggedIn ? <LoggedInNav /> : <LoggedOutNav />}
+		</NavigationContainer>
+	);
 }
 
-function WholeStack() {
-  return (
-    <Stack.Navigator 
-      screenOptions={{
-        contentStyle: {backgroundColor: 'white'},
-        headerBackTitleVisible: false,
-        headerTitle: false,
-        headerTransparent: true,
-        headerTintColor: "white",
-      }}
-      initialRouteName="Login"
-    >
-      <Stack.Screen
-        name="Login"
-        component={Login}
-        //options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Sign"
-        component={Sign}
-        //options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Home"
-        component={Home}
-        //options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Recommend"
-        component={Recommend}
-        //options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Group"
-        component={Group}
-        //options={{ headerShown: false }}
-      />
-    </Stack.Navigator>
-  )
+function LoggedInNav() {
+	return (
+		<Stack.Navigator
+			screenOptions={{
+				contentStyle: { backgroundColor: "white" },
+				headerBackTitleVisible: false,
+				headerTitle: false,
+				headerTransparent: true,
+				headerTintColor: "white",
+			}}
+			initialRouteName="Login"
+		>
+			<Stack.Screen
+				name="Home"
+				component={Home}
+				//options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="Recommend"
+				component={Recommend}
+				//options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="Group"
+				component={Group}
+				//options={{ headerShown: false }}
+			/>
+		</Stack.Navigator>
+	);
+}
+
+function LoggedOutNav() {
+	return (
+		<Stack.Navigator
+			screenOptions={{
+				contentStyle: { backgroundColor: "white" },
+				headerBackTitleVisible: false,
+				headerTitle: false,
+				headerTransparent: true,
+				headerTintColor: "white",
+			}}
+			initialRouteName="Login"
+		>
+			<Stack.Screen
+				name="Login"
+				component={Login}
+				//options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="Sign"
+				component={Sign}
+				//options={{ headerShown: false }}
+			/>
+		</Stack.Navigator>
+	);
 }
 
 /*
@@ -119,4 +140,3 @@ function TabNavi() {
   )
 }
 */
-
