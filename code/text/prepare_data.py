@@ -75,9 +75,8 @@ def main(args):
     wine_label = wine_label[wine_label['wine_id'].isna()==False]
     wine_label['wine_id'] = wine_label['wine_id'].astype('int').astype('category')
     wine_label = wine_label.loc[:,['wine_id','country','grapes','winetype']]
-    wine_label.to_csv(args.save_path+'wine_label.csv', index = False)
     wine_label, grape2idx, country2idx, winetype2idx = gen_labeled_data(wine_label)
-    
+    wine_label.to_csv(args.save_path+'wine_label.csv', index = False)
 #########################NOTE LABEL#########################
     notes_data = get_notes_group(wine_df)
     note_label = parallel_dataframe_2input(marking_note_data, review_df, notes_data, 8)

@@ -244,9 +244,12 @@ def merge_short_review(df, threshold):
             prv_id = wine_id
         
     result = pd.DataFrame(data)
-    result = result[result['length'] > 2]
+    result = result[result['length'] >= threshold]
     result.reset_index(inplace = True, drop = True)
     
     print(f"Before : {len(df)}")
     print(f"After : {len(result)}")
+    result['wine_id'] = result['wine_id'].astype('category')
+    result['length'] = result['length'].astype(int)
+    result['text'] = result['text'].astype(str)
     return result
