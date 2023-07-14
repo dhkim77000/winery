@@ -1,0 +1,1137 @@
+Mon 03 Jul 2023 19:36:17 INFO  ['/opt/conda/lib/python3.8/site-packages/ipykernel_launcher.py', '--ip=127.0.0.1', '--stdin=9003', '--control=9001', '--hb=9000', '--Session.signature_scheme="hmac-sha256"', '--Session.key=b"7d59faf9-9ddd-41af-be36-c2720b49458b"', '--shell=9002', '--transport="tcp"', '--iopub=9004', '--f=/opt/ml/.local/share/jupyter/runtime/kernel-v2-128948t1s7s4qFVGia.json']
+Mon 03 Jul 2023 19:36:17 INFO  
+General Hyper Parameters:
+gpu_id = 0
+use_gpu = True
+seed = 2020
+state = INFO
+reproducibility = True
+data_path = dataset/train_data
+checkpoint_dir = saved
+show_progress = False
+save_dataset = False
+dataset_save_path = None
+save_dataloaders = False
+dataloaders_save_path = None
+log_wandb = False
+
+Training Hyper Parameters:
+epochs = 100
+train_batch_size = 256
+learner = adam
+learning_rate = 0.001
+train_neg_sample_args = {'distribution': 'none', 'sample_num': 'none', 'alpha': 'none', 'dynamic': False, 'candidate_num': 0}
+eval_step = 1
+stopping_step = 10
+clip_grad_norm = None
+weight_decay = 0.0
+loss_decimal_place = 4
+
+Evaluation Hyper Parameters:
+eval_args = {'split': {'RS': [0.8, 0.1, 0.1]}, 'group_by': 'user', 'order': 'RO', 'mode': 'labeled'}
+repeatable = False
+metrics = ['AUC', 'LogLoss']
+topk = [10]
+valid_metric = AUC
+valid_metric_bigger = True
+eval_batch_size = 256
+metric_decimal_place = 4
+
+Dataset Hyper Parameters:
+field_separator = 	
+seq_separator =  
+USER_ID_FIELD = user_id
+ITEM_ID_FIELD = item_id
+RATING_FIELD = rating
+TIME_FIELD = timestamp
+seq_len = None
+LABEL_FIELD = label
+threshold = {'rating': 4.3}
+NEG_PREFIX = neg_
+load_col = {'inter': ['user_id', 'item_id', 'rating', 'timestamp'], 'user': ['user_id', 'count', 'mean'], 'item': ['country', 'region', 'winery', 'winetype', 'grape', 'vintage', 'price', 'num_votes', 'star5', 'star4', 'star3', 'star2', 'star1', 'pairing', 'wine_style', 'Red Fruit_count', 'Tropical_count', 'Tree Fruit_count', 'Oaky_count', 'Ageing_count', 'Black Fruit_count', 'Citrus_count', 'Dried Fruit_count', 'Earthy_count', 'Floral_count', 'Microbio_count', 'Spices_count', 'Vegetal_count', 'Red_Fruit_seq', 'Tropical_seq', 'Tree_Fruit_seq', 'Oaky_seq', 'Ageing_seq', 'Black_Fruit_seq', 'Citrus_seq', 'Dried_Fruit_seq', 'Earthy_seq', 'Floral_seq', 'Microbio_seq', 'Spices_seq', 'Vegetal_seq', 'item_id']}
+unload_col = None
+unused_col = None
+additional_feat_suffix = None
+rm_dup_inter = None
+val_interval = None
+filter_inter_by_user_or_item = True
+user_inter_num_interval = [0,inf)
+item_inter_num_interval = [0,inf)
+alias_of_user_id = None
+alias_of_item_id = None
+alias_of_entity_id = None
+alias_of_relation_id = None
+preload_weight = None
+normalize_field = None
+normalize_all = True
+ITEM_LIST_LENGTH_FIELD = item_length
+LIST_SUFFIX = _list
+MAX_ITEM_LIST_LENGTH = 50
+POSITION_FIELD = position_id
+HEAD_ENTITY_ID_FIELD = head_id
+TAIL_ENTITY_ID_FIELD = tail_id
+RELATION_ID_FIELD = relation_id
+ENTITY_ID_FIELD = entity_id
+benchmark_filename = None
+
+Other Hyper Parameters: 
+worker = 0
+wandb_project = recbole
+shuffle = True
+require_pow = False
+enable_amp = False
+enable_scaler = False
+transform = None
+embedding_size = 64
+mlp_hidden_size = [256, 256, 256]
+cross_layer_num = 6
+reg_weight = 2
+dropout_prob = 0.2
+numerical_features = []
+discretization = None
+kg_reverse_r = False
+entity_kg_num_interval = [0,inf)
+relation_kg_num_interval = [0,inf)
+MODEL_TYPE = ModelType.CONTEXT
+mode = labeled
+device = cuda
+MODEL_INPUT_TYPE = InputType.POINTWISE
+eval_type = EvaluatorType.VALUE
+single_spec = True
+local_rank = 0
+eval_neg_sample_args = {'distribution': 'none', 'sample_num': 'none'}
+
+
+Mon 03 Jul 2023 19:43:19 INFO  ['/opt/conda/lib/python3.8/site-packages/ipykernel_launcher.py', '--ip=127.0.0.1', '--stdin=9003', '--control=9001', '--hb=9000', '--Session.signature_scheme="hmac-sha256"', '--Session.key=b"7d59faf9-9ddd-41af-be36-c2720b49458b"', '--shell=9002', '--transport="tcp"', '--iopub=9004', '--f=/opt/ml/.local/share/jupyter/runtime/kernel-v2-128948t1s7s4qFVGia.json']
+Mon 03 Jul 2023 19:43:19 INFO  
+General Hyper Parameters:
+gpu_id = 0
+use_gpu = True
+seed = 2020
+state = INFO
+reproducibility = True
+data_path = /opt/ml/wine/dataset/train_data
+checkpoint_dir = saved
+show_progress = False
+save_dataset = False
+dataset_save_path = None
+save_dataloaders = False
+dataloaders_save_path = None
+log_wandb = False
+
+Training Hyper Parameters:
+epochs = 100
+train_batch_size = 256
+learner = adam
+learning_rate = 0.001
+train_neg_sample_args = {'distribution': 'none', 'sample_num': 'none', 'alpha': 'none', 'dynamic': False, 'candidate_num': 0}
+eval_step = 1
+stopping_step = 10
+clip_grad_norm = None
+weight_decay = 0.0
+loss_decimal_place = 4
+
+Evaluation Hyper Parameters:
+eval_args = {'split': {'RS': [0.8, 0.1, 0.1]}, 'group_by': 'user', 'order': 'RO', 'mode': 'labeled'}
+repeatable = False
+metrics = ['AUC', 'LogLoss']
+topk = [10]
+valid_metric = AUC
+valid_metric_bigger = True
+eval_batch_size = 256
+metric_decimal_place = 4
+
+Dataset Hyper Parameters:
+field_separator = 	
+seq_separator =  
+USER_ID_FIELD = user_id
+ITEM_ID_FIELD = item_id
+RATING_FIELD = rating
+TIME_FIELD = timestamp
+seq_len = None
+LABEL_FIELD = label
+threshold = {'rating': 4.3}
+NEG_PREFIX = neg_
+load_col = {'inter': ['user_id', 'item_id', 'rating', 'timestamp'], 'user': ['user_id', 'count', 'mean'], 'item': ['country', 'region', 'winery', 'winetype', 'grape', 'vintage', 'price', 'num_votes', 'star5', 'star4', 'star3', 'star2', 'star1', 'pairing', 'wine_style', 'Red Fruit_count', 'Tropical_count', 'Tree Fruit_count', 'Oaky_count', 'Ageing_count', 'Black Fruit_count', 'Citrus_count', 'Dried Fruit_count', 'Earthy_count', 'Floral_count', 'Microbio_count', 'Spices_count', 'Vegetal_count', 'Red_Fruit_seq', 'Tropical_seq', 'Tree_Fruit_seq', 'Oaky_seq', 'Ageing_seq', 'Black_Fruit_seq', 'Citrus_seq', 'Dried_Fruit_seq', 'Earthy_seq', 'Floral_seq', 'Microbio_seq', 'Spices_seq', 'Vegetal_seq', 'item_id']}
+unload_col = None
+unused_col = None
+additional_feat_suffix = None
+rm_dup_inter = None
+val_interval = None
+filter_inter_by_user_or_item = True
+user_inter_num_interval = [0,inf)
+item_inter_num_interval = [0,inf)
+alias_of_user_id = None
+alias_of_item_id = None
+alias_of_entity_id = None
+alias_of_relation_id = None
+preload_weight = None
+normalize_field = None
+normalize_all = True
+ITEM_LIST_LENGTH_FIELD = item_length
+LIST_SUFFIX = _list
+MAX_ITEM_LIST_LENGTH = 50
+POSITION_FIELD = position_id
+HEAD_ENTITY_ID_FIELD = head_id
+TAIL_ENTITY_ID_FIELD = tail_id
+RELATION_ID_FIELD = relation_id
+ENTITY_ID_FIELD = entity_id
+benchmark_filename = None
+
+Other Hyper Parameters: 
+worker = 0
+wandb_project = recbole
+shuffle = True
+require_pow = False
+enable_amp = False
+enable_scaler = False
+transform = None
+embedding_size = 64
+mlp_hidden_size = [256, 256, 256]
+cross_layer_num = 6
+reg_weight = 2
+dropout_prob = 0.2
+numerical_features = []
+discretization = None
+kg_reverse_r = False
+entity_kg_num_interval = [0,inf)
+relation_kg_num_interval = [0,inf)
+MODEL_TYPE = ModelType.CONTEXT
+mode = labeled
+device = cuda
+MODEL_INPUT_TYPE = InputType.POINTWISE
+eval_type = EvaluatorType.VALUE
+single_spec = True
+local_rank = 0
+eval_neg_sample_args = {'distribution': 'none', 'sample_num': 'none'}
+
+
+Mon 03 Jul 2023 19:43:50 INFO  ['/opt/conda/lib/python3.8/site-packages/ipykernel_launcher.py', '--ip=127.0.0.1', '--stdin=9003', '--control=9001', '--hb=9000', '--Session.signature_scheme="hmac-sha256"', '--Session.key=b"7d59faf9-9ddd-41af-be36-c2720b49458b"', '--shell=9002', '--transport="tcp"', '--iopub=9004', '--f=/opt/ml/.local/share/jupyter/runtime/kernel-v2-128948t1s7s4qFVGia.json']
+Mon 03 Jul 2023 19:43:50 INFO  
+General Hyper Parameters:
+gpu_id = 0
+use_gpu = True
+seed = 2020
+state = INFO
+reproducibility = True
+data_path = /opt/ml/wine/dataset/train_data
+checkpoint_dir = saved
+show_progress = False
+save_dataset = False
+dataset_save_path = None
+save_dataloaders = False
+dataloaders_save_path = None
+log_wandb = False
+
+Training Hyper Parameters:
+epochs = 100
+train_batch_size = 256
+learner = adam
+learning_rate = 0.001
+train_neg_sample_args = {'distribution': 'none', 'sample_num': 'none', 'alpha': 'none', 'dynamic': False, 'candidate_num': 0}
+eval_step = 1
+stopping_step = 10
+clip_grad_norm = None
+weight_decay = 0.0
+loss_decimal_place = 4
+
+Evaluation Hyper Parameters:
+eval_args = {'split': {'RS': [0.8, 0.1, 0.1]}, 'group_by': 'user', 'order': 'RO', 'mode': 'labeled'}
+repeatable = False
+metrics = ['AUC', 'LogLoss']
+topk = [10]
+valid_metric = AUC
+valid_metric_bigger = True
+eval_batch_size = 256
+metric_decimal_place = 4
+
+Dataset Hyper Parameters:
+field_separator = 	
+seq_separator =  
+USER_ID_FIELD = user_id
+ITEM_ID_FIELD = item_id
+RATING_FIELD = rating
+TIME_FIELD = timestamp
+seq_len = None
+LABEL_FIELD = label
+threshold = {'rating': 4.3}
+NEG_PREFIX = neg_
+load_col = {'inter': ['user_id', 'item_id', 'rating'], 'user': ['user_id', 'count', 'mean'], 'item': ['country', 'region', 'winery', 'winetype', 'grape', 'vintage', 'price', 'num_votes', 'star5', 'star4', 'star3', 'star2', 'star1', 'pairing', 'wine_style', 'Red Fruit_count', 'Tropical_count', 'Tree Fruit_count', 'Oaky_count', 'Ageing_count', 'Black Fruit_count', 'Citrus_count', 'Dried Fruit_count', 'Earthy_count', 'Floral_count', 'Microbio_count', 'Spices_count', 'Vegetal_count', 'Red_Fruit_seq', 'Tropical_seq', 'Tree_Fruit_seq', 'Oaky_seq', 'Ageing_seq', 'Black_Fruit_seq', 'Citrus_seq', 'Dried_Fruit_seq', 'Earthy_seq', 'Floral_seq', 'Microbio_seq', 'Spices_seq', 'Vegetal_seq', 'item_id']}
+unload_col = None
+unused_col = None
+additional_feat_suffix = None
+rm_dup_inter = None
+val_interval = None
+filter_inter_by_user_or_item = True
+user_inter_num_interval = [0,inf)
+item_inter_num_interval = [0,inf)
+alias_of_user_id = None
+alias_of_item_id = None
+alias_of_entity_id = None
+alias_of_relation_id = None
+preload_weight = None
+normalize_field = None
+normalize_all = True
+ITEM_LIST_LENGTH_FIELD = item_length
+LIST_SUFFIX = _list
+MAX_ITEM_LIST_LENGTH = 50
+POSITION_FIELD = position_id
+HEAD_ENTITY_ID_FIELD = head_id
+TAIL_ENTITY_ID_FIELD = tail_id
+RELATION_ID_FIELD = relation_id
+ENTITY_ID_FIELD = entity_id
+benchmark_filename = None
+
+Other Hyper Parameters: 
+worker = 0
+wandb_project = recbole
+shuffle = True
+require_pow = False
+enable_amp = False
+enable_scaler = False
+transform = None
+embedding_size = 64
+mlp_hidden_size = [256, 256, 256]
+cross_layer_num = 6
+reg_weight = 2
+dropout_prob = 0.2
+numerical_features = []
+discretization = None
+kg_reverse_r = False
+entity_kg_num_interval = [0,inf)
+relation_kg_num_interval = [0,inf)
+MODEL_TYPE = ModelType.CONTEXT
+mode = labeled
+device = cuda
+MODEL_INPUT_TYPE = InputType.POINTWISE
+eval_type = EvaluatorType.VALUE
+single_spec = True
+local_rank = 0
+eval_neg_sample_args = {'distribution': 'none', 'sample_num': 'none'}
+
+
+Mon 03 Jul 2023 19:47:55 INFO  ['/opt/conda/lib/python3.8/site-packages/ipykernel_launcher.py', '--ip=127.0.0.1', '--stdin=9003', '--control=9001', '--hb=9000', '--Session.signature_scheme="hmac-sha256"', '--Session.key=b"7d59faf9-9ddd-41af-be36-c2720b49458b"', '--shell=9002', '--transport="tcp"', '--iopub=9004', '--f=/opt/ml/.local/share/jupyter/runtime/kernel-v2-128948t1s7s4qFVGia.json']
+Mon 03 Jul 2023 19:47:55 INFO  
+General Hyper Parameters:
+gpu_id = 0
+use_gpu = True
+seed = 2020
+state = INFO
+reproducibility = True
+data_path = /opt/ml/wine/dataset/train_data
+checkpoint_dir = saved
+show_progress = False
+save_dataset = False
+dataset_save_path = None
+save_dataloaders = False
+dataloaders_save_path = None
+log_wandb = False
+
+Training Hyper Parameters:
+epochs = 100
+train_batch_size = 256
+learner = adam
+learning_rate = 0.001
+train_neg_sample_args = {'distribution': 'none', 'sample_num': 'none', 'alpha': 'none', 'dynamic': False, 'candidate_num': 0}
+eval_step = 1
+stopping_step = 10
+clip_grad_norm = None
+weight_decay = 0.0
+loss_decimal_place = 4
+
+Evaluation Hyper Parameters:
+eval_args = {'split': {'RS': [0.8, 0.1, 0.1]}, 'group_by': 'user', 'order': 'RO', 'mode': 'labeled'}
+repeatable = False
+metrics = ['AUC', 'LogLoss']
+topk = [10]
+valid_metric = AUC
+valid_metric_bigger = True
+eval_batch_size = 256
+metric_decimal_place = 4
+
+Dataset Hyper Parameters:
+field_separator = 	
+seq_separator =  
+USER_ID_FIELD = user_id
+ITEM_ID_FIELD = item_id
+RATING_FIELD = rating
+TIME_FIELD = timestamp
+seq_len = None
+LABEL_FIELD = label
+threshold = {'rating': 4.3}
+NEG_PREFIX = neg_
+load_col = {'inter': ['user_id', 'item_id', 'rating'], 'user': ['user_id', 'count', 'mean'], 'item': ['country', 'region', 'winery', 'winetype', 'grape', 'vintage', 'price', 'num_votes', 'star5', 'star4', 'star3', 'star2', 'star1', 'pairing', 'wine_style', 'Red Fruit_count', 'Tropical_count', 'Tree Fruit_count', 'Oaky_count', 'Ageing_count', 'Black Fruit_count', 'Citrus_count', 'Dried Fruit_count', 'Earthy_count', 'Floral_count', 'Microbio_count', 'Spices_count', 'Vegetal_count', 'Red_Fruit_seq', 'Tropical_seq', 'Tree_Fruit_seq', 'Oaky_seq', 'Ageing_seq', 'Black_Fruit_seq', 'Citrus_seq', 'Dried_Fruit_seq', 'Earthy_seq', 'Floral_seq', 'Microbio_seq', 'Spices_seq', 'Vegetal_seq', 'item_id']}
+unload_col = None
+unused_col = None
+additional_feat_suffix = None
+rm_dup_inter = None
+val_interval = None
+filter_inter_by_user_or_item = True
+user_inter_num_interval = [0,inf)
+item_inter_num_interval = [0,inf)
+alias_of_user_id = None
+alias_of_item_id = None
+alias_of_entity_id = None
+alias_of_relation_id = None
+preload_weight = None
+normalize_field = None
+normalize_all = True
+ITEM_LIST_LENGTH_FIELD = item_length
+LIST_SUFFIX = _list
+MAX_ITEM_LIST_LENGTH = 50
+POSITION_FIELD = position_id
+HEAD_ENTITY_ID_FIELD = head_id
+TAIL_ENTITY_ID_FIELD = tail_id
+RELATION_ID_FIELD = relation_id
+ENTITY_ID_FIELD = entity_id
+benchmark_filename = None
+
+Other Hyper Parameters: 
+worker = 0
+wandb_project = recbole
+shuffle = True
+require_pow = False
+enable_amp = False
+enable_scaler = False
+transform = None
+embedding_size = 64
+mlp_hidden_size = [256, 256, 256]
+cross_layer_num = 6
+reg_weight = 2
+dropout_prob = 0.2
+numerical_features = []
+discretization = None
+kg_reverse_r = False
+entity_kg_num_interval = [0,inf)
+relation_kg_num_interval = [0,inf)
+MODEL_TYPE = ModelType.CONTEXT
+mode = labeled
+device = cuda
+MODEL_INPUT_TYPE = InputType.POINTWISE
+eval_type = EvaluatorType.VALUE
+single_spec = True
+local_rank = 0
+eval_neg_sample_args = {'distribution': 'none', 'sample_num': 'none'}
+
+
+Mon 03 Jul 2023 19:49:32 INFO  ['/opt/conda/lib/python3.8/site-packages/ipykernel_launcher.py', '--ip=127.0.0.1', '--stdin=9003', '--control=9001', '--hb=9000', '--Session.signature_scheme="hmac-sha256"', '--Session.key=b"7d59faf9-9ddd-41af-be36-c2720b49458b"', '--shell=9002', '--transport="tcp"', '--iopub=9004', '--f=/opt/ml/.local/share/jupyter/runtime/kernel-v2-128948t1s7s4qFVGia.json']
+Mon 03 Jul 2023 19:49:32 INFO  
+General Hyper Parameters:
+gpu_id = 0
+use_gpu = True
+seed = 2020
+state = INFO
+reproducibility = True
+data_path = /opt/ml/wine/dataset/train_data
+checkpoint_dir = saved
+show_progress = False
+save_dataset = False
+dataset_save_path = None
+save_dataloaders = False
+dataloaders_save_path = None
+log_wandb = False
+
+Training Hyper Parameters:
+epochs = 100
+train_batch_size = 256
+learner = adam
+learning_rate = 0.001
+train_neg_sample_args = {'distribution': 'none', 'sample_num': 'none', 'alpha': 'none', 'dynamic': False, 'candidate_num': 0}
+eval_step = 1
+stopping_step = 10
+clip_grad_norm = None
+weight_decay = 0.0
+loss_decimal_place = 4
+
+Evaluation Hyper Parameters:
+eval_args = {'split': {'RS': [0.8, 0.1, 0.1]}, 'group_by': 'user', 'order': 'RO', 'mode': 'labeled'}
+repeatable = False
+metrics = ['AUC', 'LogLoss']
+topk = [10]
+valid_metric = AUC
+valid_metric_bigger = True
+eval_batch_size = 256
+metric_decimal_place = 4
+
+Dataset Hyper Parameters:
+field_separator = 	
+seq_separator =  
+USER_ID_FIELD = user_id
+ITEM_ID_FIELD = item_id
+RATING_FIELD = rating
+TIME_FIELD = timestamp
+seq_len = None
+LABEL_FIELD = label
+threshold = {'rating': 4.3}
+NEG_PREFIX = neg_
+load_col = {'inter': ['user_id', 'item_id', 'rating'], 'user': ['user_id', 'count', 'mean'], 'item': ['country', 'region', 'winery', 'winetype', 'grape', 'vintage', 'price', 'num_votes', 'star5', 'star4', 'star3', 'star2', 'star1', 'pairing', 'wine_style', 'Red Fruit_count', 'Tropical_count', 'Tree Fruit_count', 'Oaky_count', 'Ageing_count', 'Black Fruit_count', 'Citrus_count', 'Dried Fruit_count', 'Earthy_count', 'Floral_count', 'Microbio_count', 'Spices_count', 'Vegetal_count', 'Red_Fruit_seq', 'Tropical_seq', 'Tree_Fruit_seq', 'Oaky_seq', 'Ageing_seq', 'Black_Fruit_seq', 'Citrus_seq', 'Dried_Fruit_seq', 'Earthy_seq', 'Floral_seq', 'Microbio_seq', 'Spices_seq', 'Vegetal_seq', 'item_id']}
+unload_col = None
+unused_col = None
+additional_feat_suffix = None
+rm_dup_inter = None
+val_interval = None
+filter_inter_by_user_or_item = True
+user_inter_num_interval = [0,inf)
+item_inter_num_interval = [0,inf)
+alias_of_user_id = None
+alias_of_item_id = None
+alias_of_entity_id = None
+alias_of_relation_id = None
+preload_weight = None
+normalize_field = None
+normalize_all = True
+ITEM_LIST_LENGTH_FIELD = item_length
+LIST_SUFFIX = _list
+MAX_ITEM_LIST_LENGTH = 50
+POSITION_FIELD = position_id
+HEAD_ENTITY_ID_FIELD = head_id
+TAIL_ENTITY_ID_FIELD = tail_id
+RELATION_ID_FIELD = relation_id
+ENTITY_ID_FIELD = entity_id
+benchmark_filename = None
+
+Other Hyper Parameters: 
+worker = 0
+wandb_project = recbole
+shuffle = True
+require_pow = False
+enable_amp = False
+enable_scaler = False
+transform = None
+embedding_size = 64
+mlp_hidden_size = [256, 256, 256]
+cross_layer_num = 6
+reg_weight = 2
+dropout_prob = 0.2
+numerical_features = []
+discretization = None
+kg_reverse_r = False
+entity_kg_num_interval = [0,inf)
+relation_kg_num_interval = [0,inf)
+MODEL_TYPE = ModelType.CONTEXT
+device = cuda
+MODEL_INPUT_TYPE = InputType.POINTWISE
+eval_type = EvaluatorType.VALUE
+single_spec = True
+local_rank = 0
+eval_neg_sample_args = {'distribution': 'none', 'sample_num': 'none'}
+
+
+Mon 03 Jul 2023 20:00:26 INFO  ['/opt/conda/lib/python3.8/site-packages/ipykernel_launcher.py', '--ip=127.0.0.1', '--stdin=9003', '--control=9001', '--hb=9000', '--Session.signature_scheme="hmac-sha256"', '--Session.key=b"7d59faf9-9ddd-41af-be36-c2720b49458b"', '--shell=9002', '--transport="tcp"', '--iopub=9004', '--f=/opt/ml/.local/share/jupyter/runtime/kernel-v2-128948t1s7s4qFVGia.json']
+Mon 03 Jul 2023 20:00:26 INFO  
+General Hyper Parameters:
+gpu_id = 0
+use_gpu = True
+seed = 2020
+state = INFO
+reproducibility = True
+data_path = /opt/ml/wine/dataset/train_data
+checkpoint_dir = saved
+show_progress = False
+save_dataset = False
+dataset_save_path = None
+save_dataloaders = False
+dataloaders_save_path = None
+log_wandb = False
+
+Training Hyper Parameters:
+epochs = 100
+train_batch_size = 256
+learner = adam
+learning_rate = 0.001
+train_neg_sample_args = {'distribution': 'none', 'sample_num': 'none', 'alpha': 'none', 'dynamic': False, 'candidate_num': 0}
+eval_step = 1
+stopping_step = 10
+clip_grad_norm = None
+weight_decay = 0.0
+loss_decimal_place = 4
+
+Evaluation Hyper Parameters:
+eval_args = {'split': {'RS': [0.8, 0.1, 0.1]}, 'group_by': 'user', 'order': 'RO', 'mode': 'labeled'}
+repeatable = False
+metrics = ['AUC', 'LogLoss']
+topk = [10]
+valid_metric = AUC
+valid_metric_bigger = True
+eval_batch_size = 256
+metric_decimal_place = 4
+
+Dataset Hyper Parameters:
+field_separator = 	
+seq_separator =  
+USER_ID_FIELD = user_id
+ITEM_ID_FIELD = item_id
+RATING_FIELD = rating
+TIME_FIELD = timestamp
+seq_len = None
+LABEL_FIELD = label
+threshold = {'rating': 4.3}
+NEG_PREFIX = neg_
+load_col = {'inter': ['user_id', 'item_id', 'rating'], 'user': ['user_id', 'count', 'mean'], 'item': ['country', 'region', 'winery', 'winetype', 'grape', 'vintage', 'price', 'num_votes', 'star5', 'star4', 'star3', 'star2', 'star1', 'pairing', 'wine_style', 'Red Fruit_count', 'Tropical_count', 'Tree Fruit_count', 'Oaky_count', 'Ageing_count', 'Black Fruit_count', 'Citrus_count', 'Dried Fruit_count', 'Earthy_count', 'Floral_count', 'Microbio_count', 'Spices_count', 'Vegetal_count', 'Red_Fruit_seq', 'Tropical_seq', 'Tree_Fruit_seq', 'Oaky_seq', 'Ageing_seq', 'Black_Fruit_seq', 'Citrus_seq', 'Dried_Fruit_seq', 'Earthy_seq', 'Floral_seq', 'Microbio_seq', 'Spices_seq', 'Vegetal_seq', 'item_id']}
+unload_col = None
+unused_col = None
+additional_feat_suffix = None
+rm_dup_inter = None
+val_interval = None
+filter_inter_by_user_or_item = True
+user_inter_num_interval = [0,inf)
+item_inter_num_interval = [0,inf)
+alias_of_user_id = None
+alias_of_item_id = None
+alias_of_entity_id = None
+alias_of_relation_id = None
+preload_weight = None
+normalize_field = None
+normalize_all = True
+ITEM_LIST_LENGTH_FIELD = item_length
+LIST_SUFFIX = _list
+MAX_ITEM_LIST_LENGTH = 50
+POSITION_FIELD = position_id
+HEAD_ENTITY_ID_FIELD = head_id
+TAIL_ENTITY_ID_FIELD = tail_id
+RELATION_ID_FIELD = relation_id
+ENTITY_ID_FIELD = entity_id
+benchmark_filename = None
+
+Other Hyper Parameters: 
+worker = 0
+wandb_project = recbole
+shuffle = True
+require_pow = False
+enable_amp = False
+enable_scaler = False
+transform = None
+embedding_size = 64
+mlp_hidden_size = [256, 256, 256]
+cross_layer_num = 6
+reg_weight = 2
+dropout_prob = 0.2
+numerical_features = []
+discretization = None
+kg_reverse_r = False
+entity_kg_num_interval = [0,inf)
+relation_kg_num_interval = [0,inf)
+MODEL_TYPE = ModelType.CONTEXT
+device = cuda
+MODEL_INPUT_TYPE = InputType.POINTWISE
+eval_type = EvaluatorType.VALUE
+single_spec = True
+local_rank = 0
+eval_neg_sample_args = {'distribution': 'none', 'sample_num': 'none'}
+
+
+Mon 03 Jul 2023 20:14:24 INFO  ['/opt/conda/lib/python3.8/site-packages/ipykernel_launcher.py', '--ip=127.0.0.1', '--stdin=9003', '--control=9001', '--hb=9000', '--Session.signature_scheme="hmac-sha256"', '--Session.key=b"7d59faf9-9ddd-41af-be36-c2720b49458b"', '--shell=9002', '--transport="tcp"', '--iopub=9004', '--f=/opt/ml/.local/share/jupyter/runtime/kernel-v2-128948t1s7s4qFVGia.json']
+Mon 03 Jul 2023 20:14:24 INFO  
+General Hyper Parameters:
+gpu_id = 0
+use_gpu = True
+seed = 2020
+state = INFO
+reproducibility = True
+data_path = /opt/ml/wine/dataset/train_data
+checkpoint_dir = saved
+show_progress = False
+save_dataset = False
+dataset_save_path = None
+save_dataloaders = False
+dataloaders_save_path = None
+log_wandb = False
+
+Training Hyper Parameters:
+epochs = 100
+train_batch_size = 256
+learner = adam
+learning_rate = 0.001
+train_neg_sample_args = {'distribution': 'none', 'sample_num': 'none', 'alpha': 'none', 'dynamic': False, 'candidate_num': 0}
+eval_step = 1
+stopping_step = 10
+clip_grad_norm = None
+weight_decay = 0.0
+loss_decimal_place = 4
+
+Evaluation Hyper Parameters:
+eval_args = {'split': {'RS': [0.8, 0.1, 0.1]}, 'group_by': 'user', 'order': 'RO', 'mode': 'labeled'}
+repeatable = False
+metrics = ['AUC', 'LogLoss']
+topk = [10]
+valid_metric = AUC
+valid_metric_bigger = True
+eval_batch_size = 256
+metric_decimal_place = 4
+
+Dataset Hyper Parameters:
+field_separator = 	
+seq_separator =  
+USER_ID_FIELD = user_id
+ITEM_ID_FIELD = item_id
+RATING_FIELD = rating
+TIME_FIELD = timestamp
+seq_len = None
+LABEL_FIELD = label
+threshold = {'rating': 4.3}
+NEG_PREFIX = neg_
+load_col = {'inter': ['user_id', 'item_id', 'rating'], 'user': ['user_id', 'count', 'mean'], 'item': ['country', 'region', 'winery', 'winetype', 'grape', 'vintage', 'price', 'num_votes', 'star5', 'star4', 'star3', 'star2', 'star1', 'pairing', 'wine_style', 'Red Fruit_count', 'Tropical_count', 'Tree Fruit_count', 'Oaky_count', 'Ageing_count', 'Black Fruit_count', 'Citrus_count', 'Dried Fruit_count', 'Earthy_count', 'Floral_count', 'Microbio_count', 'Spices_count', 'Vegetal_count', 'Red_Fruit_seq', 'Tropical_seq', 'Tree_Fruit_seq', 'Oaky_seq', 'Ageing_seq', 'Black_Fruit_seq', 'Citrus_seq', 'Dried_Fruit_seq', 'Earthy_seq', 'Floral_seq', 'Microbio_seq', 'Spices_seq', 'Vegetal_seq', 'item_id']}
+unload_col = None
+unused_col = None
+additional_feat_suffix = None
+rm_dup_inter = None
+val_interval = None
+filter_inter_by_user_or_item = True
+user_inter_num_interval = [0,inf)
+item_inter_num_interval = [0,inf)
+alias_of_user_id = None
+alias_of_item_id = None
+alias_of_entity_id = None
+alias_of_relation_id = None
+preload_weight = None
+normalize_field = None
+normalize_all = True
+ITEM_LIST_LENGTH_FIELD = item_length
+LIST_SUFFIX = _list
+MAX_ITEM_LIST_LENGTH = 50
+POSITION_FIELD = position_id
+HEAD_ENTITY_ID_FIELD = head_id
+TAIL_ENTITY_ID_FIELD = tail_id
+RELATION_ID_FIELD = relation_id
+ENTITY_ID_FIELD = entity_id
+benchmark_filename = None
+
+Other Hyper Parameters: 
+worker = 0
+wandb_project = recbole
+shuffle = True
+require_pow = False
+enable_amp = False
+enable_scaler = False
+transform = None
+embedding_size = 64
+mlp_hidden_size = [256, 256, 256]
+cross_layer_num = 6
+reg_weight = 2
+dropout_prob = 0.2
+numerical_features = []
+discretization = None
+kg_reverse_r = False
+entity_kg_num_interval = [0,inf)
+relation_kg_num_interval = [0,inf)
+MODEL_TYPE = ModelType.CONTEXT
+device = cuda
+MODEL_INPUT_TYPE = InputType.POINTWISE
+eval_type = EvaluatorType.VALUE
+single_spec = True
+local_rank = 0
+eval_neg_sample_args = {'distribution': 'none', 'sample_num': 'none'}
+
+
+Mon 03 Jul 2023 20:16:45 INFO  ['/opt/conda/lib/python3.8/site-packages/ipykernel_launcher.py', '--ip=127.0.0.1', '--stdin=9003', '--control=9001', '--hb=9000', '--Session.signature_scheme="hmac-sha256"', '--Session.key=b"7d59faf9-9ddd-41af-be36-c2720b49458b"', '--shell=9002', '--transport="tcp"', '--iopub=9004', '--f=/opt/ml/.local/share/jupyter/runtime/kernel-v2-128948t1s7s4qFVGia.json']
+Mon 03 Jul 2023 20:16:45 INFO  
+General Hyper Parameters:
+gpu_id = 0
+use_gpu = True
+seed = 2020
+state = INFO
+reproducibility = True
+data_path = /opt/ml/wine/dataset/train_data
+checkpoint_dir = saved
+show_progress = False
+save_dataset = False
+dataset_save_path = None
+save_dataloaders = False
+dataloaders_save_path = None
+log_wandb = False
+
+Training Hyper Parameters:
+epochs = 100
+train_batch_size = 256
+learner = adam
+learning_rate = 0.001
+train_neg_sample_args = {'distribution': 'none', 'sample_num': 'none', 'alpha': 'none', 'dynamic': False, 'candidate_num': 0}
+eval_step = 1
+stopping_step = 10
+clip_grad_norm = None
+weight_decay = 0.0
+loss_decimal_place = 4
+
+Evaluation Hyper Parameters:
+eval_args = {'split': {'RS': [0.8, 0.1, 0.1]}, 'group_by': 'user', 'order': 'RO', 'mode': 'labeled'}
+repeatable = False
+metrics = ['AUC', 'LogLoss']
+topk = [10]
+valid_metric = AUC
+valid_metric_bigger = True
+eval_batch_size = 256
+metric_decimal_place = 4
+
+Dataset Hyper Parameters:
+field_separator = 	
+seq_separator =  
+USER_ID_FIELD = user_id
+ITEM_ID_FIELD = item_id
+RATING_FIELD = rating
+TIME_FIELD = timestamp
+seq_len = None
+LABEL_FIELD = label
+threshold = {'rating': 4.3}
+NEG_PREFIX = neg_
+load_col = {'inter': ['user_id', 'item_id', 'user_rating'], 'user': ['user_id', 'count', 'mean'], 'item': ['country', 'region', 'winery', 'winetype', 'grape', 'vintage', 'price', 'num_votes', 'star5', 'star4', 'star3', 'star2', 'star1', 'pairing', 'wine_style', 'Red Fruit_count', 'Tropical_count', 'Tree Fruit_count', 'Oaky_count', 'Ageing_count', 'Black Fruit_count', 'Citrus_count', 'Dried Fruit_count', 'Earthy_count', 'Floral_count', 'Microbio_count', 'Spices_count', 'Vegetal_count', 'Red_Fruit_seq', 'Tropical_seq', 'Tree_Fruit_seq', 'Oaky_seq', 'Ageing_seq', 'Black_Fruit_seq', 'Citrus_seq', 'Dried_Fruit_seq', 'Earthy_seq', 'Floral_seq', 'Microbio_seq', 'Spices_seq', 'Vegetal_seq', 'item_id']}
+unload_col = None
+unused_col = None
+additional_feat_suffix = None
+rm_dup_inter = None
+val_interval = None
+filter_inter_by_user_or_item = True
+user_inter_num_interval = [0,inf)
+item_inter_num_interval = [0,inf)
+alias_of_user_id = None
+alias_of_item_id = None
+alias_of_entity_id = None
+alias_of_relation_id = None
+preload_weight = None
+normalize_field = None
+normalize_all = True
+ITEM_LIST_LENGTH_FIELD = item_length
+LIST_SUFFIX = _list
+MAX_ITEM_LIST_LENGTH = 50
+POSITION_FIELD = position_id
+HEAD_ENTITY_ID_FIELD = head_id
+TAIL_ENTITY_ID_FIELD = tail_id
+RELATION_ID_FIELD = relation_id
+ENTITY_ID_FIELD = entity_id
+benchmark_filename = None
+
+Other Hyper Parameters: 
+worker = 0
+wandb_project = recbole
+shuffle = True
+require_pow = False
+enable_amp = False
+enable_scaler = False
+transform = None
+embedding_size = 64
+mlp_hidden_size = [256, 256, 256]
+cross_layer_num = 6
+reg_weight = 2
+dropout_prob = 0.2
+numerical_features = []
+discretization = None
+kg_reverse_r = False
+entity_kg_num_interval = [0,inf)
+relation_kg_num_interval = [0,inf)
+MODEL_TYPE = ModelType.CONTEXT
+device = cuda
+MODEL_INPUT_TYPE = InputType.POINTWISE
+eval_type = EvaluatorType.VALUE
+single_spec = True
+local_rank = 0
+eval_neg_sample_args = {'distribution': 'none', 'sample_num': 'none'}
+
+
+Mon 03 Jul 2023 21:19:22 INFO  ['/opt/conda/lib/python3.8/site-packages/ipykernel_launcher.py', '--ip=127.0.0.1', '--stdin=9003', '--control=9001', '--hb=9000', '--Session.signature_scheme="hmac-sha256"', '--Session.key=b"7d59faf9-9ddd-41af-be36-c2720b49458b"', '--shell=9002', '--transport="tcp"', '--iopub=9004', '--f=/opt/ml/.local/share/jupyter/runtime/kernel-v2-128948t1s7s4qFVGia.json']
+Mon 03 Jul 2023 21:19:22 INFO  
+General Hyper Parameters:
+gpu_id = 0
+use_gpu = True
+seed = 2020
+state = INFO
+reproducibility = True
+data_path = /opt/ml/wine/dataset/train_data
+checkpoint_dir = saved
+show_progress = False
+save_dataset = False
+dataset_save_path = None
+save_dataloaders = False
+dataloaders_save_path = None
+log_wandb = False
+
+Training Hyper Parameters:
+epochs = 100
+train_batch_size = 256
+learner = adam
+learning_rate = 0.001
+train_neg_sample_args = {'distribution': 'none', 'sample_num': 'none', 'alpha': 'none', 'dynamic': False, 'candidate_num': 0}
+eval_step = 1
+stopping_step = 10
+clip_grad_norm = None
+weight_decay = 0.0
+loss_decimal_place = 4
+
+Evaluation Hyper Parameters:
+eval_args = {'split': {'RS': [0.8, 0.1, 0.1]}, 'group_by': 'user', 'order': 'RO', 'mode': 'labeled'}
+repeatable = False
+metrics = ['AUC', 'LogLoss']
+topk = [10]
+valid_metric = AUC
+valid_metric_bigger = True
+eval_batch_size = 256
+metric_decimal_place = 4
+
+Dataset Hyper Parameters:
+field_separator = 	
+seq_separator =  
+USER_ID_FIELD = user_id
+ITEM_ID_FIELD = item_id
+RATING_FIELD = rating
+TIME_FIELD = timestamp
+seq_len = None
+LABEL_FIELD = label
+threshold = {'rating': 4.3}
+NEG_PREFIX = neg_
+load_col = {'inter': ['user_id', 'item_id', 'user_rating'], 'user': ['user_id', 'count', 'mean'], 'item': ['country', 'region', 'winery', 'winetype', 'grape', 'vintage', 'price', 'num_votes', 'star5', 'star4', 'star3', 'star2', 'star1', 'pairing', 'wine_style', 'Red Fruit_count', 'Tropical_count', 'Tree Fruit_count', 'Oaky_count', 'Ageing_count', 'Black Fruit_count', 'Citrus_count', 'Dried Fruit_count', 'Earthy_count', 'Floral_count', 'Microbio_count', 'Spices_count', 'Vegetal_count', 'Red_Fruit_seq', 'Tropical_seq', 'Tree_Fruit_seq', 'Oaky_seq', 'Ageing_seq', 'Black_Fruit_seq', 'Citrus_seq', 'Dried_Fruit_seq', 'Earthy_seq', 'Floral_seq', 'Microbio_seq', 'Spices_seq', 'Vegetal_seq', 'item_id']}
+unload_col = None
+unused_col = None
+additional_feat_suffix = None
+rm_dup_inter = None
+val_interval = None
+filter_inter_by_user_or_item = True
+user_inter_num_interval = [0,inf)
+item_inter_num_interval = [0,inf)
+alias_of_user_id = None
+alias_of_item_id = None
+alias_of_entity_id = None
+alias_of_relation_id = None
+preload_weight = None
+normalize_field = None
+normalize_all = True
+ITEM_LIST_LENGTH_FIELD = item_length
+LIST_SUFFIX = _list
+MAX_ITEM_LIST_LENGTH = 50
+POSITION_FIELD = position_id
+HEAD_ENTITY_ID_FIELD = head_id
+TAIL_ENTITY_ID_FIELD = tail_id
+RELATION_ID_FIELD = relation_id
+ENTITY_ID_FIELD = entity_id
+benchmark_filename = None
+
+Other Hyper Parameters: 
+worker = 0
+wandb_project = recbole
+shuffle = True
+require_pow = False
+enable_amp = False
+enable_scaler = False
+transform = None
+embedding_size = 64
+mlp_hidden_size = [256, 256, 256]
+cross_layer_num = 6
+reg_weight = 2
+dropout_prob = 0.2
+numerical_features = []
+discretization = None
+kg_reverse_r = False
+entity_kg_num_interval = [0,inf)
+relation_kg_num_interval = [0,inf)
+MODEL_TYPE = ModelType.CONTEXT
+device = cuda
+MODEL_INPUT_TYPE = InputType.POINTWISE
+eval_type = EvaluatorType.VALUE
+single_spec = True
+local_rank = 0
+eval_neg_sample_args = {'distribution': 'none', 'sample_num': 'none'}
+
+
+Mon 03 Jul 2023 21:54:17 INFO  ['/opt/conda/lib/python3.8/site-packages/ipykernel_launcher.py', '--ip=127.0.0.1', '--stdin=9003', '--control=9001', '--hb=9000', '--Session.signature_scheme="hmac-sha256"', '--Session.key=b"7d59faf9-9ddd-41af-be36-c2720b49458b"', '--shell=9002', '--transport="tcp"', '--iopub=9004', '--f=/opt/ml/.local/share/jupyter/runtime/kernel-v2-128948t1s7s4qFVGia.json']
+Mon 03 Jul 2023 21:54:17 INFO  
+General Hyper Parameters:
+gpu_id = 0
+use_gpu = True
+seed = 2020
+state = INFO
+reproducibility = True
+data_path = /opt/ml/wine/dataset/train_data
+checkpoint_dir = saved
+show_progress = False
+save_dataset = False
+dataset_save_path = None
+save_dataloaders = False
+dataloaders_save_path = None
+log_wandb = False
+
+Training Hyper Parameters:
+epochs = 100
+train_batch_size = 256
+learner = adam
+learning_rate = 0.001
+train_neg_sample_args = {'distribution': 'none', 'sample_num': 'none', 'alpha': 'none', 'dynamic': False, 'candidate_num': 0}
+eval_step = 1
+stopping_step = 10
+clip_grad_norm = None
+weight_decay = 0.0
+loss_decimal_place = 4
+
+Evaluation Hyper Parameters:
+eval_args = {'split': {'RS': [0.8, 0.1, 0.1]}, 'group_by': None, 'order': 'RO', 'mode': 'labeled'}
+repeatable = False
+metrics = ['AUC', 'LogLoss']
+topk = [10]
+valid_metric = AUC
+valid_metric_bigger = True
+eval_batch_size = 256
+metric_decimal_place = 4
+
+Dataset Hyper Parameters:
+field_separator = 	
+seq_separator =  
+USER_ID_FIELD = user_id
+ITEM_ID_FIELD = item_id
+RATING_FIELD = rating
+TIME_FIELD = timestamp
+seq_len = None
+LABEL_FIELD = label
+threshold = {'rating': 4.3}
+NEG_PREFIX = neg_
+load_col = {'inter': ['user_id', 'item_id', 'user_rating'], 'user': ['user_id', 'count', 'mean'], 'item': ['country', 'region', 'winery', 'winetype', 'grape', 'vintage', 'price', 'num_votes', 'star5', 'star4', 'star3', 'star2', 'star1', 'pairing', 'wine_style', 'Red Fruit_count', 'Tropical_count', 'Tree Fruit_count', 'Oaky_count', 'Ageing_count', 'Black Fruit_count', 'Citrus_count', 'Dried Fruit_count', 'Earthy_count', 'Floral_count', 'Microbio_count', 'Spices_count', 'Vegetal_count', 'Red_Fruit_seq', 'Tropical_seq', 'Tree_Fruit_seq', 'Oaky_seq', 'Ageing_seq', 'Black_Fruit_seq', 'Citrus_seq', 'Dried_Fruit_seq', 'Earthy_seq', 'Floral_seq', 'Microbio_seq', 'Spices_seq', 'Vegetal_seq', 'item_id']}
+unload_col = None
+unused_col = None
+additional_feat_suffix = None
+rm_dup_inter = None
+val_interval = None
+filter_inter_by_user_or_item = True
+user_inter_num_interval = [0,inf)
+item_inter_num_interval = [0,inf)
+alias_of_user_id = None
+alias_of_item_id = None
+alias_of_entity_id = None
+alias_of_relation_id = None
+preload_weight = None
+normalize_field = None
+normalize_all = True
+ITEM_LIST_LENGTH_FIELD = item_length
+LIST_SUFFIX = _list
+MAX_ITEM_LIST_LENGTH = 50
+POSITION_FIELD = position_id
+HEAD_ENTITY_ID_FIELD = head_id
+TAIL_ENTITY_ID_FIELD = tail_id
+RELATION_ID_FIELD = relation_id
+ENTITY_ID_FIELD = entity_id
+benchmark_filename = None
+
+Other Hyper Parameters: 
+worker = 0
+wandb_project = recbole
+shuffle = True
+require_pow = False
+enable_amp = False
+enable_scaler = False
+transform = None
+embedding_size = 64
+mlp_hidden_size = [256, 256, 256]
+cross_layer_num = 6
+reg_weight = 2
+dropout_prob = 0.2
+numerical_features = []
+discretization = None
+kg_reverse_r = False
+entity_kg_num_interval = [0,inf)
+relation_kg_num_interval = [0,inf)
+MODEL_TYPE = ModelType.CONTEXT
+device = cuda
+MODEL_INPUT_TYPE = InputType.POINTWISE
+eval_type = EvaluatorType.VALUE
+single_spec = True
+local_rank = 0
+eval_neg_sample_args = {'distribution': 'none', 'sample_num': 'none'}
+
+
+Mon 03 Jul 2023 21:54:35 INFO  ['/opt/conda/lib/python3.8/site-packages/ipykernel_launcher.py', '--ip=127.0.0.1', '--stdin=9003', '--control=9001', '--hb=9000', '--Session.signature_scheme="hmac-sha256"', '--Session.key=b"7d59faf9-9ddd-41af-be36-c2720b49458b"', '--shell=9002', '--transport="tcp"', '--iopub=9004', '--f=/opt/ml/.local/share/jupyter/runtime/kernel-v2-128948t1s7s4qFVGia.json']
+Mon 03 Jul 2023 21:54:35 INFO  
+General Hyper Parameters:
+gpu_id = 0
+use_gpu = True
+seed = 2020
+state = INFO
+reproducibility = True
+data_path = /opt/ml/wine/dataset/train_data
+checkpoint_dir = saved
+show_progress = False
+save_dataset = False
+dataset_save_path = None
+save_dataloaders = False
+dataloaders_save_path = None
+log_wandb = False
+
+Training Hyper Parameters:
+epochs = 100
+train_batch_size = 256
+learner = adam
+learning_rate = 0.001
+train_neg_sample_args = {'distribution': 'none', 'sample_num': 'none', 'alpha': 'none', 'dynamic': False, 'candidate_num': 0}
+eval_step = 1
+stopping_step = 10
+clip_grad_norm = None
+weight_decay = 0.0
+loss_decimal_place = 4
+
+Evaluation Hyper Parameters:
+eval_args = {'split': {'RS': [0.8, 0.1, 0.1]}, 'group_by': None, 'order': 'RO', 'mode': 'labeled'}
+repeatable = False
+metrics = ['AUC', 'LogLoss']
+topk = [10]
+valid_metric = AUC
+valid_metric_bigger = True
+eval_batch_size = 256
+metric_decimal_place = 4
+
+Dataset Hyper Parameters:
+field_separator = 	
+seq_separator =  
+USER_ID_FIELD = user_id
+ITEM_ID_FIELD = item_id
+RATING_FIELD = rating
+TIME_FIELD = timestamp
+seq_len = None
+LABEL_FIELD = label
+threshold = {'rating': 4.3}
+NEG_PREFIX = neg_
+load_col = {'inter': ['user_id', 'item_id', 'user_rating'], 'user': ['user_id', 'count', 'mean'], 'item': ['country', 'region', 'winery', 'winetype', 'grape', 'vintage', 'price', 'num_votes', 'star5', 'star4', 'star3', 'star2', 'star1', 'pairing', 'wine_style', 'Red Fruit_count', 'Tropical_count', 'Tree Fruit_count', 'Oaky_count', 'Ageing_count', 'Black Fruit_count', 'Citrus_count', 'Dried Fruit_count', 'Earthy_count', 'Floral_count', 'Microbio_count', 'Spices_count', 'Vegetal_count', 'Red_Fruit_seq', 'Tropical_seq', 'Tree_Fruit_seq', 'Oaky_seq', 'Ageing_seq', 'Black_Fruit_seq', 'Citrus_seq', 'Dried_Fruit_seq', 'Earthy_seq', 'Floral_seq', 'Microbio_seq', 'Spices_seq', 'Vegetal_seq', 'item_id']}
+unload_col = None
+unused_col = None
+additional_feat_suffix = None
+rm_dup_inter = None
+val_interval = None
+filter_inter_by_user_or_item = True
+user_inter_num_interval = [0,inf)
+item_inter_num_interval = [0,inf)
+alias_of_user_id = None
+alias_of_item_id = None
+alias_of_entity_id = None
+alias_of_relation_id = None
+preload_weight = None
+normalize_field = None
+normalize_all = True
+ITEM_LIST_LENGTH_FIELD = item_length
+LIST_SUFFIX = _list
+MAX_ITEM_LIST_LENGTH = 50
+POSITION_FIELD = position_id
+HEAD_ENTITY_ID_FIELD = head_id
+TAIL_ENTITY_ID_FIELD = tail_id
+RELATION_ID_FIELD = relation_id
+ENTITY_ID_FIELD = entity_id
+benchmark_filename = None
+
+Other Hyper Parameters: 
+worker = 0
+wandb_project = recbole
+shuffle = True
+require_pow = False
+enable_amp = False
+enable_scaler = False
+transform = None
+embedding_size = 64
+mlp_hidden_size = [256, 256, 256]
+cross_layer_num = 6
+reg_weight = 2
+dropout_prob = 0.2
+numerical_features = []
+discretization = None
+kg_reverse_r = False
+entity_kg_num_interval = [0,inf)
+relation_kg_num_interval = [0,inf)
+MODEL_TYPE = ModelType.CONTEXT
+device = cuda
+MODEL_INPUT_TYPE = InputType.POINTWISE
+eval_type = EvaluatorType.VALUE
+single_spec = True
+local_rank = 0
+eval_neg_sample_args = {'distribution': 'none', 'sample_num': 'none'}
+
+
