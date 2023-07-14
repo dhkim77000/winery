@@ -47,7 +47,7 @@ def get_embedding(df):
     with torch.no_grad():
 
         for i in tqdm(range(len(df))):
-            reviews = df['text'][i].split('.')
+            reviews = df['text'][i].split('.')[:500]
             id = df['wine_id'][i]
 
             review_vector = []
@@ -98,10 +98,10 @@ def parallel_embedding(df, num_cpu):
 if __name__ == "__main__":
     merged_reviews = pd.read_csv('/opt/ml/wine/data/merged_review.csv',encoding='utf-8-sig')
     
-    review_vectors = get_embedding(merged_reviews)
+    #review_vectors = get_embedding(merged_reviews)
     
 
-    #review_vectors = parallel_embedding(merged_reviews, 8)
+    review_vectors = parallel_embedding(merged_reviews, 8)
     
     with open('/opt/ml/wine/data/wine_vector.json', 'w') as f:
         json.dump(review_vectors)
