@@ -1,27 +1,47 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel
-import re
 
 router = APIRouter(
     prefix="/temp",
 )
 
+
 class User(BaseModel):
     email: str
     password: str
 
-users = [] # db 대용
 
-@router.get("/")
+class ReturnValue(BaseModel):
+    endpoint: str
+    status: bool
+
+
+users = [
+    {"email": "seongho@naver.com", "password": "jin"},
+    {"email": "yewon@naver.com", "password": "jeon"},
+    {"email": "youngseo@naver.com", "password": "kim"},
+    {"email": "donghwan@naver.com", "password": "kim"},
+    {"email": "jaeseong@naver.com", "password": "park"},
+]  # db 대용
+
+
+@router.get("/db")
 def show_user():
     return users
 
-@router.post("/")
-def create_user(user: User):
-    print(user)
-    if re.match(r"\w+@\w+\.[\w,\.]+", user.email):
-        users.append(user)
-        return {"status": "true"}
-    else:
-        return {"status": "false"}
 
+@router.post("/login")
+def create_user(user: User):
+    retVal = {"endpoint": "/temp/login", "status": False}
+    if user in users:
+        retVal["status"] = True
+    return retVal
+
+
+@router.post("/signin", response_model=ReturnValue)
+def create_user(user: User):
+    retVal = {"endpoint": "/temp/signin", "status": False}
+    if not dict(user) in users:
+        users.append(user)
+        retVal["status"] = True
+    return retVal
