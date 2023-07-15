@@ -33,7 +33,7 @@ def show_user():
 @router.post("/login")
 def create_user(user: User):
     retVal = {"endpoint": "/temp/login", "status": False}
-    if user in users:
+    if dict(user) in users:
         retVal["status"] = True
     return retVal
 
