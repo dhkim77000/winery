@@ -11,6 +11,7 @@ import {
 	TouchableOpacity,
 	TouchableWithoutFeedback,
 	Keyboard,
+	KeyboardAvoidingView,
 } from "react-native";
 import { postApi, getApi, isLoggedInVar } from "./Api";
 
@@ -53,38 +54,43 @@ export default function Login({ navigation }) {
 
 	return (
 		<TouchableWithoutFeedback style={{ flex: 1 }} onPress={Keyboard.dismiss}>
-		<View style={styles.container}>
-			<Image style={styles.image} source={require("./assets/logo.png")} />
-			<StatusBar style="auto" />
-			<View style={styles.inputView}>
-				<TextInput
-					style={styles.TextInput}
-					placeholder="Email"
-					placeholderTextColor="#003f5c"
-					autoCapitalize={"none"}
-					onChangeText={(text) => setValue("email", text)}
-					onSubmitEditing={() => onNext(passwordRef)}
-				/>
-			</View>
-			<View style={styles.inputView}>
-				<TextInput
-					ref={passwordRef}
-					style={styles.TextInput}
-					placeholder="Password"
-					placeholderTextColor="#003f5c"
-					secureTextEntry={true}
-					autoCapitalize={"none"}
-					onChangeText={(text) => setValue("password", text)}
-					onSubmitEditing={handleSubmit(onValid)}
-				/>
-			</View>
-			<TouchableOpacity onPress={() => navigation.navigate("Sign")}>
-				<Text style={styles.signin_button}>Sign IN</Text>
-			</TouchableOpacity>
-			<TouchableOpacity style={styles.loginBtn} onPress={handleSubmit(onValid)}>
-				<Text>LOGIN</Text>
-			</TouchableOpacity>
-		</View>
+			<KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" enabled>
+				<View style={styles.container}>
+					<Image style={styles.image} source={require("./assets/logo.png")} />
+					<StatusBar style="auto" />
+					<View style={styles.inputView}>
+						<TextInput
+							style={styles.TextInput}
+							placeholder="Email"
+							placeholderTextColor="#003f5c"
+							autoCapitalize={"none"}
+							onChangeText={(text) => setValue("email", text)}
+							onSubmitEditing={() => onNext(passwordRef)}
+						/>
+					</View>
+					<View style={styles.inputView}>
+						<TextInput
+							ref={passwordRef}
+							style={styles.TextInput}
+							placeholder="Password"
+							placeholderTextColor="#003f5c"
+							secureTextEntry={true}
+							autoCapitalize={"none"}
+							onChangeText={(text) => setValue("password", text)}
+							onSubmitEditing={handleSubmit(onValid)}
+						/>
+					</View>
+					<TouchableOpacity onPress={() => navigation.navigate("Sign")}>
+						<Text style={styles.signin_button}>Sign IN</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={styles.loginBtn}
+						onPress={handleSubmit(onValid)}
+					>
+						<Text>LOGIN</Text>
+					</TouchableOpacity>
+				</View>
+			</KeyboardAvoidingView>
 		</TouchableWithoutFeedback>
 	);
 }
