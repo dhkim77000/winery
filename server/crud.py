@@ -11,7 +11,7 @@ from passlib.context import CryptContext
 from psycopg2.extras import execute_values, register_uuid
 from schema import UserCreate, WinePost , Login_User
 from models import User, Wine,MBTI, create_user_table,create_wine_table
-import pdb
+import pdb , math
 from fastapi.security import OAuth2PasswordRequestForm
 from psycopg2.extensions import connection
 
@@ -79,6 +79,9 @@ async def get_wine_data(db: connection, wine_id):
     if result is None:
         raise HTTPException(status_code=404, detail=f"존재하지 않는 와인입니다.")
     else:
+        result = ['Null' if ((isinstance(value, float) and math.isnan(value)) or
+                     (isinstance(value, str) and value.lower() == 'nan')) 
+                  else value for value in result]
         wine = Wine(
             id = result[0],
             item_id = result[1],
@@ -121,6 +124,37 @@ async def get_wine_data(db: connection, wine_id):
         )
         return wine
 
+async def get_wine_data_simple(db: connection, wine_id):
+    
+
+    with db.cursor() as cur:
+        cur.execute("SELECT * FROM wine WHERE item_id = %s", (wine_id,))
+        result = cur.fetchone()
+
+    if result is None:
+        raise HTTPException(status_code=404, detail=f"존재하지 않는 와인입니다.")
+    else:
+        result = ['Null' if ((isinstance(value, float) and math.isnan(value)) or
+                     (isinstance(value, str) and value.lower() == 'nan')) 
+                  else value for value in result]
+
+        wine = Wine(
+            id = result[0],
+            item_id = result[1],
+            winetype = result[2],
+            vintage = result[26],
+            price = result[27],
+            wine_rating = result[28],
+            num_votes = result[29],
+            country = result[30],
+            region= result[31],
+            winery= result[32],
+            name= result[33],
+            wine_style= result[34],
+            pairing = result[37],
+        )
+        return wine
+    
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
