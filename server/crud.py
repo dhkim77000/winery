@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from sqlalchemy import func
 from passlib.context import CryptContext
 from psycopg2.extras import execute_values, register_uuid
-from schema import UserCreate, WinePost
+from schema import UserCreate, WinePost , Login_User
 from models import User, Wine,MBTI, create_user_table,create_wine_table
 import pdb
 from fastapi.security import OAuth2PasswordRequestForm
@@ -36,7 +36,7 @@ async def add_user_winelist(db: connection, user_id: int):
         return
 
 
-async def get_user(db: connection, email: str):
+async def get_user(db: connection, email: str,):
 
     with db.cursor() as cur:
         cur.execute("SELECT * FROM public.user WHERE email = %s", (email,))
@@ -45,10 +45,11 @@ async def get_user(db: connection, email: str):
     if result is None:
         raise HTTPException(status_code=404, detail=f"존재하지 않는 이메일입니다.")
     else:
-        user = User(
+        user = Login_User(
             id=result[0],
             email=result[1],
             password=result[2],
+            wine_list = result[3]
         )
         return user
     

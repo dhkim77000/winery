@@ -15,10 +15,11 @@ class Token(BaseModel):
 
 class UserCreate(BaseModel):
 
-    id : UUID = Field(default_factory=uuid4)
-    email: EmailStr
+    id :UUID = Field(default_factory=uuid4)
+    email:EmailStr
     password1: str
     password2: str
+    
 
     @validator('email', 'password1', 'password2')
     def not_empty(cls, v):
@@ -65,3 +66,11 @@ class WinePost(BaseModel):
     wine_rating : int
     num_votes : int
 
+class Login_User(BaseModel):
+    id : Union[str,None] = None
+    email: EmailStr
+    password: str
+    wine_list : Union[str,None] = None
+
+class ReturnValue(BaseModel):
+    status: bool 

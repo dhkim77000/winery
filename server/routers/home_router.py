@@ -16,7 +16,7 @@ from crud import create_user, get_user, verify_password , add_mbti_feature
 
 
 app = FastAPI()
-templates = Jinja2Templates(directory=os.path.dirname(os.getcwd())+'/templates')
+templates = Jinja2Templates(directory=os.getcwd()+'/templates')
 
 router = APIRouter(
     prefix="/home",
