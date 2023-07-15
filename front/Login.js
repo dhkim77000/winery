@@ -23,11 +23,12 @@ export default function Login({ navigation }) {
 		nextOne?.current?.focus();
 	};
 	const onValid = async (data) => {
+		const endpoint = "temp/login/";
 		const regex = /\w+@\w+\.[\w,\.]+/;
 		console.log(data);
 		if (regex.test(data.email)) {
 			try {
-				const response = await postApi("temp/login/", data);
+				const response = await postApi(endpoint, data);
 				console.log(response.data.status);
 				if (response.data.status) {
 					isLoggedInVar(true);
