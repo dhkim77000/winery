@@ -1,6 +1,8 @@
 from psycopg2.extras import execute_values, register_uuid
 from psycopg2.extensions import connection
 import database , models
+
+
 def get_top_10_items():
     # 데이터베이스 연결 설정
     conn = database.get_conn()
@@ -23,6 +25,14 @@ def get_top_10_items():
 # 함수 호출 및 결과 출력
 top_items = get_top_10_items()
 print(top_items)
+
+
+def sort_wine_by_distance(data):
+    sorted_wine = sorted(data, key=lambda x: x[1], reverse=True)
+    top_10 = [x[0] for x in sorted_wine[:10]]
+    return top_10
+
+#wine_list = sort_wine_by_distance(search_result)
 
 # @router.post("/", status_code=status.HTTP_303_SEE_OTHER)
 # async def user_login(request: Request,
@@ -51,10 +61,3 @@ print(top_items)
 #         # User does not exist or password is incorrect
 #         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
     
-@router.post("/login")
-def create_user(user: User):
-    print(dict(user))
-    if dict(user) in users:
-        return {"status": True}
-    else:
-        return {"status": False}

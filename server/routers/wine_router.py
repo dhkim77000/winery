@@ -8,7 +8,7 @@ import numpy as np
 from database import get_db, get_conn
 from crud import get_wine_data,get_wine_data_simple
 
-app = FastAPI()
+#app = FastAPI()
 
 
 router = APIRouter(
@@ -20,6 +20,7 @@ router = APIRouter(
 async def get_wine_list():
     return {'request': "wine_page"}
 
+# 와인 상세 페이지 정보 
 @router.post("/wine_detail")
 async def post_wine_info(wine_id_list: List[int],
                          db: connection = Depends(get_conn)):
@@ -30,7 +31,7 @@ async def post_wine_info(wine_id_list: List[int],
         wines[wine_id] = wine
     return wines
 
-
+# 와인 grid 페이지 정보
 @router.post("/wine_simple")
 async def post_wine_simpleinfo(wine_id_list: List[int],
                          db: connection = Depends(get_conn)):
