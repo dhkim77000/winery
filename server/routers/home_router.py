@@ -12,21 +12,20 @@ from database import get_db, get_conn
 import pdb , os
 import uvicorn
 from fastapi.responses import RedirectResponse, HTMLResponse
-from crud import create_user, get_user, verify_password , add_mbti_feature
-
+from crud import create_user, get_user, verify_password 
 
 app = FastAPI()
-templates = Jinja2Templates(directory=os.path.dirname(os.getcwd())+'/templates')
+templates = Jinja2Templates(directory=os.getcwd()+'/templates')
 
 router = APIRouter(
     prefix="/home",
 )
 
-# # 홈 화면
-# @router.get("/", response_class=HTMLResponse)
-# async def get_home(request: Request):
+# 홈 화면
+@router.get("/", response_class=HTMLResponse)
+async def get_home(request: Request):
     
-#     return templates.TemplateResponse("success.html", {"request": request})
+    return templates.TemplateResponse("success.html", {"request": request})
 
 
 # async def post_mbti_question(request: Request,

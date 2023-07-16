@@ -9,31 +9,15 @@ from pydantic import BaseModel
 from sqlalchemy import func
 from passlib.context import CryptContext
 from psycopg2.extras import execute_values, register_uuid
-from schema import UserCreate, WinePost
+from schema import UserCreate, WinePost, UserAdd
 from models import User, Wine,MBTI, create_user_table,create_wine_table
 import pdb
 from fastapi.security import OAuth2PasswordRequestForm
 from psycopg2.extensions import connection
+import numpy as np
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Create SQLAlchemy engine and session
-async def add_user_winelist(db: connection, user_id: int):
-    with db.cursor() as cur:
-        cur.execute("SELECT * FROM public.user WHERE user_id = %s", (user_id,))
-        result = cur.fetchone()
-    if result is None:
-        raise HTTPException(status_code=404, detail=f"존재하지 않는 USER입니다.")
-
-    else:
-            
-    # class User(Base):
-    #     __tablename__ = "user"
-    #     id = Column(UUID(as_uuid=True), primary_key=True, nullable=False, unique=True)
-    #     email = Column(String, nullable=False, unique=True)
-    #     password = Column(String, nullable=False)
-    # 여기에 wine_list 컬럼 추가
-        return
 
 
 async def get_user(db: connection, email: str):
@@ -49,27 +33,28 @@ async def get_user(db: connection, email: str):
             id=result[0],
             email=result[1],
             password=result[2],
+            wine_list = result[3]
         )
         return user
     
-async def get_mbti_data(db: connection, mbti_id):
-    
-
+async def get_user_for_add(new_data:UserAdd, db: connection):
+    email = new_data.email
     with db.cursor() as cur:
-        cur.execute("SELECT * FROM mbti WHERE mbti_id = %s", (mbti_id,))
+        cur.execute("SELECT * FROM public.user WHERE email = %s", (email,))
         result = cur.fetchone()
 
     if result is None:
-        raise HTTPException(status_code=404, detail=f"결과가 없습니다.")
+        raise HTTPException(status_code=404, detail=f"유저 결과가 없습니다.")
     else:
-        mbti = MBTI(
-            mbti_id=result[0],
-            wine_list=result[1],
+        user = User(
+            id=result[0],
+            email=result[1],
+            password=result[2],
+            wine_list= new_data.wine_list
         )
-        return mbti
+        return user
     
 async def get_wine_data(db: connection, wine_id):
-    
 
     with db.cursor() as cur:
         cur.execute("SELECT * FROM wine WHERE item_id = %s", (wine_id,))
@@ -140,13 +125,14 @@ async def create_user(db: connection, user_create: UserCreate):
     register_uuid()
     db_user = User(id=user_create.id,
                    password=pwd_context.hash(user_create.password1),
-                   email=user_create.email)
+                   email=user_create.email,
+                   wine_list = user_create.wine_list)
     insert_user_query = f"""
     INSERT INTO "{db_user.__tablename__}"
-        (id, email, password)
+        (id, email, password, wine_list)
         VALUES %s;
         """
-    values = [(db_user.id, db_user.email, db_user.password)]
+    values = [(db_user.id, db_user.email, db_user.password, db_user.wine_list)]
     
     # Execute the query
     with db.cursor() as cur:
@@ -159,37 +145,22 @@ async def create_user(db: connection, user_create: UserCreate):
             db.commit()
     
 
+async def update_wine_list_by_email(db: connection, db_user):
+    new_wine_list = db_user.wine_list
+    email = db_user.email
+    update_query = """
+    UPDATE "user"
+    SET wine_list = %s
+    WHERE email = %s;
+    """
+    values = (new_wine_list, email)
 
-async def add_mbti_feature(email, mbti_id, db: connection):
-
-
-    # Check if 'mbti' and 'item' columns exist in the user table
-    cursor = db.cursor()
-    cursor.execute('SELECT column_name FROM information_schema.columns WHERE table_name = \'user\'')
-    columns = [column[0] for column in cursor.fetchall()]
-    if 'mbti' not in columns:
-        cursor.execute("ALTER TABLE public.user ADD COLUMN mbti TEXT")
-    if 'item' not in columns:
-        cursor.execute("ALTER TABLE public.user ADD COLUMN item TEXT")
-    db.commit()
-
-    # Find the corresponding MBTI item
-    cursor.execute('SELECT item FROM "mbti" WHERE mbti_id = %s', (mbti_id,))
-    item = cursor.fetchone()
-
-    if item:
-        item = item[0]
-        # Update the user table with the MBTI and item
-        cursor.execute('UPDATE public.user SET mbti = %s, item = %s WHERE email = %s', (mbti_id, item, email))
+    # 쿼리 실행
+    with db.cursor() as cur:
+        cur.execute(update_query, values)
         db.commit()
-    else:
-        print("Invalid mbti_id")
-
-    # Close the database connection
-    cursor.close()
-    db.close()
-
-    return item
+        print(f"{email}의 wine_list가 업데이트되었습니다.")
+    
 
 # async def create_wine(db: connection, wine_get: WinePost):
 #     create_wine_table(db)

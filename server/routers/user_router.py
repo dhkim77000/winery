@@ -10,7 +10,7 @@ from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
 from jose import jwt , JWTError
 from datetime import timedelta, datetime
-from crud import create_user, get_user, verify_password , add_mbti_feature
+from crud import create_user, get_user, verify_password 
 from schema import UserCreate
 from database import get_db, get_conn
 import pdb,os
@@ -21,9 +21,9 @@ SECRET_KEY = "4ab2fce7a6bd79e1c014396315ed322dd6edb1c5d975c6b74a2904135172c03c"
 ALGORITHM = "HS256"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/")
 app = FastAPI()
-data_path = os.get_cwd()
-templates = Jinja2Templates(directory=os.path.dirname(os.getcwd())+'/templates')
 
+templates = Jinja2Templates(directory=os.getcwd()+'/templates')
+#pdb.set_trace()
 router = APIRouter(
     prefix="/login",
 )
@@ -74,7 +74,7 @@ async def user_create(request: Request,
                        db: connection = Depends(get_conn)):
 
     # Create a new user instance
-    user = UserCreate(email=email, password1=password, password2 = confirm_password)
+    user = UserCreate(email=email, password1=password, password2 = confirm_password,)
     
     await create_user(db=db, user_create=user)
 

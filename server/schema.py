@@ -1,4 +1,3 @@
-from pydantic import BaseModel
 from fastapi.param_functions import Depends
 from pydantic import BaseModel, Field
 from fastapi import HTTPException
@@ -13,12 +12,17 @@ class Token(BaseModel):
     token_type: str
     id: UUID
 
+class UserAdd(BaseModel):
+    email: EmailStr
+    wine_list : List 
+
 class UserCreate(BaseModel):
 
     id : UUID = Field(default_factory=uuid4)
     email: EmailStr
     password1: str
     password2: str
+    wine_list : Optional[List] = None
 
     @validator('email', 'password1', 'password2')
     def not_empty(cls, v):

@@ -10,7 +10,8 @@ def create_user_table(db):
     CREATE TABLE IF NOT EXISTS "user" (
         id UUID PRIMARY KEY NOT NULL UNIQUE,
         email VARCHAR NOT NULL UNIQUE,
-        password VARCHAR NOT NULL
+        password VARCHAR NOT NULL,
+        wine_list INTEGER[]
     );"""
     print(create_table_query)
     with db.cursor() as cur:
@@ -87,7 +88,7 @@ class User(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, nullable=False, unique=True)
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
-    wine_list = Column(ARRAY(String),  nullable=False)
+    wine_list = Column(ARRAY(Integer),  nullable=True)
 
     
 
