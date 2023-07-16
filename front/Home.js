@@ -8,7 +8,7 @@ import {
 	Button,
 	TouchableOpacity,
 } from "react-native";
-import { isLoggedInVar } from "./Api";
+import { logUserOut } from "./Api";
 
 export default function Home({ navigation }) {
 	return (
@@ -28,7 +28,7 @@ export default function Home({ navigation }) {
 			</TouchableOpacity>
 			<TouchableOpacity
 				style={styles.tempbtn}
-				onPress={() => isLoggedInVar(false)}
+				onPress={() => logUserOut()}
 			>
 				<Text>Log Out</Text>
 			</TouchableOpacity>

@@ -34,9 +34,9 @@ export default function Sign() {
 			delete data.password_check; // password_check 항목 제거
 			try {
 				const response = await postApi(endpoint, data);
-				console.log(response.data)
+				console.log(response.data);
 				if (!response.data.status) {
-					alert("이미 존재하는 계정입니다")
+					alert("이미 존재하는 계정입니다");
 				}
 			} catch (error) {
 				alert(error);
@@ -98,6 +98,9 @@ export default function Sign() {
 					</View>
 					<TouchableOpacity
 						style={styles.nextBtn}
+						disabled={
+							!watch("email") || !watch("password") || !watch("password_check")
+						}
 						onPress={handleSubmit(onValid)}
 					>
 						<Text>NEXT</Text>

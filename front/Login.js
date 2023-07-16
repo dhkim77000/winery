@@ -13,7 +13,7 @@ import {
 	Keyboard,
 	KeyboardAvoidingView,
 } from "react-native";
-import { postApi, getApi, isLoggedInVar } from "./Api";
+import { postApi, logUserIn } from "./Api";
 
 export default function Login({ navigation }) {
 	const { register, handleSubmit, setValue, watch } = useForm();
@@ -31,7 +31,7 @@ export default function Login({ navigation }) {
 				const response = await postApi(endpoint, data);
 				console.log(response.data.status);
 				if (response.data.status) {
-					isLoggedInVar(true);
+					logUserIn(data.email);
 				} else {
 					alert("회원정보를 찾을 수 없습니다");
 				}
@@ -86,6 +86,7 @@ export default function Login({ navigation }) {
 					</TouchableOpacity>
 					<TouchableOpacity
 						style={styles.loginBtn}
+						disabled={!watch("email") || !watch("password")}
 						onPress={handleSubmit(onValid)}
 					>
 						<Text>LOGIN</Text>
