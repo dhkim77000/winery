@@ -65,3 +65,7 @@ class WinePost(BaseModel):
     wine_rating : int
     num_votes : int
 
+
+class GetMBTI(BaseModel):
+    result : List[str]
+

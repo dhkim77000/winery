@@ -61,10 +61,7 @@ def main(args):
             review_df = review_df.sort_values(['wine_id', 'length'])
             review_df = merge_short_review(review_df, args.min_len)
             review_df.to_csv('/opt/ml/wine/data/review_df_cleaned.csv',index = False)
-        else:
-            review_df['wine_id'] = review_df['wine_url'].map(item2idx)
-            review_df = review_df[review_df['wine_id'].isna()==False]
-            review_df['wine_id'] = review_df['wine_id'].astype('int').astype('category')
+
     except Exception as e:
         print(e)
         print('-------------------Processing review text-------------------')
