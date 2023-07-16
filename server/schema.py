@@ -77,3 +77,7 @@ class Login_User(BaseModel):
 
 class ReturnValue(BaseModel):
     status: bool 
+
+class GetMBTI(BaseModel):
+    result : List[str]
+
