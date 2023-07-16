@@ -18,8 +18,8 @@ class UserAdd(BaseModel):
 
 class UserCreate(BaseModel):
 
-    id : UUID = Field(default_factory=uuid4)
-    email: EmailStr
+    id :UUID = Field(default_factory=uuid4)
+    email:EmailStr
     password1: str
     password2: str
     wine_list : Optional[List] = None
@@ -69,3 +69,11 @@ class WinePost(BaseModel):
     wine_rating : int
     num_votes : int
 
+class Login_User(BaseModel):
+    id : Union[str,None] = None
+    email: EmailStr
+    password: str
+    wine_list : Union[str,None] = None
+
+class ReturnValue(BaseModel):
+    status: bool 
