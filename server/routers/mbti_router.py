@@ -54,6 +54,9 @@ async def post_mbti_question():
     return {'mbti': "mbti_result"}
 
 @router.post("/loading")
+
+#######mbti 결과 받아서 미리 계산해둔 벡터에 인덱싱 후-> 평균
+#######Wine Vector에 접근해서 FAISS 실행 후 TOP - K 리턴
 async def post_mbti_question(mbti_result : GetMBTI):
 
     #### Example data
