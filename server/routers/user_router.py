@@ -21,7 +21,7 @@ SECRET_KEY = "4ab2fce7a6bd79e1c014396315ed322dd6edb1c5d975c6b74a2904135172c03c"
 ALGORITHM = "HS256"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/")
 app = FastAPI()
-data_path = os.get_cwd()
+data_path = os.getcwd()
 templates = Jinja2Templates(directory=os.path.dirname(os.getcwd())+'/templates')
 
 router = APIRouter(
