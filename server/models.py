@@ -11,7 +11,8 @@ def create_user_table(db):
         id UUID PRIMARY KEY NOT NULL UNIQUE,
         email VARCHAR NOT NULL UNIQUE,
         password VARCHAR NOT NULL,
-        wine_list INTEGER[]
+        wine_list INTEGER[],
+        mbti_result INTEGER[]
     );"""
     print(create_table_query)
     with db.cursor() as cur:
@@ -89,7 +90,7 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     wine_list = Column(ARRAY(Integer),  nullable=True)
-
+    mbti_result = Column(ARRAY(Integer),  nullable=True)
     
 
 class MBTI(Base):

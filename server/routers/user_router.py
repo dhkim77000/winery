@@ -15,7 +15,8 @@ from database import get_db, get_conn
 from models import User
 import pdb,os
 import uvicorn
-
+from passlib.context import CryptContext
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Token화 하는 부분 Front에서 하는거면 지워도 되는건가?
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
@@ -68,12 +69,15 @@ async def user_create(request: Request, user:UserCreate, db: connection = Depend
 
     # Create a new user instance
     retVal = ReturnValue(status=False)
-    await create_user(db=db, user_create=user)
-    if user:
+    result = await create_user(db=db, user_create=user) #True
+    print(result)
+    # mbti = await(db=db, user_create=user.email, w)
+    ## email, password, mbti_servey -> email,password, mbti_servery,wine_list
+    if result:
         retVal.status = True
     else:
         retVal.status = False
-    return retVal.status
+    return retVal
 
 # 로그인
 @router.get("/")
@@ -85,13 +89,10 @@ async def get_login_form(request: Request):
 async def user_login(request: Request, user : Login_User,
                      db: connection = Depends(get_conn)):
     retVal = ReturnValue(status=False)
-
+    
     # 유효성 검사 및 해당 유저 정보 유무 확인
     db_user = await get_user(db=db, email=user.email)
-    if (db_user.email == user.email) and verify_password(
-        user.password, db_user.password
-    ):
-        retVal.status = True
-    else:
-        retVal.status = False
-    return retVal.status
+    if db_user != 0 :
+        if (db_user.email == user.email) and (user.password == db_user.password):
+            retVal.status = True
+    return retVal
