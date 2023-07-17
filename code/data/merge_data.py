@@ -31,7 +31,7 @@ def merge(args):
     try:
         tmp = pd.read_csv(f'/opt/ml/wine/data/{args.dataset_name}.csv', encoding = 'utf-8-sig')
     except:
-        tmp = pd.read_csv(f'/opt/ml/wine/data/{args.dataset_name}_0.csv', encoding = 'utf-8-sig')
+        tmp = pd.read_csv(f'/opt/ml/wine/data/{args.dataset_name}0.csv', encoding = 'utf-8-sig')
     data = pd.concat([data, tmp], axis=0)
 
     bf = len(data)
