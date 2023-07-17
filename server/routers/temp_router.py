@@ -85,7 +85,7 @@ def show_user():
 @router.post("/login", response_model=ReturnValue)
 def login_user(user: User):
     retVal = {"endpoint": "/temp/login", "status": False}
-    if dict(user) in users_db:
+    if dict(user) in users_db: # 회원가입을 통해 들어온 유저는 User Class 지금 저장되어있는 유저는 dict. 그래서 로그인이 안되었음
         retVal["status"] = True
     return retVal
 
