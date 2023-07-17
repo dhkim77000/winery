@@ -66,7 +66,7 @@ def run(args, model, optimizer,training_loader,testing_loader):
 def main(args):
     tqdm.pandas()
     if args.mode == 'total':
-        labeled_review = pd.read_csv('/opt/ml/wine/data/review_df_total.csv', 
+        labeled_review = pd.read_csv('/opt/ml/wine/data/labeled_review.csv', 
                            encoding = 'utf-8',
                            usecols=['wine_id','text','price_label','note_label'])
         labeled_review['note_label'] = labeled_review['note_label'].progress_apply(list2array)
@@ -93,7 +93,7 @@ def main(args):
         
         data = labeled_review
 
-    else:
+    elif args.mode == 'note':
         data = pd.read_csv(args.data, encoding = 'utf-8')
         data['label'] = data['label'].progress_apply(list2array)
 
@@ -137,7 +137,7 @@ def main(args):
 
     model = run(args, model, optimizer, training_loader, testing_loader)
     
-    torch.save(model.state_dict(), os.path.join(args.model_out_path + 'model_state_dict.pt') )
+    torch.save(model.state_dict(), os.path.join(args.model_out_path + 'model_state_dict.pt'))
 
 if __name__ == '__main__':
 
@@ -168,4 +168,8 @@ if __name__ == '__main__':
     parser.add_argument("--save_total_limit", default=2, type=int)
      
     args = parser.parse_args()
+    
     main(args)
+    if not os.path.exists(args.model_out_path):
+        os.makedirs(args.model_out_path)
+    
