@@ -58,16 +58,19 @@ async def get_user_for_add(new_data:UserAdd, db: connection):
         return mbti
 
 async def search_wine_by_name(db: connection, wine_name):
+    min_length = len(wine_name) // 2
 
+    searched_wine_ids = set()
     with db.cursor() as cur:
-        cur.execute("SELECT * FROM wine WHERE name ILIKE %s", ('%' + wine_name + '%',))
-        result = cur.fetchone()
-        pdb.set_trace()
-    if result:
-        searched_wine_ids = []
-        for wine in result:
-            searched_wine_ids.append(result[0])
-    else: return []
+        while len(wine_name) >= min_length:
+            cur.execute("SELECT item_id FROM wine WHERE name ILIKE %s", ('%' + wine_name + '%',))
+            result = cur.fetchone()
+            if result is not None: # If result is found, break the loop and return the result
+               for id in result: searched_wine_ids.add(id)
+            # Reduce the search_term by removing the last character
+            wine_name = wine_name[:-1]
+
+    return list(searched_wine_ids)
 
 async def get_wine_data(db: connection, wine_id):
 
