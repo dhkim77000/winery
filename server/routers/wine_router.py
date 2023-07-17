@@ -1,14 +1,13 @@
 from fastapi import FastAPI, Form, Request, Response
 from fastapi import APIRouter , Depends
 from psycopg2.extensions import connection
-from typing import List
-import numpy as np
-
 from database import get_db, get_conn
-from crud import get_wine_data,get_wine_data_simple,get_user
+from crud import get_wine_data,get_wine_data_simple,get_user, search_wine_by_name
 from schema import UserAdd , Usertype
 from function import get_top_10_items
-
+from typing import List, Optional
+import numpy as np
+import pdb
 #app = FastAPI()
 
 
@@ -40,6 +39,14 @@ async def post_wine_info(wine_id_list: List[int],
         wine = await get_wine_data_simple(db=db, wine_id=wine_id)
         wines[wine_id] = wine
     return wines
+
+@router.get("/search_by_name")
+async def text_search(wine_name: str = '',
+                            page : Optional[int] = None,
+                            db: connection = Depends(get_conn)):
+    wine_id_lists = await search_wine_by_name(db=db, wine_name = wine_name)
+    
+    return wine_id_lists
 
 # # 와인 grid 페이지 정보
 # @router.post("/wine_recommend")
