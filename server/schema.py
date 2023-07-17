@@ -17,24 +17,27 @@ class UserAdd(BaseModel):
     email: EmailStr
     wine_list : List 
 
-class UserCreate(BaseModel):
+class Usertype(BaseModel):
+    email: EmailStr
+    type : str
 
+class UserCreate(BaseModel):
     id :UUID = Field(default_factory=uuid4)
     email:EmailStr
-    password1: str
-    password2: str
+    password: str
     wine_list : Optional[List] = None
+    mbti_result : List
 
-    @validator('email', 'password1', 'password2')
-    def not_empty(cls, v):
-        if not v or not v.strip():
-            raise HTTPException(status_code=401, detail="Invalid username or password")
-        return v
+    # @validator('email', 'password1', 'password2')
+    # def not_empty(cls, v):
+    #     if not v or not v.strip():
+    #         raise HTTPException(status_code=401, detail="Invalid username or password")
+    #     return v
 
-    @validator('password2')
-    def passwords_match(cls, v, values):
-        if 'password1' in values and v != values['password1']:
-            raise HTTPException(status_code=404, detail=f"비밀번호가 일치하지 않습니다")
+    # @validator('password2')
+    # def passwords_match(cls, v, values):
+    #     if 'password1' in values and v != values['password1']:
+    #         raise HTTPException(status_code=404, detail=f"비밀번호가 일치하지 않습니다")
        
 
 
@@ -71,7 +74,6 @@ class WinePost(BaseModel):
     num_votes : int
 
 class Login_User(BaseModel):
-    id :UUID = Field(default_factory=uuid4)
     email: EmailStr
     password: str
     wine_list : Union[List,None] = None
