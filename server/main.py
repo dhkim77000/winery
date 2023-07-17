@@ -3,7 +3,7 @@ from fastapi import FastAPI, Form, Request
 
 import uvicorn
 
-from routers import user_router, home_router ,wine_router
+from routers import user_router, home_router ,wine_router, temp_router
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -21,6 +21,7 @@ app.add_middleware(
 
 app.include_router(user_router.router)
 app.include_router(home_router.router)
+app.include_router(temp_router.router)
 app.include_router(wine_router.router)
 
 if __name__ == '__main__':
