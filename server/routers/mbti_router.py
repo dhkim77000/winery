@@ -20,6 +20,7 @@ router = APIRouter(
 )
 
 
+
 def get_avg_vectors(vector_list):
     return np.mean(np.array(vector_list), axis=0)
 
@@ -48,6 +49,11 @@ def faiss_search(to_search, wine_ids, datas):
         
     return None
     
+def sort_wine_by_distance(data):
+    sorted_wine = sorted(data, key=lambda x: x[1], reverse=True)
+    top_10 = [x[0] for x in sorted_wine[:10]]
+    return top_10
+
 # /mbti/ test용  
 @router.get("/")
 async def info():
@@ -79,8 +85,10 @@ async def post_mbti_question(mbti_result : GetMBTI):
     datas =  np.random.rand(num_wines, vector_dimension).astype(np.float32)
 
     search_result = await faiss_search(mean_vector, wine_ids, datas)
+    top_10 = sort_wine_by_distance(search_result)
 
-    return {'test_result': search_result}
+
+    return top_10
 
 
 

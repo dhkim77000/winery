@@ -12,6 +12,7 @@ class Token(BaseModel):
     token_type: str
     id: UUID
 
+
 class UserAdd(BaseModel):
     email: EmailStr
     wine_list : List 
@@ -70,10 +71,10 @@ class WinePost(BaseModel):
     num_votes : int
 
 class Login_User(BaseModel):
-    id : Union[str,None] = None
+    id :UUID = Field(default_factory=uuid4)
     email: EmailStr
     password: str
-    wine_list : Union[str,None] = None
+    wine_list : Union[List,None] = None
 
 class ReturnValue(BaseModel):
     status: bool 

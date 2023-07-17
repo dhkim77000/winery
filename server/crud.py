@@ -39,6 +39,7 @@ async def get_user(db: connection, email: str,):
         )
         return user
     
+
 async def get_user_for_add(new_data:UserAdd, db: connection):
     email = new_data.email
     with db.cursor() as cur:
