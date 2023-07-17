@@ -31,3 +31,41 @@ class UserCreate(BaseModel):
         if 'password1' in values and v != values['password1']:
             raise HTTPException(status_code=404, detail=f"비밀번호가 일치하지 않습니다")
        
+
+
+class WinePost(BaseModel):
+
+    id : UUID = Field(default_factory=uuid4)
+    winetype : str
+    Red_Fruit : int
+    Tropical : int
+    Tree_Fruit : int
+    Oaky : int
+    Ageing : int
+    Black_Fruit : int
+    Citrus : int
+    Dried_Fruit : int
+    Earthy : int
+    Floral : int
+    Microbio : int
+    Spices : int
+    Vegetal : int
+    Light : int
+    Bold : int
+    Smooth : int
+    Tannic : int
+    Dry : int
+    Sweet : int
+    Soft : int
+    Acidic : int
+    Fizzy : int
+    Gentle : int
+    vintage : int
+    price : int
+    wine_rating : int
+    num_votes : int
+
+
+class GetMBTI(BaseModel):
+    result : List[str]
+
