@@ -67,7 +67,22 @@ async def get_mbti_data(db: connection, mbti_id):
             wine_list=result[1],
         )
         return mbti
+
+   
+async def search_wine_by_name(db: connection, wine_name):
     
+    with db.cursor() as cur:
+        cur.execute("SELECT * FROM wine WHERE LIKE %s", (wine_name,))
+        result = cur.fetchone()
+
+    if result is None:
+        return []
+    else:
+        searched_wine_ids = []
+        for wine in result: searched_wine_ids.append(result[0])
+
+    return searched_wine_ids
+
 async def get_wine_data(db: connection, wine_id):
     
 
