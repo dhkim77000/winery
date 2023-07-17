@@ -1,22 +1,25 @@
-from fastapi import FastAPI, Form, Request, Response
-from fastapi import APIRouter , Depends
-import json
+from fastapi import FastAPI
+from fastapi import APIRouter , Depends 
 
-from routers import wine_router
-from psycopg2.extensions import connection
-from typing import List
+import json
 import pdb
 from schema import GetMBTI
-from database import get_db, get_conn
-from crud import get_mbti_data, get_wine_data
 import faiss
 import numpy as np
-#app = FastAPI()
+from psycopg2.extensions import connection
+from typing import List, Optional
+
+from schema import UserAdd
+from database import get_db, get_conn
+from crud import get_user_for_add , update_wine_list_by_email
+from models import User
 
 
 router = APIRouter(
     prefix="/mbti"
 )
+
+
 
 def get_avg_vectors(vector_list):
     return np.mean(np.array(vector_list), axis=0)
@@ -46,12 +49,16 @@ def faiss_search(to_search, wine_ids, datas):
         
     return None
     
-# mbti 설문지 post 하고
-# mbti 결과를 해당 유저의 db에 넣어주어야 함
+def sort_wine_by_distance(data):
+    sorted_wine = sorted(data, key=lambda x: x[1], reverse=True)
+    top_10 = [x[0] for x in sorted_wine[:10]]
+    return top_10
 
-@router.post("/")
-async def post_mbti_question():
-    return {'mbti': "mbti_result"}
+# /mbti/ test용  
+@router.get("/")
+async def info():
+    return {'page':'mbti_survey'}
+
 
 @router.post("/loading")
 
@@ -78,25 +85,32 @@ async def post_mbti_question(mbti_result : GetMBTI):
     datas =  np.random.rand(num_wines, vector_dimension).astype(np.float32)
 
     search_result = await faiss_search(mean_vector, wine_ids, datas)
-
-    return {'test_result': search_result}
-
-
-# 임시 와인 리스트
-wine_list = [0,1,2,100,20,30,40,55,77]
-
-@router.get("/{mbti_id}")
-async def post_wine_info(mbti_id,
-                         db: connection = Depends(get_conn)):
-    mbti_data = await get_mbti_data(db=db, mbti_id=mbti_id)
-    wine_list = mbti_data.wine_list
-    
-    wine_info = dict()
-    for wine_id in wine_list:
-        wine = await get_wine_data(db=db, wine_id=wine_id)
-        wine_info['wine_id'] = wine
-
-    return mbti_data ,wine_info 
+    top_10 = sort_wine_by_distance(search_result)
 
 
-#router.include_router(wine_router.router)
+    return top_10
+
+
+
+
+#pydantic으로 User, winelist 정보 받아옴
+
+# http://localhost:8000/docs#/default/add_wine_list_to_db_mbti__post 예시
+# {
+#   "email": "abc123@gmail.com", -> db에 저장되어있는 값이어야 함
+#   "wine_list": [0,1,2,100,20,30,40,55,77] -> item_id 값
+# }
+
+
+# mbti 결과를 해당 유저의 db에 넣기
+## user 생성시 wine_list값이 None으로 이미 들어가 있으므로 
+## 기존 값(None)을 mbti 결과로 update하는 방식
+
+@router.post("/")
+async def add_wine_list_to_db(new_data: UserAdd, db: connection = Depends(get_conn)):
+
+    # db에서 기존 데이터를 가져와서(Base) None값인 winelist를 mbti 결과값으로 바꿔줌 
+    user = await get_user_for_add(new_data=new_data, db=db)
+    # 바꿔준 정보 db에 넣기
+    await update_wine_list_by_email(db=db, db_user=user) 
+

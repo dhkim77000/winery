@@ -1,4 +1,3 @@
-from pydantic import BaseModel
 from fastapi.param_functions import Depends
 from pydantic import BaseModel, Field
 from fastapi import HTTPException
@@ -13,12 +12,18 @@ class Token(BaseModel):
     token_type: str
     id: UUID
 
+
+class UserAdd(BaseModel):
+    email: EmailStr
+    wine_list : List 
+
 class UserCreate(BaseModel):
 
-    id : UUID = Field(default_factory=uuid4)
-    email: EmailStr
+    id :UUID = Field(default_factory=uuid4)
+    email:EmailStr
     password1: str
     password2: str
+    wine_list : Optional[List] = None
 
     @validator('email', 'password1', 'password2')
     def not_empty(cls, v):
@@ -65,6 +70,14 @@ class WinePost(BaseModel):
     wine_rating : int
     num_votes : int
 
+class Login_User(BaseModel):
+    id :UUID = Field(default_factory=uuid4)
+    email: EmailStr
+    password: str
+    wine_list : Union[List,None] = None
+
+class ReturnValue(BaseModel):
+    status: bool 
 
 class GetMBTI(BaseModel):
     result : List[str]

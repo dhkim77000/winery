@@ -61,6 +61,7 @@ survey.question_answer(answers)
 # 개인의 성격 유형을 출력합니다.
 print(survey.personality_type())
 
+answers = [1,2,3,4,5]
 
 def get_survey_choices(answers):
     survey_choices = []
