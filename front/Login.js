@@ -23,7 +23,7 @@ export default function Login({ navigation }) {
 		nextOne?.current?.focus();
 	};
 	const onValid = async (data) => {
-		const endpoint = "temp/login/";
+		const endpoint = "login/login/";
 		const regex = /\w+@\w+\.[\w,\.]+/;
 		console.log(data);
 		if (regex.test(data.email)) {

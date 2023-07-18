@@ -24,7 +24,7 @@ export default function Sign() {
 		nextOne?.current?.focus();
 	};
 	const onValid = async (data) => {
-		const endpoint = "temp/signin/";
+		const endpoint = "login/register/";
 		const regex = /\w+@\w+\.[\w,\.]+/;
 		if (!regex.test(data.email)) {
 			alert("이메일 형식이 맞지 않습니다");
@@ -32,6 +32,7 @@ export default function Sign() {
 			alert("비밀번호가 일치하지 않습니다");
 		} else {
 			delete data.password_check; // password_check 항목 제거
+			console.log(data)
 			try {
 				const response = await postApi(endpoint, data);
 				console.log(response.data);
@@ -55,6 +56,9 @@ export default function Sign() {
 		register("password_check", {
 			required: true,
 		});
+		register("mbti_result", {
+			required: true,
+		})
 	}, [register]);
 
 	return (
@@ -101,7 +105,10 @@ export default function Sign() {
 						disabled={
 							!watch("email") || !watch("password") || !watch("password_check")
 						}
-						onPress={handleSubmit(onValid)}
+						onPress={() => {
+							setValue("mbti_result", [1,2,3,4,1,2,3,4,1,2])
+							handleSubmit(onValid)();
+						}}
 					>
 						<Text>NEXT</Text>
 					</TouchableOpacity>

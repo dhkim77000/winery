@@ -15,10 +15,12 @@ export default function Recommend() {
 	const email = useReactiveVar(emailVar);
 	const { register, handleSubmit, setValue, watch } = useForm();
 	const onValid = async (data) => {
-		const endpoint = "temp/rank/";
+		const endpoint = "wine/wine_recommend/";
+		console.log(data)
 		try {
 			const response = await postApi(endpoint, data);
-			setValue("rank", response.data.ranking);
+			console.log(response.data)
+			// setValue("wine_list", response.data.wine_list);
 		} catch (error) {
 			alert(error);
 			console.log(error);
@@ -36,9 +38,9 @@ export default function Recommend() {
 		register("type", {
 			required: true,
 		});
-		register("rank", {
-			required: false,
-		});
+		// register("wine_list", {
+		// 	required: false,
+		// });
 		setValue("email", email);
 	}, [register]);
 
@@ -96,11 +98,11 @@ export default function Recommend() {
 					backgroundColor: "#F48FB1",
 				}}
 			>
-				<FlatList
+				{/* <FlatList
 					data={watch("rank")}
 					renderItem={renderItem}
 					keyExtractor={(item) => item.tier}
-				/>
+				/> */}
 			</View>
 		</View>
 	);
