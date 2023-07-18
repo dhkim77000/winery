@@ -132,14 +132,13 @@ def parallel_dataframe_2input(func, df, mapping_data, num_cpu):
     output.reset_index(inplace = True, drop = True)
     return output
 
-def parallel_dataframe_1input(func, df, num_cpu):
-
-
+def parallel_dataframe_1input_col(func, df, col, num_cpu):
+ 
     chunks = np.array_split(df, num_cpu)
 
     print('Parallelizing with ' +str(num_cpu)+'cores')
     with Parallel(n_jobs = num_cpu, backend="multiprocessing") as parallel:
-        results = parallel(delayed(func)(chunks[i]) for i in range(num_cpu))
+        results = parallel(delayed(func)(chunks[i], col) for i in range(num_cpu))
 
     for i,data in enumerate(results):
         if i == 0:
@@ -147,9 +146,7 @@ def parallel_dataframe_1input(func, df, num_cpu):
         else:
             output = pd.concat([output, data], axis=0)
     output.reset_index(inplace = True, drop = True)
-    
     return output
-
 
 def cut_lowcount_feat(df, col, threshold):
     feats = {}

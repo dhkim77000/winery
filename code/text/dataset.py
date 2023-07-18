@@ -27,6 +27,7 @@ from transformers import Trainer, TrainingArguments
 from filelock import FileLock
 import time
 import pickle
+import pdb
 
 class TextDatasetForNextSentencePrediction(Dataset):
 
@@ -271,7 +272,7 @@ class MultilabelDataset(Dataset):
         mask = inputs['attention_mask']
         token_type_ids = inputs["token_type_ids"]
 
-
+        pdb.set_trace()
         return {
             'ids': torch.tensor(ids, dtype=torch.long),
             'mask': torch.tensor(mask, dtype=torch.long),
@@ -291,6 +292,8 @@ class MultilabelDataset(Dataset):
         self.wine_label = wine_label
         if len(self.wine_label) != 0:
             self.wine_id = self.data.wine_id
+        #if self.wine_label:
+        #    self.wine_id = self.data.wine_id
 
     def __len__(self):
         return len(self.comment_text)
@@ -312,7 +315,7 @@ class MultilabelDataset(Dataset):
         mask = inputs['attention_mask']
         token_type_ids = inputs["token_type_ids"]
 
-        if self.wine_label == None:
+        if self.wine_label is None:
             return {
                 'ids': torch.tensor(ids, dtype=torch.long),
                 'mask': torch.tensor(mask, dtype=torch.long),
@@ -320,13 +323,14 @@ class MultilabelDataset(Dataset):
                 'targets': torch.tensor(self.targets[index], dtype=torch.float)
             }
         else:
-            review_labels = self.targets[index]
-            wine_ids = self.wine_id[index]
-            wine_labels = self.wine_label[self.wine_label['wine_id'].isin(wine_ids)]
-            targets = pd.Series([a + b for a, b in zip(review_labels, wine_labels)])    
+
+            review_labels = self.targets.loc[index]
+            wine_ids = self.wine_id.loc[index]
+            wine_labels = self.wine_label.loc[wine_ids]['label']
+            targets = np.concatenate((review_labels, wine_labels))  
             return {
                 'ids': torch.tensor(ids, dtype=torch.long),
                 'mask': torch.tensor(mask, dtype=torch.long),
                 'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
-                'targets': torch.tensor(targets, dtype=torch.float)
+                'targets': torch.tensor(targets, dtype=torch.float).squeeze()
             }

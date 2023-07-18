@@ -129,7 +129,7 @@ def save_atomic_file(train_data, user_data, item_data):
     item_data.columns = to_recbole_columns(item_data.columns)
     
     # to_csv
-    outpath = f"/opt/ml/wine/dataset/{dataset_name}"
+    outpath = f"/opt/ml/winery/dataset/{dataset_name}"
     os.makedirs(outpath, exist_ok=True)
     import pandas as pd
 
