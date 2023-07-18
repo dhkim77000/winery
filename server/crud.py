@@ -59,7 +59,7 @@ async def get_user_for_add(new_data:UserAdd, db: connection):
         return mbti
 
 async def search_wine_by_name(db: connection, wine_name):
-    min_length = len(wine_name) // 3
+    min_length = max(len(wine_name) // 3, 2)
 
     searched_wine_ids = set()
     with db.cursor() as cur:
@@ -68,7 +68,7 @@ async def search_wine_by_name(db: connection, wine_name):
             result = cur.fetchall()
             if len(result) != 0: # If result is found, break the loop and return the result
                 for id in result: searched_wine_ids.add(id[0])
-                break
+                #break
             # Reduce the search_term by removing the last character
             wine_name = wine_name[:-1]
     return list(searched_wine_ids)
