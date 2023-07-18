@@ -66,7 +66,7 @@ def run(args, model, optimizer,training_loader,testing_loader):
         print(f"Accuracy Score : {accuracy}, F1 Score (Micro) : {f1_score_micro}, F1 Score (Macro) : {f1_score_macro}")
         if accuracy > best_accuracy:
             best_accuracy = accuracy
-            torch.save(model.state_dict(), os.path.join(args.model_out_path + 'model_state_dict_{epoch}.pt') )
+            torch.save(model.state_dict(), os.path.join(args.model_output_path + 'model_state_dict_{epoch}.pt') )
     
     return model
 
@@ -156,7 +156,7 @@ def main(args):
     testing_loader = DataLoader(testing_set, **test_params)
 
     if args.mode == 'total':
-        pdb.set_trace()
+        #pdb.set_trace()
         model = BERTClass(num_labels= len(data['label'][0]) + len(wine_label['label'].iloc[0]))
         
     else:
@@ -201,6 +201,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     main(args)
-    if not os.path.exists(args.model_out_path):
-        os.makedirs(args.model_out_path)
+    if not os.path.exists(args.model_output_path):
+        os.makedirs(args.model_output_path)
     
