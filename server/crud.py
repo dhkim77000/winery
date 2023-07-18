@@ -54,9 +54,10 @@ async def get_user_for_add(new_data:UserAdd, db: connection):
             id=result[0],
             email=result[1],
             password=result[2],
-            wine_list= new_data.wine_list
+            wine_list= new_data.wine_list,
+            mbti_result = result[4]
         )
-        return mbti
+        return user
 
 async def search_wine_by_name(db: connection, wine_name):
     min_length = len(wine_name) // 3
@@ -211,7 +212,7 @@ async def update_wine_list_by_email(db: connection, db_user):
     WHERE email = %s;
     """
     values = (new_wine_list, email)
-
+    pdb.set_trace()
     # 쿼리 실행
     with db.cursor() as cur:
         cur.execute(update_query, values)

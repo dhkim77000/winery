@@ -24,7 +24,6 @@ def get_top_10_items():
 
 # 함수 호출 및 결과 출력
 top_items = get_top_10_items()
-print(top_items)
 
 
 def sort_wine_by_distance(data):
