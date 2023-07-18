@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from sqlalchemy import func
 from passlib.context import CryptContext
 from psycopg2.extras import execute_values, register_uuid
-
+from datetime import datetime
 
 from schema import UserCreate, WinePost , Login_User, UserAdd
 from models import User, Wine,MBTI, create_user_table,create_wine_table
@@ -213,4 +213,20 @@ async def update_wine_list_by_email(db: connection, db_user):
         cur.execute(update_query, values)
         db.commit()
         print(f"{email}의 wine_list가 업데이트되었습니다.")
+    
+
+async def rating_update(collection, uid, wine_id, rating, timestamp):
+    try:
+        data = [
+        {'uid': 1, 'timestamp': int(datetime.now().timestamp()), 'rating': 4.5, 'wine_id': 1},
+        {'uid': 2, 'timestamp': int(datetime.now().timestamp()), 'rating': 3.8, 'wine_id': 2},
+        {'uid': 1, 'timestamp': int(datetime.now().timestamp()), 'rating': 5.0, 'wine_id': 5}
+        ]
+        #data = {'uid': uid, 'timestamp': int(timestamp), 'rating': rating, 'wine_id':  wine_id}
+        collection.insert_many(data)
+        #collection.insert_one(data)
+        return True
+    except Exception as e:
+        print(e)
+        return False
     

@@ -36,6 +36,11 @@ class UserCreate(BaseModel):
         if 'password1' in values and v != values['password1']:
             raise HTTPException(status_code=404, detail=f"비밀번호가 일치하지 않습니다")
        
+class UserInteraction(BaseModel):
+    uid :UUID
+    wine_id : int
+    timestamp : int
+    rating : float
 
 
 class WinePost(BaseModel):
