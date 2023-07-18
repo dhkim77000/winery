@@ -44,15 +44,13 @@ def faiss_search(to_search, wine_ids, datas):
             result.append(list(zip(ids, dists)))
         
         result.sort(key = lambda x: x[1])
-        return result
+        #pdb.set_trace()
+        return [x[0] for x in result[0]]
     
         
     return None
     
-def sort_wine_by_distance(data):
-    sorted_wine = sorted(data, key=lambda x: x[1], reverse=True)
-    
-    return top_10
+
 
 # /mbti/ test용  
 @router.get("/")
@@ -70,13 +68,13 @@ async def post_mbti_question(mbti_result : GetMBTI):
     num_wines = 12000
     vector_dimension = 768
 
-    answer_list = mbti_result.result
-    with open("/opt/ml/wine/server/data/mbti_vectors.json","r") as f:
-        answer_vector = json.load(f)
+    #answer_list = mbti_result.result
+    #with open("/opt/ml/wine/server/data/mbti_vectors.json","r") as f:
+    #    answer_vector = json.load(f)
 
-    vector_list = []
-    for answer in answer_list:
-        vector_list.append(answer_vector[answer])
+    #vector_list = []
+    #for answer in answer_list:
+    #    vector_list.append(answer_vector[answer])
 
 
     vector_list = np.random.rand(num_wines, vector_dimension).astype(np.float32)
@@ -86,11 +84,10 @@ async def post_mbti_question(mbti_result : GetMBTI):
     wine_ids = np.arange(num_wines)
     datas =  np.random.rand(num_wines, vector_dimension).astype(np.float32)
 
-    search_result = await faiss_search(mean_vector, wine_ids, datas)
-    top_10 = [x[0] for x in search_result[:10]]
+    search_result = faiss_search(mean_vector, wine_ids, datas)
+    search_result = [int(x) for x in search_result]
 
-
-    return top_10
+    return search_result
 
 
 
@@ -109,7 +106,7 @@ async def post_mbti_question(mbti_result : GetMBTI):
 ## 기존 값(None)을 mbti 결과로 update하는 방식
 
 @router.post("/")
-async def add_wine_list_to_db(new_data: UserAdd, db: connection = Depends(get_conn)):
+async def add_wine_list_to_db(new_data, db: connection = Depends(get_conn)):
 
     # db에서 기존 데이터를 가져와서(Base) None값인 winelist를 mbti 결과값으로 바꿔줌 
     user = await get_user_for_add(new_data=new_data, db=db)
