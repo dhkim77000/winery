@@ -1,13 +1,15 @@
 from fastapi import FastAPI, Form, Request, Response
 from fastapi import APIRouter , Depends
 from psycopg2.extensions import connection
-from database import get_db, get_conn
-from crud import get_wine_data,get_wine_data_simple,get_user, search_wine_by_name
-from schema import UserAdd , Usertype
+from database import get_db, get_conn, get_mongo_db
+from crud import get_wine_data,get_wine_data_simple,get_user, search_wine_by_name, rating_update
+from schema import UserAdd , Usertype, UserInteraction
 from function import get_top_10_items
 from typing import List, Optional
 import numpy as np
 import pdb
+import pymongo
+from pymongo.database import Database
 #app = FastAPI()
 
 
@@ -82,3 +84,16 @@ async def post_wine_simpleinfo(user_wine: Usertype, db: connection = Depends(get
 
 
 
+@router.post("/rating")
+async def update_rating(user_interaction: UserInteraction, 
+                        db: Database = Depends(get_mongo_db)):
+    
+    collection = db.rating
+
+    uid = user_interaction.uid
+    wine_id = user_interaction.wine_id
+    rating = user_interaction.rating
+    timestamp = user_interaction.timestamp
+    
+    push = await rating_update(collection, uid, wine_id, rating, timestamp)
+    return push
