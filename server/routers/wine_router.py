@@ -82,3 +82,16 @@ async def post_wine_simpleinfo(user_wine: Usertype, db: connection = Depends(get
 
 
 
+@router.post("/rating")
+async def update_rating(user_interaction: UserInteraction, 
+                        db: Database = Depends(get_mongo_db)):
+    
+    collection = db.rating
+
+    uid = user_interaction.uid
+    wine_id = user_interaction.wine_id
+    rating = user_interaction.rating
+    timestamp = user_interaction.timestamp
+    
+    push = await rating_update(collection, uid, wine_id, rating, timestamp)
+    return push
