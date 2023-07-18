@@ -3,7 +3,7 @@ from fastapi import APIRouter , Depends
 from psycopg2.extensions import connection
 from database import get_db, get_conn, get_mongo_db
 from crud import get_wine_data,get_wine_data_simple,get_user, search_wine_by_name, rating_update
-from schema import UserAdd , Usertype
+from schema import UserAdd , Usertype, UserInteraction
 from function import get_top_10_items
 from typing import List, Optional
 import numpy as np
