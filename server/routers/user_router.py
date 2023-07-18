@@ -31,7 +31,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/")
 
 templates = Jinja2Templates(directory=os.getcwd()+'/templates')
 router = APIRouter(
-    prefix="",
+    prefix="/login",
 )
 
 
