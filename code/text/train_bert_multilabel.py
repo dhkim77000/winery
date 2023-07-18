@@ -199,4 +199,8 @@ if __name__ == '__main__':
     parser.add_argument("--save_total_limit", default=2, type=int)
      
     args = parser.parse_args()
+    
     main(args)
+    if not os.path.exists(args.model_out_path):
+        os.makedirs(args.model_out_path)
+    
