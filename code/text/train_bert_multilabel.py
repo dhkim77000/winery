@@ -1,6 +1,7 @@
 from typing import Union, Tuple, List
 from torch import cuda
 import numpy as np
+
 import ast
 import random
 import transformers
@@ -41,9 +42,16 @@ from model import BERTClass
 from dataset import MultilabelDataset
 from train_utils import train, validation
 # Creating the customized model, by adding a drop out and a dense layer on top of distil bert to get the final output for the model. 
+import pdb
+pd.set_option('mode.chained_assignment', None)
 
 def list2array(x):
     return np.array(ast.literal_eval(x), dtype=np.int8)
+
+def convert_label(df, label):
+    df[label] = df[label].apply(list2array)
+    return df
+
 
 def run(args, model, optimizer,training_loader,testing_loader):
     best_accuracy = 0
@@ -64,38 +72,55 @@ def run(args, model, optimizer,training_loader,testing_loader):
 
 
 def main(args):
-    tqdm.pandas()
+    #tqdm.pandas()
     if args.mode == 'total':
-        labeled_review = pd.read_csv('/opt/ml/wine/data/review_df_total.csv', 
-                           encoding = 'utf-8',
-                           usecols=['wine_id','text','price_label','note_label'])
-        labeled_review['note_label'] = labeled_review['note_label'].progress_apply(list2array)
-        labeled_review['price_label'] = labeled_review['price_label'].progress_apply(list2array)
+        print("################Preprocessing labeled_review.csv##############")
+        labeled_review = pd.read_csv('/opt/ml/winery/data/labeled_review.csv', 
+                           encoding = 'utf-8', usecols=['wine_id','text','price_label','note_label'])
+               
+        #import pdb
+        #pdb.set_trace()
+        print("note_label")
+        labeled_review['note_label'] = labeled_review['note_label'].apply(list2array)
+        print('price_label')
+        labeled_review['price_label'] = labeled_review['price_label'].apply(list2array)
+        print('label')
+        labeled_review['label'] = labeled_review['note_label'].copy()
 
-        labeled_review['label'] = np.concatenate([labeled_review['note_label'], 
-                                                  labeled_review['price_label']])
+        for i in tqdm(range(labeled_review.shape[0])):
+    
+            labeled_review['label'][i] = np.concatenate((labeled_review['note_label'][i],labeled_review['price_label'][i]))
+            
         labeled_review.drop(['note_label','price_label'], axis = 1, inplace = True)
-
+        print('done for preprocessing labeled review')
 #####################Wine
+        print("################Preprocessing wine_label.csv##############")
         columns_to_load = ['wine_id','grape_label','winetype_label','country_label']
-        wine_label = pd.read_csv('/opt/ml/wine/data/wine_label.csv', 
+        wine_label = pd.read_csv('/opt/ml/winery/data/wine_label.csv', 
                                  encoding = 'utf-8',
                                  usecols=columns_to_load)
-        
-        wine_label['grape_label'] = wine_label['grape_label'].progress_apply(list2array)
-        wine_label['winetype_label'] = wine_label['winetype_label'].progress_apply(list2array)
-        wine_label['country_label'] = wine_label['country_label'].progress_apply(list2array)
+        print("grape_label")
+        wine_label['grape_label'] = wine_label['grape_label'].apply(list2array)
+        print("winetype_label")
+        wine_label['winetype_label'] = wine_label['winetype_label'].apply(list2array)
+        print("country_label")
+        wine_label['country_label'] = wine_label['country_label'].apply(list2array)
+        wine_label['label'] = wine_label['grape_label'].view()
 
-        wine_label['label'] = np.concatenate([wine_label['grape_label'], 
-                                            wine_label['winetype_label'],
-                                            wine_label['country_label']])
+        for i in tqdm(wine_label.index):
+            wine_label['label'][i] =np.concatenate((wine_label['grape_label'][i],
+                                                    wine_label['winetype_label'][i],
+                                                    wine_label['country_label'][i]))
+    #     wine_label['label'] = np.concatenate([wine_label['grape_label'], 
+    #                                        wine_label['winetype_label'],
+    #                                        wine_label['country_label']])
         wine_label.drop(['grape_label','winetype_label','country_label'], axis = 1, inplace = True)
         
         data = labeled_review
-
+        
     else:
         data = pd.read_csv(args.data, encoding = 'utf-8')
-        data['label'] = data['label'].progress_apply(list2array)
+        data['label'] = data['label'].apply(list2array)
 
     train_size = args.train_size
     train_dataset = data.sample(frac=train_size,random_state=200)
@@ -108,6 +133,7 @@ def main(args):
 
     tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
     if args.mode == 'total':
+        wine_label = wine_label.set_index('wine_id')
         training_set = MultilabelDataset(train_dataset, wine_label, tokenizer, args.max_len)
         testing_set = MultilabelDataset(test_dataset, wine_label, tokenizer, args.max_len)
     else:
@@ -129,22 +155,27 @@ def main(args):
     training_loader = DataLoader(training_set, **train_params)
     testing_loader = DataLoader(testing_set, **test_params)
 
-    
-    model = BERTClass(len(data['label'][0]))
+    if args.mode == 'total':
+        pdb.set_trace()
+        model = BERTClass(num_labels= len(data['label'][0]) + len(wine_label['label'].iloc[0]))
+        
+    else:
+        model = BERTClass(num_labels= len(data['label'][0]))
+
     model.to(args.device)
 
     optimizer = torch.optim.Adam(params =  model.parameters(), lr=args.lr)
 
     model = run(args, model, optimizer, training_loader, testing_loader)
     
-    torch.save(model.state_dict(), os.path.join(args.model_out_path + 'model_state_dict.pt') )
+    torch.save(model.state_dict(), os.path.join(args.model_output_path + 'model_state_dict.pt') )
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", default='total', type=str)
-    parser.add_argument("--model_output_path", default='/opt/ml/wine/code/text/models/model_output', type=str)
-    parser.add_argument("--data", default='/opt/ml/wine/data/text_with_notelabel.csv', type=str)
+    parser.add_argument("--model_output_path", default='/opt/ml/winery/code/text/models/model_output', type=str)
+    parser.add_argument("--data", default='/opt/ml/winery/data/text_with_notelabel.csv', type=str)
     parser.add_argument("--device", default = 'cuda' if cuda.is_available() else 'cpu', type=str)
 #######Data#############################################################################
     parser.add_argument("--max_len", default=156, type=int)

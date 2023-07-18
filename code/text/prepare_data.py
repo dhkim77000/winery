@@ -22,16 +22,17 @@ from joblib import Parallel, delayed
 import json
 import ast
 from data_utils import *
+import pdb
 
 
 def main(args):
     print('-------------------Reading Datas-------------------')
-    with open('/opt/ml/wine/code/feature_map/item2idx.json','r') as f: item2idx = json.load(f)
-    with open('/opt/ml/wine/code/feature_map/price_vocab.json','r') as f: price_vocab = json.load(f)
-    with open('/opt/ml/wine/code/feature_map/note.json','r') as f: notes_data = json.load(f)
+    with open('/opt/ml/winery/code/feature_map/item2idx.json','r') as f: item2idx = json.load(f)
+    with open('/opt/ml/winery/code/feature_map/price_vocab.json','r') as f: price_vocab = json.load(f)
+    with open('/opt/ml/winery/code/feature_map/note.json','r') as f: notes_data = json.load(f)
 
-    basic_info = pd.read_csv('/opt/ml/wine/data/basic_info_total.csv')
-    wine_df = pd.read_csv('/opt/ml/wine/data/wine_df.csv')
+    basic_info = pd.read_csv('/opt/ml/winery/data/basic_info_total.csv')
+    wine_df = pd.read_csv('/opt/ml/winery/data/wine_df.csv')
     #########################WINE LABEL#########################  
     wine_label = wine_df.loc[:, ['url','winetype']].merge(basic_info, on='url')
     wine_label['wine_id'] = wine_label['url'].map(item2idx)
@@ -43,7 +44,8 @@ def main(args):
     wine_ids = wine_label['wine_id'].unique()
 #########################REVIEW DATA#########################
     try:
-        review_df = pd.read_csv('/opt/ml/wine/data/review_df_cleaned.csv',encoding = 'utf-8-sig')
+        review_df = pd.read_csv('/opt/ml/winery/data/review_df_cleaned.csv',encoding = 'utf-8-sig')
+        review_df = review_df.sample(frac=0.7, random_state=13)
         review_df['wine_id'] = review_df['wine_id'].astype('int').astype('category')
         if args.run == 0:
             print('-------------------Processing review text-------------------')
@@ -60,12 +62,12 @@ def main(args):
 
             review_df = review_df.sort_values(['wine_id', 'length'])
             review_df = merge_short_review(review_df, args.min_len)
-            review_df.to_csv('/opt/ml/wine/data/review_df_cleaned.csv',index = False)
+            review_df.to_csv('/opt/ml/winery/data/review_df_cleaned.csv',index = False)
 
     except Exception as e:
         print(e)
         print('-------------------Processing review text-------------------')
-        review_df = pd.read_csv('/opt/ml/wine/data/review_df_total.csv',encoding = 'utf-8-sig').loc[:,['user_url','rating','text','wine_url']]
+        review_df = pd.read_csv('/opt/ml/winery/data/review_df_total.csv',encoding = 'utf-8-sig').loc[:,['user_url','rating','text','wine_url']]
 
         review_df = review_df[review_df['text'].isna()==False]
         review_df['text'] = review_df['text'].apply(lambda x: x + '.' if x[-1] != '.' else x)
@@ -75,12 +77,12 @@ def main(args):
         review_df['wine_id'] = review_df['wine_id'].astype('int').astype('category')
         
         review_df = review_df[review_df['wine_id'].isin(wine_ids)]
-
+        pdb.set_trace()
         review_df['length'] = review_df['text'].apply(get_len_text)
         review_df = review_df.loc[:, ['wine_id','text','length']]
         review_df = review_df.sort_values(['wine_id', 'length'])
         review_df = merge_short_review(review_df, args.min_len)
-        review_df.to_csv('/opt/ml/wine/data/review_df_cleaned.csv',index = False)
+        review_df.to_csv('/opt/ml/winery/data/review_df_cleaned.csv',index = False)
     
     gc.collect()
 
@@ -92,13 +94,14 @@ def main(args):
 
     #########################PRICE LABEL#########################
     labeled_review = parallel_dataframe_2input(marking_price_data, review_df, price_vocab, 8)
+    labeled_review.reset_index(inplace =true, drop = True)
     labeled_review.to_csv(args.save_path+'labeled_review.csv', index = False)
     gc.collect()
 
     gc.collect()
-    with open('/opt/ml/wine/code/feature_map/grape2idx.json','w') as f: json.dump(grape2idx, f)
-    with open('/opt/ml/wine/code/feature_map/country2idx.json','w') as f: json.dump(country2idx, f)
-    with open('/opt/ml/wine/code/feature_map/winetype2idx.json','w') as f: json.dump(winetype2idx, f)
+    with open('/opt/ml/winery/code/feature_map/grape2idx.json','w') as f: json.dump(grape2idx, f)
+    with open('/opt/ml/winery/code/feature_map/country2idx.json','w') as f: json.dump(country2idx, f)
+    with open('/opt/ml/winery/code/feature_map/winetype2idx.json','w') as f: json.dump(winetype2idx, f)
 
     
 if __name__ == '__main__':
@@ -107,7 +110,7 @@ if __name__ == '__main__':
     
 #######Train#############################################################################
     parser.add_argument("--min_len", default=6, type=int)
-    parser.add_argument("--save_path", default="/opt/ml/wine/data/", type=str)
+    parser.add_argument("--save_path", default="/opt/ml/winery/data/", type=str)
     parser.add_argument("--run", default=1, type=int)
     args = parser.parse_args()
     main(args)
