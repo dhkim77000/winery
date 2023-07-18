@@ -11,7 +11,6 @@ from joblib import Parallel, delayed
 import json
 import os
 from tqdm import tqdm
-from pyspark.sql import SparkSession
 import os, pdb
 from datetime import datetime
 import pickle

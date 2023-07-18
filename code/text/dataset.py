@@ -289,7 +289,7 @@ class MultilabelDataset(Dataset):
         self.targets = self.data.label
         self.max_len = max_len
         self.wine_label = wine_label
-        if self.wine_label:
+        if len(self.wine_label) != 0:
             self.wine_id = self.data.wine_id
 
     def __len__(self):

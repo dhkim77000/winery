@@ -48,8 +48,7 @@ def get_embedding(df):
 
         for i in tqdm(range(len(df))):
             reviews = df['text'][i].split('.')[:500]
-            id = df['wine_id'][i]
-
+            id = str(df['wine_id'][i])
             review_vector = []
             for text in tqdm(reviews):
                 try:
@@ -102,6 +101,10 @@ if __name__ == "__main__":
     
 
     review_vectors = parallel_embedding(merged_reviews, 8)
-    
-    with open('/opt/ml/wine/data/wine_vector.json', 'w') as f:
-        json.dump(review_vectors, f)
+
+    try: 
+        with open('/opt/ml/wine/data/wine_vector.json', 'w') as f:
+            json.dump(review_vectors, f)    
+    except:
+        import pdb
+        pdb.set_trace()

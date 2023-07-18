@@ -47,7 +47,9 @@ def prepare_dataset(args):
     num_cpu = os.cpu_count()
 
     crawled_item_data = pd.read_csv('/opt/ml/wine/data/wine_df.csv')
-    crawled_review_data = pd.read_csv('/opt/ml/wine/data/review_df_total.csv', encoding='utf-8-sig')
+    crawled_review_data = pd.read_csv('/opt/ml/wine/data/review_df_total.csv', 
+                                      encoding='utf-8-sig',
+                                      usecols = ['user_url','rating','date','wine_url'])
 
     item_data = parallel(crawl_item_to_csv, crawled_item_data, args, num_cpu)
     review_data = parallel(crawl_review_to_csv, crawled_review_data, args, num_cpu)

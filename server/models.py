@@ -1,5 +1,4 @@
-
-from sqlalchemy import Column,  String, Text,Integer, Float,ARRAY
+from sqlalchemy import Column, Integer, String, Float, Index, ARRAY, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import UUID
 from database import Base
@@ -140,3 +139,7 @@ class Wine(Base):
     grape = Column(ARRAY(String), nullable=True)
     pairing = Column(ARRAY(String), nullable=True)
 
+    __table_args__ = (
+        Index('gin_name_idx', "name", postgresql_ops={'name': 'gin_trgm_ops'}, postgresql_using="gin"),
+        Index('gin_house_idx', "house", postgresql_ops={'house': 'gin_trgm_ops'}, postgresql_using="gin"),
+    )

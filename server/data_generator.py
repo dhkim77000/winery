@@ -104,10 +104,8 @@ def insert_wine_data(db=connection):
             values = tuple(data.values())
             cur.execute(insert_query, values)
             pbar.update(1)
-
     db.commit()
     cur.close()
-
 
 def create_mbti_data(db):
     models.create_mbiti_table(db)
