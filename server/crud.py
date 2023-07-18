@@ -29,10 +29,9 @@ async def get_user(db: connection, email: str,):
         result = cur.fetchone()
 
     if result is None:
-        raise HTTPException(status_code=404, detail=f"존재하지 않는 이메일입니다.")
+        return False
     else:
         user = Login_User(
-            id=result[0],
             email=result[1],
             password=result[2],
             wine_list = result[3]
@@ -40,6 +39,8 @@ async def get_user(db: connection, email: str,):
         return user
     
 
+
+    
 async def get_user_for_add(new_data:UserAdd, db: connection):
     email = new_data.email
     with db.cursor() as cur:
@@ -58,18 +59,18 @@ async def get_user_for_add(new_data:UserAdd, db: connection):
         return mbti
 
 async def search_wine_by_name(db: connection, wine_name):
-    min_length = len(wine_name) // 2
+    min_length = len(wine_name) // 3
 
     searched_wine_ids = set()
     with db.cursor() as cur:
         while len(wine_name) >= min_length:
-            cur.execute("SELECT item_id FROM wine WHERE name ILIKE %s", ('%' + wine_name + '%',))
-            result = cur.fetchone()
-            if result is not None: # If result is found, break the loop and return the result
-               for id in result: searched_wine_ids.add(id)
+            cur.execute("SELECT item_id FROM wine WHERE name ILIKE %s OR house ILIKE %s", ('%' + wine_name + '%', '%' + wine_name + '%'))
+            result = cur.fetchall()
+            if len(result) != 0: # If result is found, break the loop and return the result
+                for id in result: searched_wine_ids.add(id[0])
+                break
             # Reduce the search_term by removing the last character
             wine_name = wine_name[:-1]
-
     return list(searched_wine_ids)
 
 async def get_wine_data(db: connection, wine_id):
@@ -177,25 +178,28 @@ async def create_user(db: connection, user_create: UserCreate):
     create_user_table(db)
     register_uuid()
     db_user = User(id=user_create.id,
-                   password=pwd_context.hash(user_create.password1),
+                   password=user_create.password,
                    email=user_create.email,
-                   wine_list = user_create.wine_list)
+                   wine_list = user_create.wine_list,
+                   mbti_result = user_create.mbti_result)
     insert_user_query = f"""
     INSERT INTO "{db_user.__tablename__}"
-        (id, email, password, wine_list)
+        (id, email, password, wine_list, mbti_result)
         VALUES %s;
         """
-    values = [(db_user.id, db_user.email, db_user.password, db_user.wine_list)]
+    values = [(db_user.id, db_user.email, db_user.password, db_user.wine_list, db_user.mbti_result)]
+
     
     # Execute the query
     with db.cursor() as cur:
         exist = await check_email_exist(user_create.email, cur)
         if exist:
-            raise HTTPException(status_code=404, detail=f"이미 존재하는 이메일입니다.")
+            return False
         else:
             print(insert_user_query)
             execute_values(cur, insert_user_query, values)
             db.commit()
+            return True
     
 
 async def update_wine_list_by_email(db: connection, db_user):
