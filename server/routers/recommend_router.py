@@ -49,6 +49,10 @@ def faiss_search(to_search, wine_ids, datas):
         
     return None
     
+def sort_wine_by_distance(data):
+    sorted_wine = sorted(data, key=lambda x: x[1], reverse=True)
+    
+    return top_10
 
 # /mbti/ test용  
 @router.get("/")

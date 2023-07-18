@@ -10,11 +10,14 @@ from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
 from datetime import timedelta, datetime
 from crud import create_user, get_user, verify_password 
-from schema import UserCreate ,Login_User , ReturnValue
+from schema import UserCreate ,Login_User , ReturnValue , UserAdd
 from database import get_db, get_conn
 from models import User
+from routers.recommend_router import post_mbti_question , add_wine_list_to_db
 import pdb,os
 import uvicorn
+
+
 from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -75,6 +78,18 @@ async def user_create(request: Request, user:UserCreate, db: connection = Depend
     ## email, password, mbti_servey -> email,password, mbti_servery,wine_list
     if result:
         retVal.status = True
+        #pdb.set_trace()
+
+        new_data = UserAdd(
+            email=user.email,
+            
+            wine_list = await post_mbti_question(user.mbti_result)
+            
+
+        )
+        await add_wine_list_to_db(new_data, db)
+
+
     else:
         retVal.status = False
     return retVal
