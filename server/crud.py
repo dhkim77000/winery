@@ -212,7 +212,6 @@ async def update_wine_list_by_email(db: connection, db_user):
     WHERE email = %s;
     """
     values = (new_wine_list, email)
-    pdb.set_trace()
     # 쿼리 실행
     with db.cursor() as cur:
         cur.execute(update_query, values)
