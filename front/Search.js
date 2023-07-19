@@ -10,7 +10,6 @@ import {
     SafeAreaView
   } from "react-native";
 import Icon from 'react-native-vector-icons/Ionicons';
-import wine from "./wineList";
 
 export default function Search({navigation}) {
   const [search, setSearch] = useState("");
@@ -49,14 +48,6 @@ export default function Search({navigation}) {
             onChangeText={(search) => setSearch(search)}
           />
         </View>
-        <SafeAreaView style={{marginBottom: 90, borderRadius: 20, backgroundColor: "#FFFFFF", height: "100%"}}>
-          <FlatList
-            data={wine}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.wineId}
-          >
-          </FlatList>
-      </SafeAreaView>
       </View>
   );
 }

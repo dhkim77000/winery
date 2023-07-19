@@ -7,23 +7,22 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-import wine from "./wineList";
 import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function WineInfo ({navigation: {navigate}, route}) {
-  const id = route.params.id
-  const target = wine[id-1]
-  console.log(id) // 확인용
+  const target = route.params.item
+
+  console.log(target) // 확인용
   return (
     <View style={styles.wrapper}>
-      <Image style={styles.image} source={target.pic} />
+      <Image style={styles.image} source={require('./assets/고라파덕.jpg')} />
       <Text style={styles.name}>{target.name}</Text>
       <View style={styles.ratingANDprice}>
         <View style={{flexDirection: "row"}}>
           <Icon name={'star'} size={20} color={"#000000"}/>
-          <Text style={{fontSize: 18}}>  {target.rating} ({target.numVote})</Text>
+          <Text style={{fontSize: 18}}>  {target.wine_rating} ({target.num_votes})</Text>
         </View>
-        <Text style={{fontSize: 18}}>가격: {target.price}</Text>
+        <Text style={{fontSize: 18}}>가격: $ {target.price}</Text>
       </View>
       <View style={styles.country}>
         <Text style={{fontSize: 18, fontWeight: "700"}}>From   </Text>
@@ -31,13 +30,14 @@ export default function WineInfo ({navigation: {navigate}, route}) {
       </View>
       <View style={{margin:5, marginBottom:10}}>
         <Text style={styles.detail}>와이너리:  {target.winery}</Text>
-        <Text style={styles.detail}>포도:  {target.grape}</Text>
+        <Text style={styles.detail}>포도:  {/*target.grape*/}</Text>
         <Text style={styles.detail}>빈티지:  {target.vintage}</Text>
-        <Text style={styles.detail}>와인 타입:  {target.wineType}</Text>
+        <Text style={styles.detail}>와인 타입:  {target.winetype}</Text>
       </View>
-      <Text style={styles.text}>{target.text}</Text>
+      <Text style={styles.text}>{/*target.text*/}와인 설명입니다.</Text>
       <View style={styles.tempBox}>
         <Text>Taste, Pairing 정보</Text>
+        <Text>{target.pairing}</Text>
       </View>
     </View>
   );
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     color: "#707070",
   },
   text: {
-    fontSize: 15,
+    fontSize: 20,
     margin: 5,
   },
   tempBox: {

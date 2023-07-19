@@ -9,6 +9,7 @@ import {
 	TouchableOpacity,
 } from "react-native";
 import Swiper from 'react-native-swiper';
+import { logUserOut } from './Api';
 
 export default function Home() {
 	return (

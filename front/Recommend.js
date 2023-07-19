@@ -1,5 +1,5 @@
 import { useReactiveVar } from "@apollo/client";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import {
 	Text, 
 	View,
@@ -14,17 +14,16 @@ import {
 import { emailVar, postApi } from "./Api";
 import { useEffect, useState } from "react";
 import Icon from 'react-native-vector-icons/Ionicons';
-import wine from './wineList';
 
-export default function Recommend() {
+export default function Recommend({navigation}) {
 	const email = useReactiveVar(emailVar);
 	const { register, handleSubmit, setValue, watch } = useForm();
 	const [selectedId, setSelectedId] = useState(0); // category 선택
 	const [wineList, setWineList] = useState([]);
 
 	const categories = [
-		{ id: 0, text: '인기순', icon: 'star', item: [] },
-		{ id: 1, text: '추천순', icon: 'heart', item: [] },
+		{ id: 0, text: '인기순', icon: 'star' },
+		{ id: 1, text: '추천순', icon: 'heart' },
 		//{ id: 2, text: '여름추천', icon: 'sunny', item: [] },
 	]
 
@@ -33,7 +32,6 @@ export default function Recommend() {
 		console.log(data)
 		try {
 			const response = await postApi(endpoint, data);
-			//console.log(response.data)
 			setWineList(response.data)
 		} catch (error) {
 			alert(error);
@@ -62,7 +60,7 @@ export default function Recommend() {
 
 	const isWinePress = (item) => { // 와인 눌렀을 때 상세페이지로 넘어가도록
 		console.log(item)
-		//navigation.navigate('WineInfo', {id: item.key})
+		navigation.navigate('WineInfo', {item: item})
 	}
 
 	const renderItem = ({item}) => {
@@ -80,7 +78,7 @@ export default function Recommend() {
 					<Text style={{fontSize: 18, paddingLeft: 5}}>{item.wine_rating}</Text>
 				</View>
 				<View style={{flexDirection: "row", alignItems: "center"}}> 
-					<Text>{item.country},  {item.winery}</Text>
+					<Text>{item.country},  {item.region}</Text>
 				</View>
 				<View style={{flexDirection: "row", alignItems: "center", marginTop: 5}}> 
 					<Text>$ {item.price}</Text>
@@ -98,6 +96,8 @@ export default function Recommend() {
 			required: true,
 		});
 		setValue("email", email);
+		setValue("type", "인기순")
+		handleSubmit(onValid)();
 	}, [register]);
 
 	return (
@@ -114,7 +114,7 @@ export default function Recommend() {
 			<FlatList
 				data={Object.values(wineList)}
 				renderItem={renderItem}
-				keyExtractor={(item) => item.itemId}
+				keyExtractor={(item) => item.item_id}
 			>
 			</FlatList>
 		  </SafeAreaView>
