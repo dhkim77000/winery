@@ -31,6 +31,14 @@ def sort_wine_by_distance(data):
     top_10 = [x[0] for x in sorted_wine[:10]]
     return top_10
 
+
+def delete_table(cursor, table_name):
+    
+    # 기존 테이블 삭제 (선택사항)
+    #cursor = conn.cursor()
+    cursor.execute(f'DROP TABLE IF EXISTS "{table_name}";')
+    cursor.close()
+
 #wine_list = sort_wine_by_distance(search_result)
 
 # @router.post("/", status_code=status.HTTP_303_SEE_OTHER)

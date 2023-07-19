@@ -6,6 +6,8 @@ from database import Base
 
 
 def create_user_table(db):
+
+    
     create_table_query = """
     CREATE TABLE IF NOT EXISTS "user" (
         id UUID PRIMARY KEY NOT NULL UNIQUE,
@@ -15,6 +17,7 @@ def create_user_table(db):
         mbti_result INTEGER[]
     );"""
     print(create_table_query)
+    
     with db.cursor() as cur:
         cur.execute(create_table_query)
         db.commit()
