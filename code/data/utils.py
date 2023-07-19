@@ -33,20 +33,25 @@ def drop_columns(df):
 
 def fill_na(df):
     with open('/opt/ml/wine/code/data/meta_data/string_columns.json','r',encoding='utf-8') as f:  
-        col = json.load(f)
-        df[col] = df[col].fillna('Empty')
+        cols = json.load(f)
+        for col in cols:
+            if col in df.columns: df[col] = df[col].fillna('Empty')
+
     with open('/opt/ml/wine/code/data/meta_data/dict_columns.json','r',encoding='utf-8') as f:  
-        col = json.load(f)
-        df[col] = df[col].fillna('{}')
+        cols = json.load(f)
+        for col in cols:
+            if col in df.columns: df[col] = df[col].fillna('{}')
+
     with open('/opt/ml/wine/code/data/meta_data/seq_columns.json','r',encoding='utf-8') as f:  
-        col = json.load(f)
-        df[col] = df[col].fillna("[]")
+        cols = json.load(f)
+        for col in cols:
+            if col in df.columns: df[col] = df[col].fillna("[]")
 
     with open('/opt/ml/wine/code/data/meta_data/float_columns.json','r',encoding='utf-8') as f:  
-        col = json.load(f)
+        cols = json.load(f)
         #col = [c for c in col if '_count' in c]
-        for c in col:
-            if c in df.columns: df[c] = df[c].fillna(0)
+        for col in cols:
+            if col in df.columns: df[c] = df[c].fillna(0)
     
 
     return df
@@ -97,7 +102,6 @@ def list_feature_mapper(args, df, column):
         df[column] = df[column].apply(lambda x: " ".join(x))
 
     unique_val = set(list(exploded))
-    feature_dic = {}
 
     feature2idx = {f:i for i, f in enumerate(unique_val)}
     idx2feature = {i:f for i, f in enumerate(unique_val)}
@@ -113,9 +117,11 @@ def list_feature_mapper(args, df, column):
     return df, feature2idx, idx2feature
 
 def map_all_single_features(df):
-    single_category_columns = ['country', 'region', 'winery', 'winetype', 'vintage', 'house', 'wine_style']
+    with open('/opt/ml/wine/code/data/meta_data/string_columns.json','r',encoding='utf-8') as f:  
+        single_category_columns = json.load(f)
+
     for c in single_category_columns:
-        feature_mapper(df, c)
+        if c in df.columns: feature_mapper(df, c)
     return  
 
 def map_all_list_features(df,args):
@@ -211,20 +217,19 @@ def expand_notes(df, args):
             df.drop(note_col.replace(' ','_') + '_child', axis = 1, inplace = True)
     return df
 
-def crawl_item_to_csv(df, args):
+def item_preprocess(df, args):
     df = fill_na(df)
     df = drop_columns(df)
     map_all_single_features(df)
     df = map_all_list_features(df, args)
-    df = expand_notes(df, args)
+    #df = expand_notes(df, args)
 
     return df
 
-def crawl_review_to_csv(df, args):
+def inter_preprocess(df, args):
     
-    df = df[df['user_url'].isna()== False]
+    df = df[df['uid'].isna()== False]
     tqdm.pandas()
-    df.loc[:,'date'] = df.loc[:,'date'].progress_apply(lambda x: pd.to_datetime(x))
 
     return df
 
@@ -248,9 +253,9 @@ def parallel(func, df, args, num_cpu):
             result.drop(c, axis = 1, inplace= True)  
 
 
-    if 'user_url' in result.columns:
+    if 'uid' in result.columns:
 
-        urls = result['user_url'].unique()
+        urls = result['uid'].unique()
         user2idx = {v:k for k,v in enumerate(urls)}
         idx2user = {k:v for k,v in enumerate(urls)}
 
@@ -258,16 +263,6 @@ def parallel(func, df, args, num_cpu):
             json.dump(user2idx, f, ensure_ascii=False)
         with open(f'/opt/ml/wine/code/data/feature_map/idx2user.json','w',encoding='utf-8') as f:  
             json.dump(idx2user, f, ensure_ascii=False)
-
-    elif  'url' in result.columns:
-        urls = result['url'].unique()
-        item2idx = {v:k for k,v in enumerate(urls)}
-        idx2item = {k:v for k,v in enumerate(urls)}
-
-        with open(f'/opt/ml/wine/code/data/feature_map/item2idx.json','w',encoding='utf-8') as f:  
-            json.dump(item2idx, f, ensure_ascii=False)
-        with open(f'/opt/ml/wine/code/data/feature_map/idx2item.json','w',encoding='utf-8') as f:  
-            json.dump(idx2item, f, ensure_ascii=False)
 
     return result
 

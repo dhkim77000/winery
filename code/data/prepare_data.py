@@ -45,25 +45,44 @@ def load_index_file():
 
 def prepare_dataset(args):
     num_cpu = os.cpu_count()
+    item_data_cols = [
+        'item_id',
 
-    crawled_item_data = pd.read_csv('/opt/ml/wine/data/wine_df.csv')
-    crawled_review_data = pd.read_csv('/opt/ml/wine/data/review_df_total.csv', 
+        'house', 
+
+        'country', 'region1', 
+        'winetype',  'wine style', 'grape','vintage',
+
+       'price', 'wine_rating', 'num_votes', 
+       'pairing',
+
+       'Red Fruit', 'Tropical', 'Tree Fruit', 'Oaky', 'Ageing', 'Black Fruit',
+       'Citrus', 'Dried Fruit', 'Earthy', 'Floral', 'Microbio', 'Spices', 'Vegetal', 
+
+       'Light', 'Bold', 
+       'Smooth', 'Tannic', 
+       'Dry', 'Sweet',
+       'Soft','Acidic',
+       'Fizzy', 'Gentle']
+    
+    item_data = pd.read_csv('/opt/ml/wine/data/item_df_allfeature.csv',
+                            encoding= 'utf-8-sig',
+                            usecols = item_data_cols)
+    
+    item_data['item_id'] = item_data['item_id'].astype(int).astype('category')
+    
+    inter = pd.read_csv('/opt/ml/wine/data/review_df_total.csv', 
                                       encoding='utf-8-sig',
-                                      usecols = ['user_url','rating','date','wine_url'])
+                                      usecols = ['uid','rating','date','item_id'])
+    inter['item_id'] = inter['item_id'].astype(int).astype('category')
+    inter['uid'] = inter['uid'].astype('category')
 
-    item_data = parallel(crawl_item_to_csv, crawled_item_data, args, num_cpu)
-    review_data = parallel(crawl_review_to_csv, crawled_review_data, args, num_cpu)
+    item_data = parallel(item_preprocess, item_data, args, num_cpu)
+    inter = parallel(inter_preprocess, inter, args, num_cpu)
   
     item2idx, user2idx, idx2item, idx2user = load_index_file()
 
-    item_data['item_id'] = item_data.loc[:, 'url'].map(item2idx)
-    item_data.drop('url', axis = 1, inplace= True)
-
-    review_data['item_id'] = review_data.loc[:, 'wine_url'].map(item2idx)
-    review_data.dropna(inplace = True)
-    review_data['user_id'] = review_data.loc[:, 'user_url'].map(user2idx)
-    review_data.drop(['user_url','wine_url'], axis = 1, inplace= True)
-    review_data.drop_duplicates(inplace = True)
+    inter.drop_duplicates(inplace = True)
     ####추가
 
     feature_engineering()
@@ -71,24 +90,20 @@ def prepare_dataset(args):
         item_data.to_csv('/opt/ml/wine/data/item_data_expand.csv', encoding='utf-8-sig', index=False)
     else:
         item_data.to_csv('/opt/ml/wine/data/item_data.csv', encoding='utf-8-sig', index=False)
-    review_data.to_csv('/opt/ml/wine/data/review_data.csv', encoding='utf-8-sig', index=False)
+    inter.to_csv('/opt/ml/wine/data/inter.csv', encoding='utf-8-sig', index=False)
 
 
-    
-    item_data['pairing'][item_data['pairing'] == 'Empty']
 
-    user_data = review_data.groupby('user_id').agg(count=('rating', 'count'), mean=('rating', 'mean')).reset_index()
+    user_data = inter.groupby('uid').agg(count=('rating', 'count'), mean=('rating', 'mean')).reset_index()
 
+    print(f'Total {len(item_data)} items, {len(user_data)} users, {len(inter)} interactions')
 
-    print(f'Total {len(item_data)} items, {len(user_data)} users, {len(review_data)} interactions')
-
-    review_data.rename(columns={'rating': 'user_rating','date': 'timestamp'}, inplace=True)
+    inter.rename(columns={'rating': 'user_rating','date': 'timestamp'}, inplace=True)
 
 
-    train_rating = pd.merge(review_data.loc[:,['user_id','user_rating','timestamp','item_id']],
+    train_rating = pd.merge(inter.loc[:,['uid','user_rating','timestamp','item_id']],
                             item_data.loc[:, 'item_id'],
                             on = 'item_id', how = 'inner')
-    item_data['pairing'][item_data['pairing'] == '']
 
     train_rating.to_csv('/opt/ml/wine/data/train_rating.csv', encoding='utf-8', index=False)
     user_data.to_csv('/opt/ml/wine/data/user_data.csv', encoding='utf-8', index=False)
