@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useState, Component, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
 	StyleSheet,
@@ -15,8 +15,8 @@ import {
 } from "react-native";
 import { isLoggedInVar, postApi } from "./Api";
 
-export default function Sign() {
-	const { register, handleSubmit, setValue, watch } = useForm();
+export default function Sign({navigation}) {
+	const { register, setValue, watch } = useForm();
 	const passwordRef = useRef();
 	const passwordCheckRef = useRef();
 
@@ -24,8 +24,9 @@ export default function Sign() {
 		nextOne?.current?.focus();
 	};
 	const onValid = async (data) => {
-		const endpoint = "login/register/";
+		const endpoint = "login/check/";
 		const regex = /\w+@\w+\.[\w,\.]+/;
+		console.log(data)
 		if (!regex.test(data.email)) {
 			alert("이메일 형식이 맞지 않습니다");
 		} else if (data.password != data.password_check) {
@@ -38,6 +39,9 @@ export default function Sign() {
 				console.log(response.data);
 				if (!response.data.status) {
 					alert("이미 존재하는 계정입니다");
+				} else {
+					console.log(watch())
+					navigation.navigate('Mbti', {email: watch("email"), password: watch("password")})
 				}
 			} catch (error) {
 				alert(error);
@@ -56,9 +60,6 @@ export default function Sign() {
 		register("password_check", {
 			required: true,
 		});
-		register("mbti_result", {
-			required: true,
-		})
 	}, [register]);
 
 	return (
@@ -96,7 +97,9 @@ export default function Sign() {
 							secureTextEntry={true}
 							ref={passwordCheckRef}
 							onChangeText={(text) => setValue("password_check", text)}
-							onSubmitEditing={handleSubmit(onValid)}
+							onSubmitEditing={() => {
+								onValid(watch());
+							}}
 							autoCapitalize={"none"}
 						/>
 					</View>
@@ -106,8 +109,7 @@ export default function Sign() {
 							!watch("email") || !watch("password") || !watch("password_check")
 						}
 						onPress={() => {
-							setValue("mbti_result", [1,2,3,4,1,2,3,4,1,2])
-							handleSubmit(onValid)();
+							onValid(watch())
 						}}
 					>
 						<Text>NEXT</Text>
@@ -130,7 +132,6 @@ const styles = StyleSheet.create({
 		width: "70%",
 		height: 45,
 		marginBottom: 20,
-		alignItems: "center",
 	},
 	TextInput: {
 		height: 50,

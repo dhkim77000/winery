@@ -7,7 +7,6 @@ import {
 	View,
 	Image,
 	TextInput,
-	Button,
 	TouchableOpacity,
 	TouchableWithoutFeedback,
 	Keyboard,
@@ -116,7 +115,6 @@ const styles = StyleSheet.create({
 		width: "70%",
 		height: 45,
 		marginBottom: 20,
-		alignItems: "center",
 	},
 	TextInput: {
 		height: 50,

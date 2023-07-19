@@ -1,4 +1,4 @@
-// import React, { Component } from 'react';
+import React from 'react';
 import {
 	StyleSheet,
 	Text,
@@ -8,24 +8,17 @@ import {
 	Button,
 	TouchableOpacity,
 } from "react-native";
-import { logUserOut } from "./Api";
+import Swiper from 'react-native-swiper';
 
-export default function Home({ navigation }) {
+export default function Home() {
 	return (
 		<View style={styles.container}>
-			<Text style={styles.paragraph}>Temporary Home</Text>
-			<TouchableOpacity
-				style={styles.tempbtn}
-				onPress={() => navigation.navigate("Recommend")}
-			>
-				<Text>Recommend</Text>
-			</TouchableOpacity>
-			<TouchableOpacity
-				style={styles.tempbtn}
-				onPress={() => navigation.navigate("Group")}
-			>
-				<Text>Group Recommend</Text>
-			</TouchableOpacity>
+			<View style={styles.banner}>
+				{swipers()}
+			</View>
+			<Text style={styles.paragraph}>
+				금주의 추천 와인
+			</Text>
 			<TouchableOpacity
 				style={styles.tempbtn}
 				onPress={() => logUserOut()}
@@ -36,29 +29,55 @@ export default function Home({ navigation }) {
 	);
 }
 
+export function swipers() { // 배너
+	return(
+	  <Swiper
+		  autoplay
+		  autoplayTimeout={4}       
+		>
+		  <View style={styles.slide}>
+			<Image style={styles.image} source={require("./assets/고라파덕.jpg")} />
+		  </View>
+		  <View style={styles.slide}>
+			<Image style={styles.image} source={require("./assets/꼬부기.jpg")} />
+		  </View>
+		  <View style={styles.slide}>
+			<Image style={styles.image} source={require("./assets/이브이.jpg")} />
+		  </View>
+		  <View style={styles.slide}>
+			<Image style={styles.image} source={require("./assets/케이시.jpg")} />
+		  </View>
+		  <View style={styles.slide}>
+			<Image style={styles.image} source={require("./assets/파이리.jpg")} />
+		  </View>
+		</Swiper>
+	)
+  }
+
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: "#fff",
-		alignItems: "center",
+	wrapper: {
 		justifyContent: "center",
-	},
-	paragraph: {
-		margin: 24,
-		fontSize: 18,
-		fontWeight: "bold",
-		textAlign: "center",
-	},
-	item: {
-		flexDirection: "row",
-		justifyContent: "space-between",
+	  },
+	  container: {
+		flex: 1,
 		alignItems: "center",
-		height: 50,
-		paddingHorizontal: 20,
-		borderTopWidth: 1,
-		borderColor: "#000",
-	},
-	tempbtn: {
+	  },
+	  paragraph: {
+		margin: 24,
+		fontSize: 25,
+		fontWeight: 'bold',
+		alignItems: 'flex-start'
+	  },
+	  image: {
+		flex: 1,
+		resizeMode: "contain",
+	  },
+	  slide: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+	  },
+	  tempbtn: {
 		width: "80%",
 		borderRadius: 25,
 		height: 50,
@@ -67,5 +86,12 @@ const styles = StyleSheet.create({
 		marginTop: 20,
 		marginBottom: 20,
 		backgroundColor: "#ffc0cb",
+	  },
+	  banner: {
+		height: "50%",
+		resizeMode: "contain",
+		justifyContent: "center",
+		backgroundColor: "#FFFFFF",
+		padding: 10,
 	},
 });
