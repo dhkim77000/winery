@@ -26,7 +26,7 @@ class UserCreate(BaseModel):
     email:EmailStr
     password: str
     wine_list : Optional[List] = None
-    mbti_result : List
+    mbti_result : Optional[List] = None
 
     # @validator('email', 'password1', 'password2')
     # def not_empty(cls, v):
