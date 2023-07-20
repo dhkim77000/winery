@@ -9,7 +9,7 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
 from datetime import timedelta, datetime
-from crud import create_user, get_user, verify_password 
+from crud import create_user, get_user, verify_password , check_email_exist
 from schema import UserCreate ,Login_User , ReturnValue , UserAdd
 from database import get_db, get_conn
 from models import User
@@ -66,6 +66,19 @@ router = APIRouter(
 async def get_register_form(request: Request):
     return templates.TemplateResponse('register_form.html', context={'request': request})
 
+
+@router.post("/check", response_model=None)
+async def email_check(request: Request, user:UserCreate, db: connection = Depends(get_conn)):
+    print(user)
+    retVal = ReturnValue(status=False)
+    with db.cursor() as cur:
+        exist = await check_email_exist(user.email, cur)
+        if exist:
+            retVal.status = False
+        else:
+            retVal.status = True
+        return retVal
+    
 # Pydantic UserCrate table로 data 받아서 User class로 db에 넣기
 @router.post("/register", response_model=None)
 async def user_create(request: Request, user:UserCreate, db: connection = Depends(get_conn)):

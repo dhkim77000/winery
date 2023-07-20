@@ -85,13 +85,13 @@ async def post_mbti_question(mbti_result : GetMBTI):
     num_wines = 12000
     vector_dimension = 768
 
-    answer_list = mbti_result.result
-    with open("/opt/ml/wine/server/data/mbti_vectors.json","r") as f:
-        answer_vector = json.load(f)
+    # answer_list = mbti_result.result
+    # with open("/opt/ml/wine/server/data/mbti_vectors.json","r") as f:
+    #     answer_vector = json.load(f)
 
-    vector_list = []
-    for answer in answer_list:
-        vector_list.append(answer_vector[answer])
+    # vector_list = []
+    # for answer in answer_list:
+    #     vector_list.append(answer_vector[answer])
 
 
     vector_list = np.random.rand(num_wines, vector_dimension).astype(np.float32)
@@ -101,8 +101,8 @@ async def post_mbti_question(mbti_result : GetMBTI):
     wine_ids = np.arange(num_wines)
     datas =  np.random.rand(num_wines, vector_dimension).astype(np.float32)
 
-    search_result = await faiss_search(mean_vector, wine_ids, datas)
-    top_10 = [x[0] for x in search_result[:10]]
+    search_result = faiss_search(mean_vector, wine_ids, datas)
+    top_10 = [int(x[0]) for x in search_result[0]]
 
     
     return top_10
