@@ -1,9 +1,9 @@
 from fastapi.param_functions import Depends
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from fastapi import HTTPException
 from uuid import UUID, uuid4
 from typing import List, Union, Optional, Dict, Any
-from pydantic import EmailStr, validator
+
 
 from datetime import datetime
 
@@ -40,9 +40,10 @@ class UserCreate(BaseModel):
     #         raise HTTPException(status_code=404, detail=f"비밀번호가 일치하지 않습니다")
        
 class UserInteraction(BaseModel):
-    uid :UUID
+    uid :UUID = Field(default_factory=uuid4)
+    email : EmailStr
     wine_id : int
-    timestamp : int
+    timestamp : Field(default_factory=datetime.now().timestamp())
     rating : float
 
 class WinePost(BaseModel):

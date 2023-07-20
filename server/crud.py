@@ -17,6 +17,7 @@ import pdb , math
 from fastapi.security import OAuth2PasswordRequestForm
 from psycopg2.extensions import connection
 import numpy as np
+import pandas as pd
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -59,6 +60,16 @@ async def get_user_for_add(new_data:UserAdd, db: connection):
         )
         return user
 
+def get_all_wine_feature(db: connection):
+    
+    with db.cursor() as cur:
+        cur.execute("SELECT * FROM wine")
+        result = cur.fetchall()
+            
+
+    
+    return result
+
 async def search_wine_by_name(db: connection, wine_name):
     min_length = max(len(wine_name) // 3, 2)
 
@@ -79,7 +90,7 @@ async def get_wine_data(db: connection, wine_id):
     with db.cursor() as cur:
         cur.execute("SELECT * FROM wine WHERE item_id = %s", (wine_id,))
         result = cur.fetchone()
-    pdb.set_trace()
+    #pdb.set_trace()
     if result is None:
         raise HTTPException(status_code=404, detail=f"존재하지 않는 와인입니다.")
     else:
@@ -212,7 +223,7 @@ async def update_wine_list_by_email(db: connection, db_user):
     WHERE email = %s;
     """
     values = (new_wine_list, email)
-    pdb.set_trace()
+    #pdb.set_trace()
     # 쿼리 실행
     with db.cursor() as cur:
         cur.execute(update_query, values)
@@ -221,14 +232,15 @@ async def update_wine_list_by_email(db: connection, db_user):
     
 async def rating_update(collection, uid, wine_id, rating, timestamp):
     try:
-        data = [
-        {'uid': 1, 'timestamp': int(datetime.now().timestamp()), 'rating': 4.5, 'wine_id': 1},
-        {'uid': 2, 'timestamp': int(datetime.now().timestamp()), 'rating': 3.8, 'wine_id': 2},
-        {'uid': 1, 'timestamp': int(datetime.now().timestamp()), 'rating': 5.0, 'wine_id': 5}
-        ]
-        #data = {'uid': uid, 'timestamp': int(timestamp), 'rating': rating, 'wine_id':  wine_id}
-        collection.insert_many(data)
-        #collection.insert_one(data)
+        # data = [
+        # {'uid': 1, 'timestamp': int(datetime.now().timestamp()), 'rating': 4.5, 'wine_id': 1},
+        # {'uid': 2, 'timestamp': int(datetime.now().timestamp()), 'rating': 3.8, 'wine_id': 2},
+        # {'uid': 1, 'timestamp': int(datetime.now().timestamp()), 'rating': 5.0, 'wine_id': 5}
+        # ]
+        data = {'uid': uid, 'timestamp': int(timestamp), 'rating': rating, 'wine_id':  wine_id}
+        pdb.set_trace()
+        #collection.insert_many(data)
+        collection.insert_one(data)
         return True
     except Exception as e:
         print(e)

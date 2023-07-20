@@ -4,6 +4,7 @@ from psycopg2.extensions import connection
 from database import get_db, get_conn, get_mongo_db
 from crud import get_wine_data,get_wine_data_simple,get_user, search_wine_by_name, rating_update
 from schema import UserAdd , Usertype, UserInteraction
+from uuid import UUID, uuid4
 from function import get_top_10_items
 from typing import List, Optional
 import numpy as np
@@ -91,9 +92,10 @@ async def update_rating(user_interaction: UserInteraction,
     collection = db.rating
 
     uid = user_interaction.uid
+    email = user_interaction.email
     wine_id = user_interaction.wine_id
     rating = user_interaction.rating
     timestamp = user_interaction.timestamp
     
-    push = await rating_update(collection, uid, wine_id, rating, timestamp)
+    push = await rating_update(collection, uid, email, wine_id, rating, timestamp)
     return push

@@ -65,17 +65,20 @@ def create_wine_table(db_connect):
         Acidic int,
         Fizzy int,
         Gentle int,
-        vintage float,
+        vintage TEXT,
         price float,
         wine_rating float,
         num_votes float,
         country TEXT,
-        region TEXT,
+        region1 TEXT,
+        grape TEXT[],
+        region2 TEXT,
+        region3 TEXT,
+        region4 TEXT,
         winery TEXT,
         name TEXT,
         wine_style TEXT,
         house TEXT,
-        grape TEXT[],
         pairing TEXT[]
     );
     """
@@ -130,16 +133,19 @@ class Wine(Base):
     Acidic = Column(Integer, nullable=True)
     Fizzy = Column(Integer, nullable=True)
     Gentle = Column(Integer, nullable=True)
-    vintage = Column(Float, nullable=True)
+    vintage = Column(String, nullable=True)
     price = Column(Float, nullable=True)
     wine_rating = Column(Float, nullable=True)
     num_votes = Column(Float, nullable=True)
     country = Column(String, nullable=True)
-    region= Column(String, nullable=True)
+    region1 = Column(String, nullable=True)
+    grape = Column(ARRAY(String), nullable=True)
+    region2 = Column(String, nullable=True)
+    region3 = Column(String, nullable=True)
+    region4 = Column(String, nullable=True)
     winery= Column(String, nullable=True)
     name= Column(String, nullable=True)
     wine_style= Column(String, nullable=True)
     house = Column(String, nullable=True)
-    grape = Column(ARRAY(String), nullable=True)
     pairing = Column(ARRAY(String), nullable=True)
 
