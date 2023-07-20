@@ -237,7 +237,7 @@ async def rating_update(collection, uid, email, wine_id, rating, timestamp):
         # {'uid': 1, 'timestamp': int(datetime.now().timestamp()), 'rating': 5.0, 'wine_id': 5}
         # ]
         data = {'uid': uid, 'email': email, 'timestamp': int(timestamp), 'rating': rating, 'wine_id':  wine_id}
-        pdb.set_trace()
+        #pdb.set_trace()
         #collection.insert_many(data)
         collection.insert_one(data)
         return True
