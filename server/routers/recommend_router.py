@@ -171,6 +171,7 @@ async def rating_data_generator(train_data_inter,db):
     for user_id, user_rating, timestamp, item_id in train_data_inter.values:
         user_interaction = UserInteraction(
             uid=str(uuid4()),
+            email = "example@example.com",
             wine_id=item_id,
             timestamp=timestamp,
             rating=user_rating
