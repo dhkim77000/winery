@@ -43,7 +43,7 @@ class UserInteraction(BaseModel):
     uid :UUID = Field(default_factory=uuid4)
     email : EmailStr
     wine_id : int
-    timestamp : Field(default_factory=datetime.now().timestamp())
+    timestamp : int = Field(default_factory=datetime.now().timestamp())
     rating : float
 
 class WinePost(BaseModel):
