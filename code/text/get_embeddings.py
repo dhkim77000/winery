@@ -102,9 +102,11 @@ if __name__ == "__main__":
 
     review_vectors = parallel_embedding(merged_reviews, 8)
 
-    try: 
-        with open('/opt/ml/wine/data/wine_vector.json', 'w') as f:
-            json.dump(review_vectors, f)    
+    try:
+        for key in tqdm(review_vectors): review_vectors[key] = review_vectors[key].tolist()
+        with open('/opt/ml/wine/data/wine_vector.json', 'w') as f: json.dump(review_vectors, f)    
     except:
         import pdb
         pdb.set_trace()
+    
+    

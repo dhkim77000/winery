@@ -81,7 +81,8 @@ def main(args):
         review_df['length'] = review_df['text'].apply(get_len_text)
         review_df = review_df.loc[:, ['wine_id','text','length']]
         review_df = review_df.sort_values(['wine_id', 'length'])
-        review_df = merge_short_review(review_df, args.min_len)
+        review_df = review_df[review_df['length']>=args.min_len]
+        #review_df = merge_short_review(review_df, args.min_len)
         review_df.to_csv('/opt/ml/winery/data/review_df_cleaned.csv',index = False)
     
     gc.collect()
