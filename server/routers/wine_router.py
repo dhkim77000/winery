@@ -3,6 +3,7 @@ from fastapi import APIRouter , Depends
 from psycopg2.extensions import connection
 from database import get_db, get_conn, get_mongo_db
 from crud import get_wine_data,get_wine_data_simple,get_user, search_wine_by_name, rating_update
+from crud_mongo import check_rating_datas
 from schema import UserAdd , Usertype, UserInteraction
 from uuid import UUID, uuid4
 from function import get_top_10_items
@@ -90,12 +91,26 @@ async def update_rating(user_interaction: UserInteraction,
                         db: Database = Depends(get_mongo_db)):
     
     collection = db.rating
-
-    uid = user_interaction.uid
     email = user_interaction.email
     wine_id = user_interaction.wine_id
     rating = user_interaction.rating
     timestamp = user_interaction.timestamp
     
-    push = await rating_update(collection, uid, email, wine_id, rating, timestamp)
+    push = await rating_update(collection, email, wine_id, rating, timestamp)
     return push
+
+
+@router.post("/rating_check")
+async def update_rating(check: UserInteraction, 
+                        db: Database = Depends(get_mongo_db)):
+    
+    #wine_id = user_inter.wine_id
+    email = check.email
+    wine = check.wine_id
+    search_result = await check_rating_datas(email,wine,db)
+    #pdb.set_trace()
+    if search_result:
+
+        return search_result
+    else:
+        return {'rating' : 0}

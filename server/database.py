@@ -40,6 +40,6 @@ def get_db():
 def get_mongo_db():
     mongo_uri = "mongodb://localhost:27017/"
     table_name = 'interaction'
-    client = pymongo.MongoClient(mongo_uri ,uuidRepresentation="standard")
+    client = pymongo.MongoClient(mongo_uri  ,uuidRepresentation="standard")
     db = client[table_name]
     return db  

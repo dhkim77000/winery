@@ -18,6 +18,7 @@ from pymongo.database import Database
 from schema import UserAdd, UserInteraction
 from database import get_db, get_conn
 from crud import get_user_for_add , update_wine_list_by_email , get_all_wine_feature
+from crud_mongo import *
 from models import User
 
 pd.set_option('mode.chained_assignment', None)
@@ -154,27 +155,63 @@ async def get_wine_to_recbole(db: connection = Depends(get_conn)):
 
 @router.post("/crawl_rating_to_model")
 async def preprocess_user_interaction(db: Database = Depends(get_mongo_db)):
-    print("train_data.inter 파일 불러오기")
-    file_path_inter = '/opt/ml/server/winery/server/data/train_data.inter' 
-    train_data_inter = pd.read_csv(file_path_inter, sep='\t')
-    ####
-    train_data_inter= train_data_inter[:5]
-    print("done")
-    print("time stamp 값 int형으로 변환")
-    train_data_inter['timestamp:float'] = train_data_inter['timestamp:float'].apply(transfrom)
-    print("done")
-    await rating_data_generator(train_data_inter, db)
-    return "save crawl_data"
-
-async def rating_data_generator(train_data_inter,db):
+    answer = input("csv 불러올건가요 yes or no")
     # 예시로 for 루프를 사용하여 가상의 데이터를 생성하고 처리합니다.
-    for user_id, user_rating, timestamp, item_id in train_data_inter.values:
-        user_interaction = UserInteraction(
-            uid=str(uuid4()),
-            email = "example@example.com",
-            wine_id=item_id,
-            timestamp=timestamp,
-            rating=user_rating
-        )
-        # 비동기 함수를 호출합니다.
-        await update_rating(user_interaction, db)
+    if answer == "yes":
+        print("train_data.inter 파일 불러오기")
+        file_path_inter = '/opt/ml/server/winery/server/data/train_data.inter' 
+        train_data_inter = pd.read_csv(file_path_inter, sep='\t')
+        ####
+        #train_data_inter= train_data_inter[:5]
+        print("done")
+        print("time stamp 값 int형으로 변환")
+        train_data_inter['timestamp:float'] = train_data_inter['timestamp:float'].apply(transfrom)
+        print("done")
+        await rating_data_generator(train_data_inter, db,answer)
+        return "save crawl_data"
+    else:
+        train_data_inter = 0
+        await rating_data_generator(train_data_inter, db,answer)
+
+async def rating_data_generator(train_data_inter,db,answer):
+    #pdb.set_trace()
+    
+    # 예시로 for 루프를 사용하여 가상의 데이터를 생성하고 처리합니다.
+    if answer == "yes":
+        for idx in range(train_data_inter.shape[0]):
+            result = train_data_inter.iloc[idx,:]
+            user_interaction = UserInteraction(
+                email = "example@example.com",
+                wine_id = result['item_id:token'],
+                timestamp = result['timestamp:float'],
+                rating = result['user_rating:float']
+            )
+            # 비동기 함수를 호출합니다.
+            push = await update_rating(user_interaction, db)
+    
+
+        
+
+    
+    numbers = input("'all' or 'number'")
+    if numbers == 'all':
+        all_rating_data = await get_all_rating_data(db)
+        
+        inter_column = ["_id","email","timestamp","rating","wine_id"]
+        result_df = pd.DataFrame(all_rating_data, columns=inter_column)
+        result_df.to_csv("/opt/ml/server/winery/server/data/sample_all_rating_data_to_recbole.csv", index = False)
+        return "save all data : '/opt/ml/server/winery/server/data/sample_all_rating_data_to_recbole.csv'"
+    
+    else:
+        rating_datas = await get_rating_datas(numbers,db)
+        inter_column = ["_id","email","timestamp","rating","wine_id"]
+        result_df = pd.DataFrame(rating_datas, columns=inter_column)
+        result_df.to_csv("/opt/ml/server/winery/server/data/sample_rating_data_to_recbole.csv", index = False)
+        return "save all data : '/opt/ml/server/winery/server/data/sample_rating_data_to_recbole.csv'"
+        
+
+
+
+
+
+

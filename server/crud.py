@@ -130,13 +130,16 @@ async def get_wine_data(db: connection, wine_id):
             wine_rating = result[28],
             num_votes = result[29],
             country = result[30],
-            region= result[31],
-            winery= result[32],
-            name= result[33],
-            wine_style= result[34],
-            house = result[35],
-            grape = result[36],
-            pairing = result[37],
+            region1 = result[31],
+            grape = result[32],
+            region2 = result[33],
+            region3 = result[34],
+            region4 = result[35],
+            winery= result[36],
+            name= result[37],
+            wine_style= result[38],
+            house = result[39],
+            pairing = result[40],
         )
         return wine
 
@@ -229,14 +232,15 @@ async def update_wine_list_by_email(db: connection, db_user):
         db.commit()
         print(f"{email}의 wine_list가 업데이트되었습니다.")
     
-async def rating_update(collection, uid, email, wine_id, rating, timestamp):
+async def rating_update(collection, email, wine_id, rating, timestamp):
     try:
         # data = [
         # {'uid': 1, 'timestamp': int(datetime.now().timestamp()), 'rating': 4.5, 'wine_id': 1},
         # {'uid': 2, 'timestamp': int(datetime.now().timestamp()), 'rating': 3.8, 'wine_id': 2},
         # {'uid': 1, 'timestamp': int(datetime.now().timestamp()), 'rating': 5.0, 'wine_id': 5}
         # ]
-        data = {'uid': uid, 'email': email, 'timestamp': int(timestamp), 'rating': rating, 'wine_id':  wine_id}
+        timestamp = int(datetime.now().timestamp())
+        data = {'email': email, 'timestamp': timestamp, 'rating': rating, 'wine_id':  wine_id}
         #pdb.set_trace()
         #collection.insert_many(data)
         collection.insert_one(data)

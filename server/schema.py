@@ -38,12 +38,11 @@ class UserCreate(BaseModel):
     # def passwords_match(cls, v, values):
     #     if 'password1' in values and v != values['password1']:
     #         raise HTTPException(status_code=404, detail=f"비밀번호가 일치하지 않습니다")
-       
+    # uid :UUID = Field(default_factory=uuid4)
 class UserInteraction(BaseModel):
-    uid :UUID = Field(default_factory=uuid4)
     email : EmailStr
     wine_id : int
-    timestamp : int = Field(default_factory=datetime.now().timestamp())
+    timestamp : int = Field(default_factory=0)
     rating : float
 
 class WinePost(BaseModel):
