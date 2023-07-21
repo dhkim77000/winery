@@ -283,17 +283,17 @@ class MultilabelDataset(Dataset):
 
 class MultilabelDataset(Dataset):
 
-    def __init__(self, dataframe, wine_label, tokenizer, max_len):
+    def __init__(self, mode, dataframe, wine_label, tokenizer, max_len):
         self.tokenizer = tokenizer
         self.data = dataframe
         self.comment_text = dataframe.text
-        self.targets = self.data.label
+        
         self.max_len = max_len
         self.wine_label = wine_label
-        if len(self.wine_label) != 0:
-            self.wine_id = self.data.wine_id
-        #if self.wine_label:
-        #    self.wine_id = self.data.wine_id
+        self.wine_id = self.data.wine_id
+        self.mode = mode
+        if self.mode != 'inference':
+            self.targets = self.data.label
 
     def __len__(self):
         return len(self.comment_text)
@@ -314,23 +314,32 @@ class MultilabelDataset(Dataset):
         ids = inputs['input_ids']
         mask = inputs['attention_mask']
         token_type_ids = inputs["token_type_ids"]
+        wine_ids = self.wine_id.loc[index]
 
-        if self.wine_label is None:
+        if self.mode == 'inference':
             return {
-                'ids': torch.tensor(ids, dtype=torch.long),
-                'mask': torch.tensor(mask, dtype=torch.long),
-                'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
-                'targets': torch.tensor(self.targets[index], dtype=torch.float)
-            }
+                    'ids': torch.tensor(ids, dtype=torch.long),
+                    'mask': torch.tensor(mask, dtype=torch.long),
+                    'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
+                    'wine_ids' : wine_ids
+                }
         else:
+            if self.wine_label is None:
+                return {
+                    'ids': torch.tensor(ids, dtype=torch.long),
+                    'mask': torch.tensor(mask, dtype=torch.long),
+                    'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
+                    'targets': torch.tensor(self.targets[index], dtype=torch.float)
+                }
+            else:
 
-            review_labels = self.targets.loc[index]
-            wine_ids = self.wine_id.loc[index]
-            wine_labels = self.wine_label.loc[wine_ids]['label']
-            targets = np.concatenate((review_labels, wine_labels))  
-            return {
-                'ids': torch.tensor(ids, dtype=torch.long),
-                'mask': torch.tensor(mask, dtype=torch.long),
-                'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
-                'targets': torch.tensor(targets, dtype=torch.float).squeeze()
-            }
+                review_labels = self.targets.loc[index]
+                wine_ids = self.wine_id.loc[index]
+                wine_labels = self.wine_label.loc[wine_ids]['label']
+                targets = np.concatenate((review_labels, wine_labels))  
+                return {
+                    'ids': torch.tensor(ids, dtype=torch.long),
+                    'mask': torch.tensor(mask, dtype=torch.long),
+                    'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
+                    'targets': torch.tensor(targets, dtype=torch.float).squeeze()
+                }

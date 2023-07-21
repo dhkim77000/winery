@@ -77,7 +77,7 @@ def main(args):
         review_df['wine_id'] = review_df['wine_id'].astype('int').astype('category')
         
         review_df = review_df[review_df['wine_id'].isin(wine_ids)]
-        pdb.set_trace()
+        
         review_df['length'] = review_df['text'].apply(get_len_text)
         review_df = review_df.loc[:, ['wine_id','text','length']]
         review_df = review_df.sort_values(['wine_id', 'length'])
@@ -95,7 +95,7 @@ def main(args):
 
     #########################PRICE LABEL#########################
     labeled_review = parallel_dataframe_2input(marking_price_data, review_df, price_vocab, 8)
-    labeled_review.reset_index(inplace =true, drop = True)
+    labeled_review.reset_index(inplace =True, drop = True)
     labeled_review.to_csv(args.save_path+'labeled_review.csv', index = False)
     gc.collect()
 

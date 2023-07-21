@@ -38,4 +38,4 @@ class BERTClass(torch.nn.Module):
         elif self.mode == 'embedding':
             output = self.l1(ids, attention_mask = mask, token_type_ids = token_type_ids)
             embeddings = output.last_hidden_state.detach().cpu()
-            return embeddings
+            return embeddings[:,0]

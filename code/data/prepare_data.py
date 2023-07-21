@@ -71,21 +71,32 @@ def prepare_dataset(args):
     
     item_data['item_id'] = item_data['item_id'].astype(int).astype('category')
     
+    item_data = fill_vectors(item_data, '/opt/ml/wine/data/wine_vector.json')
+    wine_vectors = []
+
+    for vector in item_data['vectors']: wine_vectors.append(vector)
+    wine_vectors = np.array(wine_vectors)
+
+
     inter = pd.read_csv('/opt/ml/wine/data/review_df_total.csv', 
                                       encoding='utf-8-sig',
                                       usecols = ['uid','rating','date','item_id'])
     inter['item_id'] = inter['item_id'].astype(int).astype('category')
     inter['uid'] = inter['uid'].astype('category')
+    
+    inter = data_to_normal(inter,'email','timestamp','rating','wine_id')
 
     item_data = parallel(item_preprocess, item_data, args, num_cpu)
     inter = parallel(inter_preprocess, inter, args, num_cpu)
-  
+    
+    item_data.drop_duplicates(subset='item_id', keep='first', inplace=True)
+    columns_to_check = item_data.columns.drop('item_id')
+    item_data.dropna(subset=columns_to_check, how='all', inplace=True)
+
     item2idx, user2idx, idx2item, idx2user = load_index_file()
 
     inter.drop_duplicates(inplace = True)
     ####추가
-
-    feature_engineering()
     if args.expand_notes:
         item_data.to_csv('/opt/ml/wine/data/item_data_expand.csv', encoding='utf-8-sig', index=False)
     else:
@@ -147,9 +158,6 @@ def save_atomic_file(train_data, user_data, item_data):
     outpath = f"/opt/ml/winery/dataset/{dataset_name}"
     os.makedirs(outpath, exist_ok=True)
     import pandas as pd
-
-
-    
 
     train_data.to_csv(os.path.join(outpath,"train_data.inter"),sep='\t',index=False, encoding='utf-8')
     item_data.to_csv(os.path.join(outpath,"train_data.item"),sep='\t',index=False, encoding='utf-8')

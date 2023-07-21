@@ -4,6 +4,7 @@ import joblib
 import ast
 from joblib import Parallel, delayed
 import pandas as pd
+from pandas import DataFrame
 import numpy as np
 import joblib
 import ast
@@ -14,6 +15,8 @@ from tqdm import tqdm
 import os, pdb
 from datetime import datetime
 import pickle
+from collections import defaultdict, deque
+import re
 
 def drop_columns(df):
     to_drop = ['Red Fruit','Tropical','Tree Fruit','Oaky',
@@ -223,7 +226,7 @@ def item_preprocess(df, args):
     map_all_single_features(df)
     df = map_all_list_features(df, args)
     #df = expand_notes(df, args)
-
+    df['vectors'] = df['vectors'].apply(lambda x: " ".join(x))
     return df
 
 def inter_preprocess(df, args):
@@ -297,8 +300,6 @@ def to_recbole_columns(columns):
     return recbole_columns
 
 
-
-
 def afterprocessing(sub,train):
     # 날짜를 datetime 형식으로 변환
     new_train = train.copy()
@@ -319,9 +320,127 @@ def afterprocessing(sub,train):
     sub = sub.groupby('user').head(10)[['user','item']]
     return sub
 
+def keep_only_english(text):
+    try:
+        english_text = re.sub(r'[^a-zA-Z\s]', '', text)
+        return english_text.lower().strip()
+    except: return None
+
+def find_vectors(columns_name : deque, grouped_vectors: DataFrame):
+    column, name = columns_name.popleft()
+    if name is not None:
+        grouped_vectors = grouped_vectors.query(f"{column} == '{name}'")
+        if columns_name:
+            vector = find_vectors(columns_name, grouped_vectors.drop(column,axis = 1))
+        else: 
+            vector = grouped_vectors.vectors.mean()
+            
+        return vector
+    else:
+        return grouped_vectors.vectors.mean()
+    
+def get_item_vector(df, vector_path):
+    with open(vector_path,'r') as f: 
+        vectors = json.load(f)
+    vector_list = []
+
+    for id in tqdm(df.item_id):
+        id = str(id)
+        if id in vectors.keys():
+            vector_list.append(np.array(vectors[id]))
+        else:
+            vector_list.append(None)
+    df['vectors'] = vector_list
+    return df
+
+def fill_vectors(df : DataFrame, vector_path: str):
+    df = get_item_vector(df, vector_path)
+
+    for col in ['country','region', 'winetype', 'wine_style']:
+        df[col] = df[col].apply(keep_only_english)
+    
+    vector_item = df[df.vectors.isna()==False]
+
+    grouped_vectors = vector_item.groupby([
+        'country',
+        'region', 
+        'winetype',
+        'wine_style'
+    ]).agg({'vectors': 'mean'}).reset_index()
+
+    non_vectors = df[df['vectors'].isna()==True]
+    non_vectors_cols = list(grouped_vectors.columns)
+    non_vectors_cols.append('item_id')
+    non_vectors = non_vectors.loc[:, non_vectors_cols]
+
+    vectors = []
+    for index, row in tqdm(non_vectors.iterrows()):
+        columns_name = deque()
+
+        for column, name in zip(row.keys(), row.values):
+            if column != 'vectors':
+                columns_name.append((column, name))
+            else: break
+        vector = find_vectors(columns_name, grouped_vectors)
+        vectors.append(vector)
+    
+    non_vectors['vectors'] = vectors
+    not_filled = non_vectors[non_vectors['vectors'].isna()==True]
+    filled = non_vectors[non_vectors['vectors'].isna()==False]
+    mean_vector = filled['vectors'].mean()
+    
+    not_filled['vectors'] = [ mean_vector for _ in range(len(not_filled))]
+    filled_total = pd.concat([filled, not_filled], axis=0)
+
+    no_vectors = df[df['vectors'].isna()==True]
+    no_vectors.drop('vectors',axis = 1, inplace = True)
+    yes_vectors = df[df['vectors'].isna()==False]
+
+    no_vectors.reset_index(drop = True, inplace = True)
+    filled_total.reset_index(drop = True, inplace = True)
+    no_vectors = no_vectors.sort_values(by='item_id', ascending=False)
+    filled_total = filled_total.sort_values(by='item_id', ascending=False)
+    no_vectors.set_index('item_id', inplace = True)
+    no_vectors['item_id'] = no_vectors.index
+    yes_vectors['item_id'] = yes_vectors.index
+
+    filled_total.set_index('item_id', inplace = True)
+    filled_total['item_id'] = filled_total.index
+
+    no_vectors['vectors'] = filled_total['vectors']
+    no_vectors.reset_index(drop = True, inplace = True)
+    yes_vectors.reset_index(drop = True, inplace = True)
+
+    item_data_with_vectors = pd.concat([no_vectors,yes_vectors], axis=0)
+
+    item_data_with_vectors = item_data_with_vectors.sort_values(by='item_id', ascending=True).reset_index(drop = True)
+    return item_data_with_vectors
+
+import pandas as pd
 
 
-def feature_engineering():
-    ### 추가
-    return 
+##data_to_normal(data,'email','timestamp','rating','wine_id')
+def data_to_normal(data,user_id,timestamp,rating,wine_id):
+    grouped_data = data.groupby(user_id)[rating].agg(['mean', 'std','count'])
+
+    # 여러개 구매한 유저
+    other_user = grouped_data[(grouped_data['count']>=5) & (grouped_data['std'] != 0)]
+
+    other_user
+
+    other_userlist = list(other_user.index)
+
+    other_user_data = data[data[user_id].isin(other_userlist)].sort_values(by=user_id)
+    other_user_data
+
+    other_data = pd.merge(other_user_data,other_user, on =user_id,how='left')
+
+    other_data = other_data.set_index(other_user_data.index)
+
+    other_data['scaled_rating'] = (other_data[rating]-other_data['mean'])/other_data['std']
+    print(other_data['scaled_rating'].quantile(0.75))
+    result = other_data[['_id',user_id,timestamp,'scaled_rating',wine_id]]
+    result.rename(columns = {'scaled_rating':'rating'})
+    return result
+
 
