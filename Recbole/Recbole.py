@@ -8,8 +8,6 @@ from tqdm import tqdm
 from args import parse_args
 from logging import getLogger
 import torch
-
-from recbole.model.general_recommender.multivae import MultiVAE
 from recbole.quick_start import run_recbole
 
 from recbole.config import Config
@@ -28,14 +26,6 @@ def run(args):
 def main(args):
     # 메모리 부족 문제 해결을 위해 CUDA 캐시 비우기
     torch.cuda.empty_cache()
-    
-#     config_file_list=['/opt/ml/backend/Recbole/general.yaml']
-#     model=args.model_name
-#     dataset='train_data'
-#     config = Config(model=model, dataset=dataset, config_file_list=config_file_list)
-#     dataset = create_dataset(config)
-    
-#     train_data, valid_data, test_data = data_preparation(config, dataset)
     # run
     print(f"running {args.model_name}...")
     start = time.time()
