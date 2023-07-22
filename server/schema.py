@@ -39,6 +39,10 @@ class UserCreate(BaseModel):
     #     if 'password1' in values and v != values['password1']:
     #         raise HTTPException(status_code=404, detail=f"비밀번호가 일치하지 않습니다")
     # uid :UUID = Field(default_factory=uuid4)
+class CheckInteraction(BaseModel):
+    email : EmailStr
+    wine_id : int
+
 class UserInteraction(BaseModel):
     email : EmailStr
     wine_id : int

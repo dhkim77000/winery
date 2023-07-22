@@ -52,5 +52,53 @@ async def check_rating_datas(user_email,wine,db):
 
     return json_result
 
+async def rating_push(collection, email, wine_id, rating, timestamp):
+    try:
+        # data = [
+        # {'uid': 1, 'timestamp': int(datetime.now().timestamp()), 'rating': 4.5, 'wine_id': 1},
+        # {'uid': 2, 'timestamp': int(datetime.now().timestamp()), 'rating': 3.8, 'wine_id': 2},
+        # {'uid': 1, 'timestamp': int(datetime.now().timestamp()), 'rating': 5.0, 'wine_id': 5}
+        # ]
+        timestamp = int(datetime.now().timestamp())
+        data = {'email': email, 'timestamp': timestamp, 'rating': rating, 'wine_id':  wine_id}
+        #pdb.set_trace()
+        #collection.insert_many(data)
+        collection.insert_one(data)
+        return True
+    except Exception as e:
+        print(e)
+        return False
+    
+
+async def rating_update(collection, email, wine_id, rating, timestamp):
+    try:
+        timestamp = int(datetime.now().timestamp())
+        update_data = {
+        '$set': {
+            'timestamp': timestamp,
+            'rating': rating
+        }
+    }
+        result = collection.update_many({'email': email, 'wine_id': wine_id}, update_data)
+        
+        return result
+    except Exception as e:
+        print(e)
+        return False
+    
+
+
+async def rating_delete(collection, email, wine_id):
+    try:
+        result = await collection.delete_many({'email': email, 'wine_id': wine_id})       
+        count = result.deleted_count
+        
+        return count
+    
+    except Exception as e:
+        print(e)
+        return False
+    
+
 
 

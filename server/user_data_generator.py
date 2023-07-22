@@ -16,7 +16,6 @@ import copy
 
 from uuid import UUID, uuid4
 import models, database, crud
-from function import delete_table
 
 pd.set_option('mode.chained_assignment', None)
 # user
@@ -33,7 +32,12 @@ pd.set_option('mode.chained_assignment', None)
 # ['3', '4.0', '2022-05-16 00:00:00', '65527']
 
 
-
+def delete_table(cursor, table_name):
+    
+    # 기존 테이블 삭제 (선택사항)
+    #cursor = conn.cursor()
+    cursor.execute(f'DROP TABLE IF EXISTS "{table_name}";')
+    cursor.close()
 
 
 

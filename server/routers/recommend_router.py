@@ -148,7 +148,7 @@ async def get_wine_to_recbole(db: connection = Depends(get_conn)):
     
     result_df['grape'] = result_df['grape'].apply(string_data)
     result_df['pairing'] = result_df['pairing'].apply(string_data)
-    result_df.to_csv("/opt/ml/server/winery/server/data/sample_itemdata_to_recbole.csv",index = False)
+    result_df.to_csv("/opt/ml/server/winery/server/data/sample_itemdata_to_recbole.csv",index = False,encoding='utf-8-sig')
     
     return "save file : '/opt/ml/server/winery/server/data/sample_itemdata_to_recbole.csv'"
 ""
@@ -157,10 +157,11 @@ async def get_wine_to_recbole(db: connection = Depends(get_conn)):
 async def preprocess_user_interaction(db: Database = Depends(get_mongo_db)):
     answer = input("csv 불러올건가요 yes or no")
     # 예시로 for 루프를 사용하여 가상의 데이터를 생성하고 처리합니다.
-    if answer == "yes":
+    pdb.set_trace()
+    if answer == 'yes':
         print("train_data.inter 파일 불러오기")
         file_path_inter = '/opt/ml/server/winery/server/data/train_data.inter' 
-        train_data_inter = pd.read_csv(file_path_inter, sep='\t')
+        train_data_inter = pd.read_csv(file_path_inter, sep='\t',encoding='utf-8-sig')
         ####
         #train_data_inter= train_data_inter[:5]
         print("done")
@@ -175,19 +176,19 @@ async def preprocess_user_interaction(db: Database = Depends(get_mongo_db)):
 
 async def rating_data_generator(train_data_inter,db,answer):
     #pdb.set_trace()
-    
+    pdb.set_trace()
     # 예시로 for 루프를 사용하여 가상의 데이터를 생성하고 처리합니다.
-    if answer == "yes":
-        for idx in range(train_data_inter.shape[0]):
-            result = train_data_inter.iloc[idx,:]
-            user_interaction = UserInteraction(
-                email = "example@example.com",
-                wine_id = result['item_id:token'],
-                timestamp = result['timestamp:float'],
-                rating = result['user_rating:float']
-            )
-            # 비동기 함수를 호출합니다.
-            push = await update_rating(user_interaction, db)
+
+    for idx in range(train_data_inter.shape[0]):
+        result = train_data_inter.iloc[idx,:]
+        user_interaction = UserInteraction(
+            email = f"user_{result['user_id:token']}@example.com",
+            wine_id = result['item_id:token'],
+            timestamp = result['timestamp:float'],
+            rating = result['user_rating:float']
+        )
+        # 비동기 함수를 호출합니다.
+        push = await update_rating(user_interaction, db)
     
 
         
@@ -199,14 +200,14 @@ async def rating_data_generator(train_data_inter,db,answer):
         
         inter_column = ["_id","email","timestamp","rating","wine_id"]
         result_df = pd.DataFrame(all_rating_data, columns=inter_column)
-        result_df.to_csv("/opt/ml/server/winery/server/data/sample_all_rating_data_to_recbole.csv", index = False)
+        result_df.to_csv("/opt/ml/server/winery/server/data/sample_all_rating_data_to_recbole.csv", index = False, encoding='utf-8-sig')
         return "save all data : '/opt/ml/server/winery/server/data/sample_all_rating_data_to_recbole.csv'"
     
     else:
         rating_datas = await get_rating_datas(numbers,db)
         inter_column = ["_id","email","timestamp","rating","wine_id"]
         result_df = pd.DataFrame(rating_datas, columns=inter_column)
-        result_df.to_csv("/opt/ml/server/winery/server/data/sample_rating_data_to_recbole.csv", index = False)
+        result_df.to_csv("/opt/ml/server/winery/server/data/sample_rating_data_to_recbole.csv", index = False, encoding='utf-8-sig')
         return "save all data : '/opt/ml/server/winery/server/data/sample_rating_data_to_recbole.csv'"
         
 

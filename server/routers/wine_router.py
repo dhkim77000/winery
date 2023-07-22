@@ -2,9 +2,9 @@ from fastapi import FastAPI, Form, Request, Response
 from fastapi import APIRouter , Depends
 from psycopg2.extensions import connection
 from database import get_db, get_conn, get_mongo_db
-from crud import get_wine_data,get_wine_data_simple,get_user, search_wine_by_name, rating_update
-from crud_mongo import check_rating_datas
-from schema import UserAdd , Usertype, UserInteraction
+from crud import get_wine_data,get_wine_data_simple,get_user, search_wine_by_name
+from crud_mongo import check_rating_datas, rating_update , rating_push, rating_delete
+from schema import UserAdd , Usertype, UserInteraction,CheckInteraction
 from uuid import UUID, uuid4
 from function import get_top_10_items
 from typing import List, Optional
@@ -71,15 +71,15 @@ async def post_wine_simpleinfo(user_wine: Usertype, db: connection = Depends(get
     wine_id_list = db_user.wine_list
     type1,type2 = {},{}
     popular_wines = get_top_10_items()
-    if user_wine.type == 'type1':
+    if user_wine.type == '인기순':
         for wine_id in popular_wines:
-            popular_wine =  await get_wine_data_simple(db=db, wine_id=wine_id)
+            popular_wine =  await get_wine_data(db=db, wine_id=wine_id)
             type1[wine_id] = popular_wine
         return type1
     
-    elif user_wine.type == 'type2':
+    elif user_wine.type == '추천순':
         for wine_id in wine_id_list:
-            recommend_wine = await get_wine_data_simple(db=db, wine_id=wine_id)
+            recommend_wine = await get_wine_data(db=db, wine_id=wine_id)
             # 여기서 추천순 기준 wines 딕셔너리에 추가합니다.
             type2[wine_id] = recommend_wine
         return type2
@@ -96,12 +96,22 @@ async def update_rating(user_interaction: UserInteraction,
     rating = user_interaction.rating
     timestamp = user_interaction.timestamp
     
-    push = await rating_update(collection, email, wine_id, rating, timestamp)
-    return push
+
+    search_result = check_rating_datas(email,wine_id,db)
+
+    if search_result == "[]":
+        push = await rating_push(collection, email, wine_id, rating, timestamp)
+        return f"push date complete : {push}"
+    else:
+        count = await rating_delete(collection, email, wine_id)
+        if count == 0 :
+            count = False
+        push = await rating_push(collection, email, wine_id, rating, timestamp)
+        return f"delete {count} and push : {push}"
 
 
 @router.post("/rating_check")
-async def update_rating(check: UserInteraction, 
+async def rating_check(check: CheckInteraction, 
                         db: Database = Depends(get_mongo_db)):
     
     #wine_id = user_inter.wine_id
@@ -109,8 +119,9 @@ async def update_rating(check: UserInteraction,
     wine = check.wine_id
     search_result = await check_rating_datas(email,wine,db)
     #pdb.set_trace()
-    if search_result:
-
+    
+    if search_result == "[]":
+        return 0
+    else: 
         return search_result
-    else:
-        return {'rating' : 0}
+    
