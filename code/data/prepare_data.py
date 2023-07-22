@@ -51,7 +51,7 @@ def prepare_dataset(args):
         'house', 
 
         'country', 'region1', 
-        'winetype',  'wine style', 'grape','vintage',
+        'winetype',  'wine_style', 'grape','vintage',
 
        'price', 'wine_rating', 'num_votes', 
        'pairing',
@@ -65,42 +65,67 @@ def prepare_dataset(args):
        'Soft','Acidic',
        'Fizzy', 'Gentle']
     
-    item_data = pd.read_csv('/opt/ml/wine/data/item_df_allfeature.csv',
+    item_data = pd.read_csv('/opt/ml/wine/data/item_data_sample.csv',
                             encoding= 'utf-8-sig',
                             usecols = item_data_cols)
     
-    item_data['item_id'] = item_data['item_id'].astype(int).astype('category')
-    
-    item_data = fill_vectors(item_data, '/opt/ml/wine/data/wine_vector.json')
-    wine_vectors = []
+    item_data.rename(columns = {'item_id':'wine_id'}, inplace= True)
+    item_data = item_data.dropna(subset=['wine_id'], axis=0)
 
-    for vector in item_data['vectors']: wine_vectors.append(vector)
-    wine_vectors = np.array(wine_vectors)
+    item_data['wine_id'] = item_data['wine_id'].astype(int).astype('category')
 
-
-    inter = pd.read_csv('/opt/ml/wine/data/review_df_total.csv', 
+    inter = pd.read_csv('/opt/ml/wine/data/inter_sample.csv', 
                                       encoding='utf-8-sig',
-                                      usecols = ['uid','rating','date','item_id'])
-    inter['item_id'] = inter['item_id'].astype(int).astype('category')
-    inter['uid'] = inter['uid'].astype('category')
+                                      usecols = ['email','rating','timestamp','wine_id'])
     
-    inter = data_to_normal(inter,'email','timestamp','rating','wine_id')
+    inter = inter.dropna(subset=['wine_id'], axis=0)
+    inter['wine_id'] = inter['wine_id'].astype(int).astype('category')
+    inter = inter[inter['wine_id'].isin(item_data['wine_id'])]
+
+    users = inter['email'].unique()
+    user2idx = {feature: index for index, feature in enumerate(users)}
+    idx2user = {index: feature for index, feature in enumerate(users)}
+    with open('/opt/ml/wine/code/data/feature_map/user2idx.json','w') as f: json.dump(user2idx,f)
+    with open('/opt/ml/wine/code/data/feature_map/idx2user.json','w') as f: json.dump(idx2user,f)
 
     item_data = parallel(item_preprocess, item_data, args, num_cpu)
     inter = parallel(inter_preprocess, inter, args, num_cpu)
-    
-    item_data.drop_duplicates(subset='item_id', keep='first', inplace=True)
-    columns_to_check = item_data.columns.drop('item_id')
+    inter = data_to_normal(inter,'email','timestamp','rating','wine_id')
+
+    item_data.drop_duplicates(subset='wine_id', keep='first', inplace=True)
+    columns_to_check = item_data.columns.drop('wine_id')
     item_data.dropna(subset=columns_to_check, how='all', inplace=True)
+
+    
+
+
+    if args.with_vector == 1:
+        item_data = fill_vectors(item_data, args.wine_vector)
+        
+        wine_vectors = []
+        for vector in item_data['vectors']: 
+            wine_vectors.append(vector)
+        wine_vectors = np.array(wine_vectors)
+
+        item_data.set_index('wine_id', inplace= True)
+        item_data['wine_id'] = item_data.index
+        for id in tqdm(item_data.index):
+            item_data = find_most_sim_item(item_data, id, wine_vectors)
+
+        print(item.data.isnull().sum())
+        item_data['vectors'] = item_data['vectors'].apply(lambda x: " ".join(x))
 
     item2idx, user2idx, idx2item, idx2user = load_index_file()
 
+
     inter.drop_duplicates(inplace = True)
+
     ####추가
     if args.expand_notes:
         item_data.to_csv('/opt/ml/wine/data/item_data_expand.csv', encoding='utf-8-sig', index=False)
     else:
         item_data.to_csv('/opt/ml/wine/data/item_data.csv', encoding='utf-8-sig', index=False)
+
     inter.to_csv('/opt/ml/wine/data/inter.csv', encoding='utf-8-sig', index=False)
 
 
@@ -112,9 +137,9 @@ def prepare_dataset(args):
     inter.rename(columns={'rating': 'user_rating','date': 'timestamp'}, inplace=True)
 
 
-    train_rating = pd.merge(inter.loc[:,['uid','user_rating','timestamp','item_id']],
-                            item_data.loc[:, 'item_id'],
-                            on = 'item_id', how = 'inner')
+    train_rating = pd.merge(inter.loc[:,['uid','user_rating','timestamp','wine_id']],
+                            item_data.loc[:, 'wine_id'],
+                            on = 'wine_id', how = 'inner')
 
     train_rating.to_csv('/opt/ml/wine/data/train_rating.csv', encoding='utf-8', index=False)
     user_data.to_csv('/opt/ml/wine/data/user_data.csv', encoding='utf-8', index=False)
@@ -143,10 +168,10 @@ def save_atomic_file(train_data, user_data, item_data):
     dataset_name = 'train_data'
     # train_data 컬럼명 변경
 
-    train_data['item_id'] = train_data['item_id'].astype(int).astype('category')
+    train_data['wine_id'] = train_data['wine_id'].astype(int).astype('category')
     train_data['user_id'] = train_data['user_id'].astype(int).astype('category')
 
-    item_data['item_id'] = item_data['item_id'].astype(int).astype('category')
+    item_data['wine_id'] = item_data['wine_id'].astype(int).astype('category')
     
     user_data['user_id'] = user_data['user_id'].astype(int).astype('category')
 
@@ -170,6 +195,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--expand_notes", default=False, type=bool)
+    parser.add_argument("--with_vector", default=1, type=int)
+    parser.add_argument("--wine_vector", default='/opt/ml/wine/data/wine_vector.json', type = str)
     parser.add_argument("--prepare_recbole", default=True, type=bool)
     args = parser.parse_args()
 

@@ -37,8 +37,10 @@ from dataset import MultilabelDataset
 from transformers import BertForMaskedLM, pipeline
 from torch import cuda
 import csv
+import multiprocessing as mp
 import ast
 from transformers import Trainer, TrainingArguments, AutoTokenizer
+from multiprocessing import Manager, Pool
 
 def get_label_num():
     #model = BERTClass(num_labels= )
@@ -82,116 +84,127 @@ def get_label_num():
 def list2array(x):
     return np.array(ast.literal_eval(x), dtype=np.int8)
 
-def get_embedding(df, args):
+def get_embedding_multilabel(df, vector_dic, args):
 
     device = torch.device("cuda")
     df.reset_index(inplace = True)
     review_vectors = {}
 
-    if args.mode == 'total':
-        
 
-        model = BERTClass(
-            num_labels= get_label_num(),
-            mode = 'embedding'
-            )
-        
-
-        model.load_state_dict(torch.load(args.model_path))
-        model.to(device)
-
-
-        tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
-
-        params = {'batch_size': args.batch_size,
-                    'shuffle': False,
-                    'num_workers': 0
-                    }
-        
-        dataset = MultilabelDataset('inference',df, None, tokenizer, args.max_len)
-        data_loader = DataLoader(dataset, **params)
-        vector_dic = defaultdict(list)
-        with torch.no_grad():
-            for data in tqdm(data_loader):
-                ids = data['ids'].to(args.device, dtype = torch.long)
-                mask = data['mask'].to(args.device, dtype = torch.long)
-                token_type_ids = data['token_type_ids'].to(args.device, dtype = torch.long)
-                wine_ids = data['wine_ids'].tolist()
-                outputs = model(ids, mask, token_type_ids)
-                for id, vector in zip(wine_ids, outputs):
-                    if str(id) not in vector_dic:
-                        vector_dic[str(id)] = {'count': 1, 'mean': vector}
-                    else:
-                        vector_dic[str(id)]['count'] += 1
-                        vector_dic[str(id)]['mean'] += (vector - vector_dic[str(id)]['mean']) / vector_dic[str(id)]['count']
-                    del vector
-                    gc.collect()
-                    
-                del outputs
-                del ids, mask, token_type_ids, wine_ids
-                gc.collect()
-
-        pdb.set_trace()
-
-    else:
-        tokenizer = BertTokenizerFast(
-            vocab_file='/opt/ml/wine/code//text/models/review_tokenizer-vocab.txt',
-            max_len=156,
-            do_lower_case=True
-            )
-        
-        model = BertModel.from_pretrained('/opt/ml/wine/code/text/models/model_output')
-        model.to(device)
-
-        with torch.no_grad():
-
-            for i in tqdm(range(len(df))):
-                reviews = df['text'][i].split('.')[:500]
-                id = str(df['wine_id'][i])
-                review_vector = []
-                for text in tqdm(reviews):
-                    try:
-                        encoded_input = tokenizer.encode_plus(
-                            text, 
-                            truncation = True,
-                            add_special_tokens=True, 
-                            return_tensors='pt')
-                        for key in encoded_input:
-                            encoded_input[key] = encoded_input[key].to(device)
-
-                        model_output = model(**encoded_input)
-                    
-                        embeddings = model_output.last_hidden_state.detach().cpu()
-                        sentence_embedding = torch.mean(embeddings[0], dim=0)
-                        review_vector.append(sentence_embedding)
-                        del embeddings
-                        del model_output
-                        del encoded_input
-                        gc.collect()
-                    except: 1
-                mean_vector = torch.mean(torch.stack(review_vector), dim=0).numpy()
-                del review_vector
-                del sentence_embedding
-                gc.collect()
-                review_vectors[id] = mean_vector
-            
-    return review_vectors
+    model = BERTClass(
+        num_labels= get_label_num(),
+        mode = 'embedding'
+        )
     
 
+    model.load_state_dict(torch.load(args.model_path))
+    model.to(device)
+
+
+    tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
+
+    params = {'batch_size': args.batch_size,
+                'shuffle': False,
+                'num_workers': 0
+                }
+    
+    dataset = MultilabelDataset('inference',df, None, tokenizer, args.max_len)
+    data_loader = DataLoader(dataset, **params)
+    vector_dic = defaultdict(list)
+    with torch.no_grad():
+        for data in tqdm(data_loader):
+            ids = data['ids'].to(args.device, dtype = torch.long)
+            mask = data['mask'].to(args.device, dtype = torch.long)
+            token_type_ids = data['token_type_ids'].to(args.device, dtype = torch.long)
+            wine_ids = data['wine_ids'].tolist()
+            outputs = model(ids, mask, token_type_ids)
+            for id, vector in zip(wine_ids, outputs):
+                if str(id) not in vector_dic:
+                    vector_dic[str(id)] = {'count': 1, 'mean': vector}
+                else:
+                    vector_dic[str(id)]['count'] += 1
+                    vector_dic[str(id)]['mean'] += (vector - vector_dic[str(id)]['mean']) / vector_dic[str(id)]['count']
+                del vector
+                del id
+                gc.collect()
+                
+            del outputs
+            del ids, mask, token_type_ids, wine_ids
+            gc.collect()
+    return vector_dic
+
+
+def get_embedding_MLM(df, args):
+
+    device = torch.device("cuda")
+    df.reset_index(inplace = True)
+    review_vectors = {}
+
+    tokenizer = BertTokenizerFast(
+                vocab_file='/opt/ml/wine/code//text/models/review_tokenizer-vocab.txt',
+                max_len=156,
+                do_lower_case=True
+                )
+            
+    model = BertModel.from_pretrained('/opt/ml/wine/code/text/models/model_output')
+    model.to(device)
+
+    with torch.no_grad():
+
+        for i in tqdm(range(len(df))):
+            reviews = df['text'][i].split('.')[:500]
+            id = str(df['wine_id'][i])
+            review_vector = []
+            for text in tqdm(reviews):
+                try:
+                    encoded_input = tokenizer.encode_plus(
+                        text, 
+                        truncation = True,
+                        add_special_tokens=True, 
+                        return_tensors='pt')
+                    for key in encoded_input:
+                        encoded_input[key] = encoded_input[key].to(device)
+
+                    model_output = model(**encoded_input)
+                
+                    embeddings = model_output.last_hidden_state.detach().cpu()
+                    sentence_embedding = torch.mean(embeddings[0], dim=0)
+                    review_vector.append(sentence_embedding)
+                    del embeddings
+                    del model_output
+                    del encoded_input
+                    gc.collect()
+                except: 1
+            mean_vector = torch.mean(torch.stack(review_vector), dim=0).numpy()
+            del review_vector
+            del sentence_embedding
+            gc.collect()
+            review_vectors[id] = mean_vector
+            
+    return review_vectors
 
 def parallel_embedding(df, args, num_cpu):
 
+
     chunks = np.array_split(df, num_cpu)
+    if args.mode == 'total':
+        manager = Manager()
+        vector_dic = manager.dict()
+        print('Parallelizing with ' + str(num_cpu)+ 'cores')
+        with Parallel(n_jobs = num_cpu, backend="multiprocessing") as parallel:
+            results = parallel(delayed(get_embedding_multilabel)(chunks[i], vector_dic, args) for i in range(num_cpu))
+        pdb.set_trace()
 
-    print('Parallelizing with ' + str(num_cpu)+ 'cores')
-    with Parallel(n_jobs = num_cpu, backend="multiprocessing") as parallel:
-        results = parallel(delayed(get_embedding)(chunks[i], args) for i in range(num_cpu))
+    else:
+        print('Parallelizing with ' + str(num_cpu)+ 'cores')
+        with Parallel(n_jobs = num_cpu, backend="multiprocessing") as parallel:
+            results = parallel(delayed(get_embedding_MLM)(chunks[i], args) for i in range(num_cpu))
 
-    for i,data in enumerate(results):
-        if i == 0:
-            output = data
-        else:
-            output.update(data)
+        for i,data in enumerate(results):
+            if i == 0:
+                output = data
+            else:
+                output.update(data)
 
     return output
 
@@ -205,11 +218,16 @@ if __name__ == '__main__':
                         type=str)
     parser.add_argument("--data", default='/opt/ml/wine/data/review_df_total.csv', type=str)
     parser.add_argument("--max_len", default = 152, type=int)
-    parser.add_argument("--batch_size", default = 128, type=int)
+    parser.add_argument("--batch_size", default = 32, type=int)
     parser.add_argument("--device", default = 'cuda' if cuda.is_available() else 'cpu', type=str)
+    print('cuda' if cuda.is_available() else 'cpu')
 #######Data#############################################################################
+    
+    
+    
+    #mp.set_start_method('spawn')
+    torch.multiprocessing.set_start_method('spawn')
 
-    #review_vectors = get_embedding(merged_reviews)
     args = parser.parse_args()
     data = pd.read_csv(args.data, encoding= 'utf-8-sig')
     with open('/opt/ml/wine/code/data/feature_map/item2idx.json','r') as f:
@@ -218,8 +236,8 @@ if __name__ == '__main__':
         data['wine_id'] = data['wine_url'].map(item2idx)
         data = data[data['wine_id'].isna()==False]
         data.reset_index(drop=True, inplace=True)
-    #review_vectors = parallel_embedding(data, 8)
-    get_embedding(data, args)
+    review_vectors = parallel_embedding(data, args, 8)
+    #get_embedding(data, args)
 
     try:
         for key in tqdm(review_vectors): review_vectors[key] = review_vectors[key].tolist()
