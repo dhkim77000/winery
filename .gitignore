@@ -17,3 +17,4 @@
 *.log
 *.txt
 *.pyc
+*.ipynb_checkpoints
