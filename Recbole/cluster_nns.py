@@ -4,6 +4,8 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import faiss
+import pandas as pd
+from tqdm import tqdm
 
 def get_nns(user : str,
             inter_per_user : pd.DataFrame,
