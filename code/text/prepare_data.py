@@ -27,7 +27,7 @@ import nltk
 
 def main(args):
     nltk.data.path.append('/opt/ml/wine/code/nltk_data')
-
+    tqdm.pandas()
     # Now download the punkt tokenizer data
     nltk.download('punkt')
     print('-------------------Reading Datas-------------------')
@@ -54,14 +54,14 @@ def main(args):
         if args.run == 0:
             print('-------------------Processing review text-------------------')
             review_df = review_df[review_df['text'].isna()==False]
-            review_df['text'] = review_df['text'].apply(lambda x: x + '.' if x[-1] != '.' else x)
+            review_df['text'] = review_df['text'].progress_apply(lambda x: x + '.' if x[-1] != '.' else x)
 
-            review_df['text'] = review_df['text'].apply(keep_english_and_digits)
+            review_df['text'] = review_df['text'].progress_apply(keep_english_and_digits)
             review_df['wine_id'] = review_df['wine_url'].map(item2idx)
             review_df = review_df[review_df['wine_id'].isna()==False]
             review_df['wine_id'] = review_df['wine_id'].astype('int').astype('category')
             review_df = review_df[review_df['wine_id'].isin(wine_ids)]
-            review_df['length'] = review_df['text'].apply(get_len_text)
+            review_df['length'] = review_df['text'].progress_apply(get_len_text)
             review_df = review_df.loc[:, ['wine_id','text','length']]
 
             review_df = review_df.sort_values(['wine_id', 'length'])
@@ -74,8 +74,8 @@ def main(args):
         review_df = pd.read_csv('/opt/ml/wine/data/review_df_total.csv',encoding = 'utf-8-sig').loc[:,['user_url','rating','text','wine_url']]
 
         review_df = review_df[review_df['text'].notna()]
-        review_df['text'] = review_df['text'].apply(lambda x: x + '.' if x[-1] != '.' else x)
-        review_df['text'] = review_df['text'].apply(keep_english_and_digits)
+        review_df['text'] = review_df['text'].progress_apply(lambda x: x + '.' if x[-1] != '.' else x)
+        review_df['text'] = review_df['text'].progress_apply(keep_english_and_digits)
         review_df['wine_id'] = review_df['wine_url'].map(item2idx)
         review_df = review_df[review_df['wine_id'].isna()==False]
         review_df['wine_id'] = review_df['wine_id'].astype('int').astype('category')
@@ -83,8 +83,8 @@ def main(args):
         review_df = review_df[review_df['wine_id'].isin(wine_ids)]
 
         review_df = review_df[review_df['text'].notna()]
-        review_df['length'] = review_df['text'].apply(get_len_text)
-        review_df['en'] = review_df['text'].apply(is_mostly_english)
+        review_df['length'] = review_df['text'].progress_apply(get_len_text)
+        review_df['en'] = review_df['text'].progress_apply(is_mostly_english)
         review_df = review_df[review_df['en'] == True]
         review_df.drop('en', axis = 1, inplace = True)
         review_df = review_df.loc[:, ['wine_id','text','length']]
