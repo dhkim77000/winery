@@ -216,7 +216,7 @@ if __name__ == '__main__':
     parser.add_argument("--model_path", 
                         default='/opt/ml/wine/code/text/models/model_outputmodel_state_dict_4.pt', 
                         type=str)
-    parser.add_argument("--data", default='/opt/ml/wine/data/review_df_total.csv', type=str)
+    parser.add_argument("--data", default='/opt/ml/wine/data/review_df_cleaned.csv', type=str)
     parser.add_argument("--max_len", default = 152, type=int)
     parser.add_argument("--batch_size", default = 32, type=int)
     parser.add_argument("--device", default = 'cuda' if cuda.is_available() else 'cpu', type=str)

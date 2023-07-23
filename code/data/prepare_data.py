@@ -64,7 +64,7 @@ def prepare_dataset(args):
        'Dry', 'Sweet',
        'Soft','Acidic',
        'Fizzy', 'Gentle']
-    
+
     item_data = pd.read_csv('/opt/ml/wine/data/item_data_sample.csv',
                             encoding= 'utf-8-sig',
                             usecols = item_data_cols)
@@ -112,8 +112,9 @@ def prepare_dataset(args):
         for id in tqdm(item_data.index):
             item_data = find_most_sim_item(item_data, id, wine_vectors)
 
-        print(item.data.isnull().sum())
-        item_data['vectors'] = item_data['vectors'].apply(lambda x: " ".join(x))
+        print(item_data.isnull().sum())
+
+        item_data['vectors'] = item_data['vectors'].apply(lambda x: " ".join(map(str, x))).str.replace('[', '').str.replace(']', '')
 
     item2idx, user2idx, idx2item, idx2user = load_index_file()
 
@@ -130,14 +131,14 @@ def prepare_dataset(args):
 
 
 
-    user_data = inter.groupby('uid').agg(count=('rating', 'count'), mean=('rating', 'mean')).reset_index()
+    user_data = inter.groupby('email').agg(count=('rating', 'count'), mean=('rating', 'mean')).reset_index()
 
     print(f'Total {len(item_data)} items, {len(user_data)} users, {len(inter)} interactions')
 
-    inter.rename(columns={'rating': 'user_rating','date': 'timestamp'}, inplace=True)
+    inter.rename(columns={'rating': 'user_rating'}, inplace=True)
 
 
-    train_rating = pd.merge(inter.loc[:,['uid','user_rating','timestamp','wine_id']],
+    train_rating = pd.merge(inter.loc[:,['email','user_rating','timestamp','wine_id']],
                             item_data.loc[:, 'wine_id'],
                             on = 'wine_id', how = 'inner')
 

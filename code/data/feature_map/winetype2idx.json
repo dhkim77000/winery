@@ -1,1 +1,1 @@
-{"White_wine": 0, "Red_wine": 1, "Dessert_wine": 2, "Sparkling_wine": 3, "Fortified_Wine": 4, "Rosé_wine": 5}
+{"Red_wine": 0, "White_wine": 1, "Rosé_wine": 2, "Sparkling_wine": 3, "Dessert_wine": 4, "Fortified_Wine": 5, "Empty": 6}

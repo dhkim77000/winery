@@ -506,14 +506,13 @@ def find_most_sim_item(df : DataFrame, to_fill_wine_id: int, wine_vectors : np.a
     wine_ids = list(df['wine_id'])
     vector_dimension = item_vector.shape[0]
 
-    index = faiss.IndexFlatL2(vector_dimension)
+    index = faiss.IndexFlatIP(vector_dimension)
     index = faiss.IndexIDMap2(index)
     index.add_with_ids(wine_vectors, wine_ids)
 
     # Faiss expects the query vectors to be normalized
     to_search = np.expand_dims(item_vector, axis=0)
     to_search = np.ascontiguousarray(to_search.astype(np.float32))
-    faiss.normalize_L2(to_search)
 
     k = index.ntotal
     distances, searched_wine_ids = index.search(to_search, k=20)
