@@ -16,7 +16,8 @@ export const logUserOut = async () => {
 
 const api = axios.create({
 	// baseURL: "http://49.50.160.134:30005/", // FastAPI 백엔드의 기본 URL을 여기에 입력합니다. 재성's 서버
-	baseURL: "http://101.101.216.159:30007", // 성호's 서버
+	// baseURL: "http://101.101.216.159:30007", // 성호's 서버
+	// baseURL: "http://118.67.134.105:30005" //영서's 서버
 });
 
 export const getApi = (endpoint) => {

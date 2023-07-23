@@ -124,7 +124,7 @@ export default function Mbti({navigation: {navigate}, route}) {
   );
   }
   else { // 전 sign 페이지로 back
-    navigation.goBack();
+    navigate.goBack();
   }
 
   

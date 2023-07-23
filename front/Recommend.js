@@ -59,7 +59,7 @@ export default function Recommend({navigation}) {
 	}
 
 	const isWinePress = (item) => { // 와인 눌렀을 때 상세페이지로 넘어가도록
-		console.log(item)
+		console.log(item.item_id)
 		navigation.navigate('WineInfo', {item: item})
 	}
 
@@ -71,14 +71,14 @@ export default function Recommend({navigation}) {
 				style={styles.content}
 			>
 			<Image style={styles.image} source={require('./assets/고라파덕.jpg')} />
-			<View style={{padding: 15}}>
+			<View style={{padding: 15, flexShrink:1}}>
 				<Text style={{fontSize: 18, marginBottom: 5}}>{item.name}</Text>
 				<View style={{flexDirection: "row", alignItems: 'center'}}>
 					<Icon name={'star'} size={15} color={"#000000"}/>
 					<Text style={{fontSize: 18, paddingLeft: 5}}>{item.wine_rating}</Text>
 				</View>
 				<View style={{flexDirection: "row", alignItems: "center"}}> 
-					<Text>{item.country},  {item.region}</Text>
+					<Text>{item.country},  {item.region1}</Text>
 				</View>
 				<View style={{flexDirection: "row", alignItems: "center", marginTop: 5}}> 
 					<Text>$ {item.price}</Text>
@@ -117,6 +117,7 @@ export default function Recommend({navigation}) {
 				keyExtractor={(item) => item.item_id}
 			>
 			</FlatList>
+			<View style={{height: 80}}/>
 		  </SafeAreaView>
 		</View>
 	);
