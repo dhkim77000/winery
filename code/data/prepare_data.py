@@ -136,8 +136,10 @@ def prepare_dataset(args):
 
     for col in columns_with_nan:
         if col in tok_columns:
+            item_data[col].fillna(item_data[col].mode().iloc[0], inplace= True)
             item_data[col] = item_data[col].replace('', 'other')
         elif col in seq_columns:
+            item_data[col].fillna(item_data[col].mode().iloc[0], inplace= True)
             item_data[col] = item_data[col].replace('', 'other')
         elif col in float_columns:
             item_data[col] = item_data[col].fillna(item_data[col].mean())

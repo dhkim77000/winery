@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import faiss
 import pandas as pd
 from tqdm import tqdm
-
+from collections import Counter
 def get_nns(user : str,
             inter_per_user : pd.DataFrame,
             item_data: pd.DataFrame,
@@ -40,6 +40,13 @@ def get_nns(user : str,
     # Step 4: Apply K-Means with the optimal K value
     kmeans = KMeans(n_clusters=optimal_k, random_state=42)
     clusters = kmeans.fit_predict(X_normalized)
+    cluster_k = Counter(clusters)
+
+    num_cluster = len(mean_vectors)
+    k = total_k // num_cluster
+    
+    for cluster, count in cluster_k.items():
+        cluster_k[cluster] = int(total_k / len(clusters)) * count
 
     mean_vectors = {}
     for vector, cluster in zip(vectors, clusters):
@@ -49,18 +56,18 @@ def get_nns(user : str,
             mean_vectors[cluster]['count'] += 1
             mean_vectors[cluster]['mean'] += (vector - mean_vectors[cluster]['mean']) / mean_vectors[cluster]['count']
 
-    num_cluster = len(mean_vectors)
+    
 
-    k = total_k // num_cluster
+    
 
     result = []
-    for _, to_search in tqdm(mean_vectors.items()):
+    for cluster, to_search in tqdm(mean_vectors.items()):
         # Faiss expects the query vectors to be normalized
         to_search  = to_search['mean']
         to_search = np.expand_dims(to_search, axis=0)
         to_search = np.ascontiguousarray(to_search.astype(np.float32))
 
-        distances, searched_wine_ids = index.search(to_search, k=k)
+        distances, searched_wine_ids = index.search(to_search, k= cluster_k[cluster])
 
         for dis, id in zip(distances[0], searched_wine_ids[0]):
             result.append((id, dis))

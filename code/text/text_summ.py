@@ -5,6 +5,8 @@ import random
 import pandas as pd
 from datetime import datetime, date
 from tqdm.notebook import tqdm
+import argparse
+
 from sklearn.metrics import log_loss, accuracy_score, precision_score, recall_score
 from tqdm import tqdm
 # from IPython.display import Image
@@ -42,8 +44,7 @@ def is_english(text):
     english_chars = sum(1 for char in text if 'a' <= char.lower() <= 'z')
     non_english_chars = len(text) - english_chars
     non_english_percentage = (non_english_chars / len(text)) * 100
-    
-    # Return True if the text is at least 90% English characters
+
     return non_english_percentage <= 15
 
 def remove_non_eng(df):
@@ -51,32 +52,46 @@ def remove_non_eng(df):
     eng_review= df[df['eng_or_na']==True]
     return eng_review
 
-with open('/opt/ml/wine/code/feature_map/item2idx.json','r') as f: item2idx = json.load(f)
-basic_info = pd.read_csv('/opt/ml/wine/data/wine_df.csv')
-basic_info['wine_id'] = basic_info['url'].map(item2idx)
-basic_info = basic_info[basic_info['wine_id'].isnull() == False]
-review_df = pd.read_csv('/opt/ml/wine/data/review_df_cleaned.csv',encoding = 'utf-8-sig')
 
-basic_info['wine_id'] = basic_info['wine_id'].astype('int').astype('category')
-review_df['wine_id'] = review_df['wine_id'].astype('int').astype('category')
+if __name__ == '__main__':
 
-tqdm.pandas()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", default='wine', type=str)
+    parser.add_argument("--outname", default='wine_summary.json', type=str)
+    parser.add_argument("--max_len", default = 20, type=int)
+    parser.add_argument("--min_len", default = 5, type=int)
+    args = parser.parse_args()
+        
+    with open('/opt/ml/wine/code/feature_map/item2idx.json','r') as f: item2idx = json.load(f)
+    basic_info = pd.read_csv('/opt/ml/wine/data/wine_df.csv')
+    basic_info['wine_id'] = basic_info['url'].map(item2idx)
+    basic_info = basic_info[basic_info['wine_id'].isnull() == False]
+    review_df = pd.read_csv('/opt/ml/wine/data/review_df_cleaned.csv',encoding = 'utf-8-sig')
+
+    basic_info['wine_id'] = basic_info['wine_id'].astype('int').astype('category')
+    review_df['wine_id'] = review_df['wine_id'].astype('int').astype('category')
+
+    tqdm.pandas()
 
 
-GPT2_model = TransformerSummarizer(transformer_type="GPT2",transformer_model_key="gpt2-medium")
+    GPT2_model = TransformerSummarizer(transformer_type="GPT2",transformer_model_key="gpt2-medium")
 
-eng_review = parallel_dataframe_1input(remove_non_eng, review_df, 8)
-eng_review = pd.merge(eng_review, basic_info.loc[:,['wine_id','wine_style']], on = 'wine_id',how ='inner')
-eng_review =eng_review[eng_review['wine_style'].isna()==False]
+    eng_review = parallel_dataframe_1input(remove_non_eng, review_df, 8)
+    eng_review = pd.merge(eng_review, basic_info.loc[:,['wine_id','wine_style']], on = 'wine_id',how ='inner')
+    eng_review =eng_review[eng_review['wine_style'].isna()==False]
 
-merged_reviews = eng_review.groupby('wine_style').agg({'text': ' '.join})
-top_styles = basic_info['wine_style'].value_counts().index[:150]
-top_reviews = merged_reviews.loc[merged_reviews.index.isin(top_styles)]
 
-style_summary = {}
-GPT2_model = TransformerSummarizer(transformer_type="GPT2",transformer_model_key="gpt2-medium")
-for style, text in tqdm(zip(top_reviews.index, top_reviews['text'])):
-    text = text[:1000000]
-    style_summary[style] = ''.join(GPT2_model(text, min_length=30, max_length=100))
+    if args.mode == 'wine_style':
+        merged_reviews = eng_review.groupby('wine_style').agg({'text': ' '.join})
+        top_styles = basic_info['wine_style'].value_counts().index[:150]
+        top_reviews = merged_reviews.loc[merged_reviews.index.isin(top_styles)]
+    elif args.mode == 'wine':
+        merged_reviews = eng_review.groupby('wine_id').agg({'text': ' '.join})
 
-with open('/opt/ml/wine/data/wine_style_summary.json','w') as f: json.dump(style_summary, f)
+    style_summary = {}
+    GPT2_model = TransformerSummarizer(transformer_type="GPT2",transformer_model_key="gpt2-medium")
+    for style, text in tqdm(zip(top_reviews.index, top_reviews['text'])):
+        text = text[:1000000]
+        style_summary[style] = ''.join(GPT2_model(text, min_length=args.min_len, max_length=args.max_len))
+
+    with open('/opt/ml/wine/data/{args.out_name}','w') as f: json.dump(style_summary, f)
