@@ -45,6 +45,16 @@ def load_index_file():
 
 def prepare_dataset(args):
     num_cpu = os.cpu_count()
+
+    with open('/opt/ml/wine/code/data/meta_data/seq_columns.json','r',encoding='utf-8') as f:  
+        seq_columns = json.load(f)
+    with open('/opt/ml/wine/code/data/meta_data/token_columns.json','r',encoding='utf-8') as f:  
+        tok_columns = json.load(f)
+    with open('/opt/ml/wine/code/data/meta_data/float_columns.json','r',encoding='utf-8') as f:  
+        float_columns = json.load(f)
+
+
+
     item_data_cols = [
         'item_id',
 
@@ -122,6 +132,16 @@ def prepare_dataset(args):
     inter.drop_duplicates(inplace = True)
 
     ####추가
+    columns_with_nan = item_data.columns[item_data.isnull().any()].tolist()
+
+    for col in columns_with_nan:
+        if col in tok_columns:
+            item_data[col] = item_data[col].replace('', 'other')
+        elif col in seq_columns:
+            item_data[col] = item_data[col].replace('', 'other')
+        elif col in float_columns:
+            item_data[col] = item_data[col].fillna(item_data[col].mean())
+
     if args.expand_notes:
         item_data.to_csv('/opt/ml/wine/data/item_data_expand.csv', encoding='utf-8-sig', index=False)
     else:
@@ -131,16 +151,15 @@ def prepare_dataset(args):
 
 
 
-    user_data = inter.groupby('email').agg(count=('rating', 'count'), mean=('rating', 'mean')).reset_index()
+    user_data = inter.groupby('email').agg(count=('scaled_rating', 'count'), mean=('scaled_rating', 'mean')).reset_index()
 
     print(f'Total {len(item_data)} items, {len(user_data)} users, {len(inter)} interactions')
 
-    inter.rename(columns={'rating': 'user_rating'}, inplace=True)
+    inter.rename(columns={'scaled_rating': 'user_rating'}, inplace=True)
 
 
-    train_rating = pd.merge(inter.loc[:,['email','user_rating','timestamp','wine_id']],
-                            item_data.loc[:, 'wine_id'],
-                            on = 'wine_id', how = 'inner')
+    item_data.reset_index(drop = True, inplace = True)
+    train_rating = pd.merge(inter.loc[:,['email','user_rating','timestamp','wine_id']],item_data.loc[:, 'wine_id'],on = 'wine_id', how = 'inner')
 
     train_rating.to_csv('/opt/ml/wine/data/train_rating.csv', encoding='utf-8', index=False)
     user_data.to_csv('/opt/ml/wine/data/user_data.csv', encoding='utf-8', index=False)
@@ -168,20 +187,23 @@ def prepare_recbole_dataset():
 def save_atomic_file(train_data, user_data, item_data):
     dataset_name = 'train_data'
     # train_data 컬럼명 변경
-
+    item2idx, user2idx, idx2item, idx2user = load_index_file()
+    
     train_data['wine_id'] = train_data['wine_id'].astype(int).astype('category')
-    train_data['user_id'] = train_data['user_id'].astype(int).astype('category')
+    train_data['email'] = train_data['email'].map(user2idx)
+    train_data['email'] = train_data['email'].astype(int).astype('category')
 
     item_data['wine_id'] = item_data['wine_id'].astype(int).astype('category')
     
-    user_data['user_id'] = user_data['user_id'].astype(int).astype('category')
+    user_data['email'] = user_data['email'].map(user2idx)
+    user_data['email'] = user_data['email'].astype(int).astype('category')
 
     train_data.columns = to_recbole_columns(train_data.columns)
     user_data.columns = to_recbole_columns(user_data.columns)
     item_data.columns = to_recbole_columns(item_data.columns)
     
     # to_csv
-    outpath = f"/opt/ml/winery/dataset/{dataset_name}"
+    outpath = f"/opt/ml/wine/dataset/{dataset_name}"
     os.makedirs(outpath, exist_ok=True)
     import pandas as pd
 

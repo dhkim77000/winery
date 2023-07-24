@@ -27,7 +27,7 @@ import nltk
 
 def main(args):
     nltk.data.path.append('/opt/ml/wine/code/nltk_data')
-    tqdm.pandas()
+    
     # Now download the punkt tokenizer data
     nltk.download('punkt')
     print('-------------------Reading Datas-------------------')

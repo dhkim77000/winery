@@ -447,6 +447,7 @@ def count_grape(data : pd.DataFrame):
 
 def count_pairing(data : pd.DataFrame):
     dict = defaultdict(float)
+    data = data[data['pairing'] != '']
     for pairings, dist in zip(data.pairing, data.distance):
         for menu in pairings.split(' '):
             try: dict[menu] += dist

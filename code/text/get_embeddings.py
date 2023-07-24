@@ -92,6 +92,7 @@ def get_embedding_multilabel(df, vector_dic, args):
 
 
     model = BERTClass(
+        args = args,
         num_labels= get_label_num(),
         mode = 'embedding'
         )
@@ -131,6 +132,7 @@ def get_embedding_multilabel(df, vector_dic, args):
             del outputs
             del ids, mask, token_type_ids, wine_ids
             gc.collect()
+            torch.cuda.empty_cache()
     return vector_dic
 
 
@@ -216,10 +218,11 @@ if __name__ == '__main__':
     parser.add_argument("--model_path", 
                         default='/opt/ml/wine/code/text/models/model_outputmodel_state_dict_4.pt', 
                         type=str)
-    parser.add_argument("--data", default='/opt/ml/wine/data/review_df_cleaned.csv', type=str)
+    parser.add_argument("--data", default='/opt/ml/wine/data/review_df_cleaned_.csv', type=str)
     parser.add_argument("--max_len", default = 152, type=int)
-    parser.add_argument("--batch_size", default = 32, type=int)
+    parser.add_argument("--batch_size", default = 16, type=int)
     parser.add_argument("--device", default = 'cuda' if cuda.is_available() else 'cpu', type=str)
+    parser.add_argument("--pool", default = 'mean', type=str)
     print('cuda' if cuda.is_available() else 'cpu')
 #######Data#############################################################################
     
@@ -238,7 +241,7 @@ if __name__ == '__main__':
         data.reset_index(drop=True, inplace=True)
     review_vectors = parallel_embedding(data, args, 8)
     #get_embedding(data, args)
-
+    #get_embedding_multilabel(data, {}, args)
     try:
         for key in tqdm(review_vectors): review_vectors[key] = review_vectors[key].tolist()
         with open('/opt/ml/wine/data/wine_vector_multilabel.json', 'w') as f: json.dump(review_vectors, f)    
