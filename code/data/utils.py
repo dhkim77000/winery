@@ -19,6 +19,12 @@ from collections import defaultdict, deque
 import re
 import faiss
 
+def string2array(x):
+    x = x.replace('\n', '').strip('[]')
+    x_list = [float(i) for i in x.split(' ') if len(i) != 0]
+    return np.array(x_list)
+
+
 def drop_columns(df):
     to_drop = ['Red Fruit','Tropical','Tree Fruit','Oaky',
                'Ageing','Black Fruit','Citrus','Dried Fruit','Earthy',
@@ -491,7 +497,7 @@ def most_close(sim_items : DataFrame):
     return result
 
 
-def find_most_sim_item(df : DataFrame, to_fill_wine_id: int, wine_vectors : np.array):
+def find_most_sim_item(df : DataFrame, to_fill_wine_id: int, index : faiss.IndexIDMap2):
 
     ###index should be wine_id/wine_id
     item_to_fill = df.loc[to_fill_wine_id,:]
@@ -502,37 +508,30 @@ def find_most_sim_item(df : DataFrame, to_fill_wine_id: int, wine_vectors : np.a
     except: pdb.set_trace()
     None_col.append('distance')
 
-    df.set_index('wine_id', inplace=True)
-    df['wine_id'] = df.index
-    wine_ids = list(df['wine_id'])
-    vector_dimension = item_vector.shape[0]
+    if len(None_col) > 1:
+            
+        # Faiss expects the query vectors to be normalized
+        to_search = np.expand_dims(item_vector, axis=0)
+        to_search = np.ascontiguousarray(to_search.astype(np.float32))
 
-    index = faiss.IndexFlatIP(vector_dimension)
-    index = faiss.IndexIDMap2(index)
-    index.add_with_ids(wine_vectors, wine_ids)
+        k = index.ntotal
+        distances, searched_wine_ids = index.search(to_search, k=20)
 
-    # Faiss expects the query vectors to be normalized
-    to_search = np.expand_dims(item_vector, axis=0)
-    to_search = np.ascontiguousarray(to_search.astype(np.float32))
+        result = []
+        for ids, dists in zip(searched_wine_ids[0], distances[0]): 
+            result.append((ids, dists))
 
-    k = index.ntotal
-    distances, searched_wine_ids = index.search(to_search, k=20)
-
-    result = []
-    for ids, dists in zip(searched_wine_ids[0], distances[0]): 
-        result.append((ids, dists))
-
-    sim_items = df.loc[[x[0] for x in result], :]
-    sim_items['distance'] = 0
-    sim_items = sim_items.loc[:, None_col]
-    
-    
-    for id, dist in result: sim_items.loc[id, 'distance'] = 1/dist
-
-    to_fill = most_close(sim_items)
-    
-    for col, val in to_fill.items():
-        df.loc[to_fill_wine_id, col] = val
+        sim_items = df.loc[[x[0] for x in result], :]
+        sim_items['distance'] = 0
+        sim_items = sim_items.loc[:, None_col]
+        
+        
+        for id, dist in result: sim_items.loc[id, 'distance'] = 1/dist
+        pdb.set_trace()
+        to_fill = most_close(sim_items)
+        
+        for col, val in to_fill.items():
+            df.loc[to_fill_wine_id, col] = val
 
     return df
 

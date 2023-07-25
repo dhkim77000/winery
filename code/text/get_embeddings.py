@@ -111,7 +111,7 @@ def get_embedding_multilabel(df, vector_dic, args):
     
     dataset = MultilabelDataset('inference',df, None, tokenizer, args.max_len)
     data_loader = DataLoader(dataset, **params)
-    vector_dic = defaultdict(list)
+  
     with torch.no_grad():
         for data in tqdm(data_loader):
             ids = data['ids'].to(args.device, dtype = torch.long)
@@ -218,7 +218,7 @@ if __name__ == '__main__':
     parser.add_argument("--model_path", 
                         default='/opt/ml/wine/code/text/models/model_outputmodel_state_dict_4.pt', 
                         type=str)
-    parser.add_argument("--data", default='/opt/ml/wine/data/review_df_cleaned_.csv', type=str)
+    parser.add_argument("--data", default='/opt/ml/wine/data/review_df_cleaned.csv', type=str)
     parser.add_argument("--max_len", default = 152, type=int)
     parser.add_argument("--batch_size", default = 16, type=int)
     parser.add_argument("--device", default = 'cuda' if cuda.is_available() else 'cpu', type=str)
@@ -249,4 +249,4 @@ if __name__ == '__main__':
         import pdb
         pdb.set_trace()
     
-    
+

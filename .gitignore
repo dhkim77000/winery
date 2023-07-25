@@ -3,6 +3,7 @@
 *.item
 *.user
 *.inter
+*.itememb
 *.npy
 *.html
 *.json

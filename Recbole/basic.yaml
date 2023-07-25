@@ -1,21 +1,34 @@
-# 수정필요
-data_path: /opt/ml/backend/Recbole/dataset/
+# 수정필요 ->
+data_path: /opt/ml/wine/dataset/
+<<<<<<< HEAD
+additional_feat_suffix: [itememb]
+=======
 
-USER_ID_FIELD: user_id
-ITEM_ID_FIELD: item_id
+>>>>>>> b49eb06179b0aa894da305455f8ac2998b72689d
+USER_ID_FIELD: email
+ITEM_ID_FIELD: wine_id
 RATING_FIELD: user_rating
 
 load_col:
-  inter: [user_id,user_rating, item_id]
-  user : [user_id, count, mean]
-  item : [item_id, country, region, winetype, vintage, price, rating, num_votes, wine_style , Red Fruit_count, Tropical_count, Tree Fruit_count, Oaky_count, Ageing_count, Black Fruit_count, Citrus_count, Dried Fruit_count, Earthy_count, Floral_count, Microbio_count, Spices_count,Vegetal_count]
-    # item : [item_id, country, region, winery, winetype, grape, vintage, price, rating, num_votes, wine_style , Red Fruit_count, Tropical_count, Tree Fruit_count, Oaky_count, Ageing_count, Black Fruit_count, Citrus_count, Dried Fruit_count, Earthy_count, Floral_count, Microbio_count, Spices_count,Vegetal_count]
-threshold: {'user_rating': 4}
+  inter: [email,user_rating,timestamp,wine_id]
+<<<<<<< HEAD
+  user : [email, count]
+  item :  [wine_id,house, country, region1, winetype, wine_style,vintage,price,wine_rating, num_votes, pairing,Red Fruit, Tropical, Tree Fruit,Oaky,Ageing, Black Fruit,Citrus, Dried Fruit, Earthy, Floral, Microbio, Spices,Vegetal, Light, Bold, Smooth, Tannic, Dry, Sweet,Soft,Acidic,Fizzy, Gentle,vectors]
+  itememb: [wine_id, vectors]
 
+preload_weight:
+    wine_id: vectors
+
+threshold: {'user_rating': 0.69}
+=======
+  user : [email, count, mean]
+  item :  [wine_id,house, country, region1, winetype, wine_style,vintage,price,wine_rating, num_votes, pairing,Red Fruit, Tropical, Tree Fruit,Oaky,Ageing, Black Fruit,Citrus, Dried Fruit, Earthy, Floral, Microbio, Spices,Vegetal, Light, Bold, Smooth, Tannic, Dry, Sweet,Soft,Acidic,Fizzy, Gentle,vectors]
+# threshold: {'user_rating': 4}
+>>>>>>> b49eb06179b0aa894da305455f8ac2998b72689d
 
 normalize_all: True
 show_progress : False
-epochs : 1
+epochs : 5
 device : torch.device("cuda" if torch.cuda.is_available() else "cpu")
 embedding_size: 64
 
@@ -24,9 +37,9 @@ eval_batch_size: 1024
 eval_args:
   split: {'RS':[8,1,1]}
   order: RO
-  group_by: ~
   mode: labeled
-train_neg_sample_args: ~
+  group_by_user: False
+  training_neg_sample_num: 0
 
 metrics: ['RMSE','MAE','LogLoss','AUC']
 valid_metric: RMSE

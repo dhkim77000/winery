@@ -4,12 +4,13 @@ import argparse
 import pandas as pd
 import numpy as np
 import time, datetime
+import pdb
 from tqdm import tqdm
 from args import parse_args
 from logging import getLogger
 import torch
 import pdb
-
+from utils import candid2recbole
 
 from recbole.model.general_recommender.multivae import MultiVAE
 from recbole.quick_start import run_recbole
@@ -27,7 +28,19 @@ def main(args):
         (모델경로)로 사용할 모델을 선택합니다.
         --rank_K로 몇개의 추천아이템을 뽑아낼지 선택합니다.
     """
-    
+    with open('/opt/ml/wine/code/feature_map/idx2user.json','r') as f:
+        idx2user = json.load(f)
+
+    item_data = pd.read_csv('/opt/ml/wine/data/item_data.csv', encoding='utf-8-sig')
+
+    item_data_recbole = pd.read_csv("/opt/ml/wine/dataset/train_data/train_data.item", 
+                                    sep='\t', 
+                                    encoding='utf-8')
+
+    inter = pd.read_csv("/opt/ml/wine/dataset/train_data/train_data.inter", 
+                                    sep='\t',
+                                    encoding='utf-8')
+
     general_model = ['Pop', 'ItemKNN', 'BPR', 'NeuMF', 'ConvNCF', 'DMF', 'FISM', 'NAIS', 'SpectralCF', 'GCMC', 'NGCF', 'LightGCN', 'DGCF', 'LINE', 'MultiVAE', 'MultiDAE', 'MacridVAE', 'CDAE', 'ENMF', 'NNCF', 'RaCT', 'RecVAE', 'EASE', 'SLIMElastic', 'SGL', 'ADMMSLIM', 'NCEPLRec', 'SimpleX', 'NCL']
     sequence_model = ['FPMC', 'GRU4Rec', 'NARM', 'STAMP', 'Caser', 'NextItNet', 'TransRec', 'SASRec', 'BERT4Rec', 'SRGNN', 'GCSAN', 'GRU4RecF', 'SASRecF', 'FDSA', 'S3Rec', 'GRU4RecKG', 'KSR', 'FOSSIL', 'SHAN', 'RepeatNet', 'HGN', 'HRM', 'NPE', 'LightSANs', 'SINE', 'CORE' ]
     context_aware_model = ['LR', 'FM', 'NFM', 'DeepFM', 'xDeepFM', 'AFM', 'FFM', 'FwFM', 'FNN', 'PNN', 'DSSM', 'WideDeep', 'DIN', 'DIEN', 'DCN', 'DCNV2', 'AutoInt', 'XGBOOST', 'LIGHTGBM' ]
@@ -42,12 +55,13 @@ def main(args):
     if model_name in general_model :
         checkpoint = torch.load(model_path)
         config = checkpoint['config']
+        
         config['dataset'] = 'train_data'
         print("create dataset start!")
         dataset = create_dataset(config)
         train_data, valid_data, test_data = data_preparation(config, dataset)
         print("create dataset done!")
-        model = get_model(config['model'])(config, train_data.dataset).to(config['device'])
+        model = get_model(config['model'])(config, test_data.dataset).to(config['device'])
         model.load_state_dict(checkpoint['state_dict'])
         model.load_other_parameter(checkpoint.get('other_parameter'))
 
@@ -153,12 +167,27 @@ def main(args):
         
     elif model_name in sequence_model or model_name in context_aware_model:
         # config, model, dataset 불러오기
+        # user, item id -> token 변환 array
+
         checkpoint = torch.load(model_path)
         config = checkpoint['config']
         config['dataset'] = 'train_data'
         init_seed(config['seed'], config['reproducibility'])
         print("create dataset start!")
-        dataset = create_dataset(config)
+        init_dataset = create_dataset(config)
+
+        user_id = config['USER_ID_FIELD']
+        item_id = config['ITEM_ID_FIELD']
+        user_id2token = init_dataset.field2id_token[user_id]
+        item_id2token = init_dataset.field2id_token[item_id]
+
+        candid2recbole(item_data, item_data_recbole, inter)
+
+        
+        ###경로 수정
+        #config.final_config_dict['data_path'] = 'adfsafadfafasfadfa'
+        #pdb.set_trace()
+        
         train_data, valid_data, test_data = data_preparation(config, dataset)
         print("create dataset done!")
         model = get_model(config['model'])(config, test_data.dataset).to(config['device'])
@@ -167,12 +196,6 @@ def main(args):
 
         # device 설정
         device = config.final_config_dict['device']
-
-        # user, item id -> token 변환 array
-        user_id = config['USER_ID_FIELD']
-        item_id = config['ITEM_ID_FIELD']
-        user_id2token = dataset.field2id_token[user_id]
-        item_id2token = dataset.field2id_token[item_id]
 
         # user id list
         batch_size = 32
@@ -200,7 +223,7 @@ def main(args):
         with torch.no_grad():
             for data in tbar:
                 if max(data) > len(user_id2token):
-                    data = [item for item in data if item <= 1154808]
+                    data = [item for item in data if item <= user_len]
                     data = torch.tensor(data)
                 # interaction 생성
                 interaction = dict()

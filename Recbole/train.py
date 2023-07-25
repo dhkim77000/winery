@@ -15,13 +15,13 @@ from recbole.data import dataset
 from recbole.data import create_dataset, data_preparation, Interaction
 from recbole.utils import init_logger, get_trainer, get_model, init_seed, set_color
 
+data_path = os.getcwd()
 def run(args):
 
     return run_recbole(
         model=args.model_name,
         dataset='train_data',
-        # 경로 수정 필요
-        config_file_list=['/opt/ml/backend/Recbole/basic.yaml'],
+        config_file_list=['/opt/ml/wine/Recbole/basic.yaml'],
     )
 
 def main(args):

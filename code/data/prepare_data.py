@@ -119,30 +119,23 @@ def prepare_dataset(args):
 
         item_data.set_index('wine_id', inplace= True)
         item_data['wine_id'] = item_data.index
+
+        wine_ids = list(item_data['wine_id'])
+        vector_dimension = wine_vectors.shape[1]
+
+        index = faiss.IndexFlatIP(vector_dimension)
+        index = faiss.IndexIDMap2(index)
+        index.add_with_ids(wine_vectors, wine_ids)
+
         for id in tqdm(item_data.index):
-            item_data = find_most_sim_item(item_data, id, wine_vectors)
+            item_data = find_most_sim_item(item_data, id, index)
 
         print(item_data.isnull().sum())
-
-        item_data['vectors'] = item_data['vectors'].apply(lambda x: " ".join(map(str, x))).str.replace('[', '').str.replace(']', '')
 
     item2idx, user2idx, idx2item, idx2user = load_index_file()
 
 
     inter.drop_duplicates(inplace = True)
-
-    ####추가
-    columns_with_nan = item_data.columns[item_data.isnull().any()].tolist()
-
-    for col in columns_with_nan:
-        if col in tok_columns:
-            item_data[col].fillna(item_data[col].mode().iloc[0], inplace= True)
-            item_data[col] = item_data[col].replace('', 'other')
-        elif col in seq_columns:
-            item_data[col].fillna(item_data[col].mode().iloc[0], inplace= True)
-            item_data[col] = item_data[col].replace('', 'other')
-        elif col in float_columns:
-            item_data[col] = item_data[col].fillna(item_data[col].mean())
 
     if args.expand_notes:
         item_data.to_csv('/opt/ml/wine/data/item_data_expand.csv', encoding='utf-8-sig', index=False)
@@ -169,17 +162,18 @@ def prepare_dataset(args):
     return train_rating, user_data, item_data
 
 def load_data_file():
-
     data_path = '/opt/ml/wine/data'
-    # train load
+    
     try:
         train_data = pd.read_csv(os.path.join(data_path, 'train_rating.csv'), encoding = 'utf-8-sig')
         user_data = pd.read_csv(os.path.join(data_path, 'user_data.csv'), encoding = 'utf-8-sig')
         item_data = pd.read_csv(os.path.join(data_path, 'item_data.csv'), encoding = 'utf-8-sig')
+
     except:
         print('No files found, prepare dataste')
         train_data, user_data, item_data = prepare_dataset()
 
+    
     return train_data, user_data, item_data
 
 def prepare_recbole_dataset():
@@ -187,6 +181,14 @@ def prepare_recbole_dataset():
     save_atomic_file(train_data, user_data, item_data)
 
 def save_atomic_file(train_data, user_data, item_data):
+    
+    with open('/opt/ml/wine/code/data/meta_data/seq_columns.json','r',encoding='utf-8') as f:  
+        seq_columns = json.load(f)
+    with open('/opt/ml/wine/code/data/meta_data/token_columns.json','r',encoding='utf-8') as f:  
+        tok_columns = json.load(f)
+    with open('/opt/ml/wine/code/data/meta_data/float_columns.json','r',encoding='utf-8') as f:  
+        float_columns = json.load(f)
+        
     dataset_name = 'train_data'
     # train_data 컬럼명 변경
     item2idx, user2idx, idx2item, idx2user = load_index_file()
@@ -196,7 +198,9 @@ def save_atomic_file(train_data, user_data, item_data):
     train_data['email'] = train_data['email'].astype(int).astype('category')
 
     item_data['wine_id'] = item_data['wine_id'].astype(int).astype('category')
-    
+
+    item_data['vectors'] = item_data['vectors'].apply(lambda x: " ".join(map(str, x))).str.replace('[', '').str.replace(']', '')
+
     user_data['email'] = user_data['email'].map(user2idx)
     user_data['email'] = user_data['email'].astype(int).astype('category')
 
@@ -207,8 +211,36 @@ def save_atomic_file(train_data, user_data, item_data):
     # to_csv
     outpath = f"/opt/ml/wine/dataset/{dataset_name}"
     os.makedirs(outpath, exist_ok=True)
-    import pandas as pd
+<<<<<<< HEAD
+=======
 
+    columns_with_nan = item_data.columns[item_data.isnull().any()].tolist()
+    for col in columns_with_nan:
+        if col in tok_columns:
+            item_data[col].fillna(item_data[col].mode().iloc[0], inplace= True)
+            item_data[col] = item_data[col].replace('', 'other')
+        elif col in seq_columns:
+            item_data[col].fillna(item_data[col].mode().iloc[0], inplace= True)
+            item_data[col] = item_data[col].replace('', 'other')
+        elif col in float_columns:
+            item_data[col] = item_data[col].fillna(item_data[col].mean())
+>>>>>>> b49eb06179b0aa894da305455f8ac2998b72689d
+
+    columns_with_nan = item_data.columns[item_data.isnull().any()].tolist()
+    for col in columns_with_nan:
+        if col in tok_columns:
+            item_data[col].fillna(item_data[col].mode().iloc[0], inplace= True)
+            item_data[col] = item_data[col].replace('', 'other')
+        elif col in seq_columns:
+            item_data[col].fillna(item_data[col].mode().iloc[0], inplace= True)
+            item_data[col] = item_data[col].replace('', 'other')
+        elif col in float_columns:
+            item_data[col] = item_data[col].fillna(item_data[col].mean())
+
+    pdb.set_trace()
+    item_emb = item_data.loc[:,['wine_id:token','vectors:float_seq']]
+    
+    item_emb.to_csv(os.path.join(outpath,"train_data.itememb"),sep='\t',index=False, encoding='utf-8')
     train_data.to_csv(os.path.join(outpath,"train_data.inter"),sep='\t',index=False, encoding='utf-8')
     item_data.to_csv(os.path.join(outpath,"train_data.item"),sep='\t',index=False, encoding='utf-8')
     user_data.to_csv(os.path.join(outpath,"train_data.user"),sep='\t',index=False, encoding='utf-8')

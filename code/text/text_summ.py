@@ -84,13 +84,13 @@ if __name__ == '__main__':
     if args.mode == 'wine_style':
         merged_reviews = eng_review.groupby('wine_style').agg({'text': ' '.join})
         top_styles = basic_info['wine_style'].value_counts().index[:150]
-        top_reviews = merged_reviews.loc[merged_reviews.index.isin(top_styles)]
+        merged_reviews = merged_reviews.loc[merged_reviews.index.isin(top_styles)]
     elif args.mode == 'wine':
         merged_reviews = eng_review.groupby('wine_id').agg({'text': ' '.join})
 
     style_summary = {}
     GPT2_model = TransformerSummarizer(transformer_type="GPT2",transformer_model_key="gpt2-medium")
-    for style, text in tqdm(zip(top_reviews.index, top_reviews['text'])):
+    for style, text in tqdm(zip(merged_reviews.index, merged_reviews['text'])):
         text = text[:1000000]
         style_summary[style] = ''.join(GPT2_model(text, min_length=args.min_len, max_length=args.max_len))
 
