@@ -8,14 +8,14 @@ import {
 	Button,
 	TouchableOpacity,
 } from "react-native";
-import Swiper from 'react-native-swiper';
+// import Swiper from 'react-native-swiper';
 import { logUserOut } from './Api';
 
 export default function Home() {
 	return (
 		<View style={styles.container}>
 			<View style={styles.banner}>
-				{swipers()}
+				{/* {swipers()} */}
 			</View>
 			<Text style={styles.paragraph}>
 				금주의 추천 와인
@@ -30,30 +30,30 @@ export default function Home() {
 	);
 }
 
-export function swipers() { // 배너
-	return(
-	  <Swiper
-		  autoplay
-		  autoplayTimeout={4}       
-		>
-		  <View style={styles.slide}>
-			<Image style={styles.image} source={require("./assets/고라파덕.jpg")} />
-		  </View>
-		  <View style={styles.slide}>
-			<Image style={styles.image} source={require("./assets/꼬부기.jpg")} />
-		  </View>
-		  <View style={styles.slide}>
-			<Image style={styles.image} source={require("./assets/이브이.jpg")} />
-		  </View>
-		  <View style={styles.slide}>
-			<Image style={styles.image} source={require("./assets/케이시.jpg")} />
-		  </View>
-		  <View style={styles.slide}>
-			<Image style={styles.image} source={require("./assets/파이리.jpg")} />
-		  </View>
-		</Swiper>
-	)
-  }
+// export function swipers() { // 배너
+// 	return(
+// 	  <Swiper
+// 		  autoplay
+// 		  autoplayTimeout={4}       
+// 		>
+// 		  <View style={styles.slide}>
+// 			<Image style={styles.image} source={require("./assets/고라파덕.jpg")} />
+// 		  </View>
+// 		  <View style={styles.slide}>
+// 			<Image style={styles.image} source={require("./assets/꼬부기.jpg")} />
+// 		  </View>
+// 		  <View style={styles.slide}>
+// 			<Image style={styles.image} source={require("./assets/이브이.jpg")} />
+// 		  </View>
+// 		  <View style={styles.slide}>
+// 			<Image style={styles.image} source={require("./assets/케이시.jpg")} />
+// 		  </View>
+// 		  <View style={styles.slide}>
+// 			<Image style={styles.image} source={require("./assets/파이리.jpg")} />
+// 		  </View>
+// 		</Swiper>
+// 	)
+//   }
 
 const styles = StyleSheet.create({
 	wrapper: {
