@@ -211,20 +211,6 @@ def save_atomic_file(train_data, user_data, item_data):
     # to_csv
     outpath = f"/opt/ml/wine/dataset/{dataset_name}"
     os.makedirs(outpath, exist_ok=True)
-<<<<<<< HEAD
-=======
-
-    columns_with_nan = item_data.columns[item_data.isnull().any()].tolist()
-    for col in columns_with_nan:
-        if col in tok_columns:
-            item_data[col].fillna(item_data[col].mode().iloc[0], inplace= True)
-            item_data[col] = item_data[col].replace('', 'other')
-        elif col in seq_columns:
-            item_data[col].fillna(item_data[col].mode().iloc[0], inplace= True)
-            item_data[col] = item_data[col].replace('', 'other')
-        elif col in float_columns:
-            item_data[col] = item_data[col].fillna(item_data[col].mean())
->>>>>>> b49eb06179b0aa894da305455f8ac2998b72689d
 
     columns_with_nan = item_data.columns[item_data.isnull().any()].tolist()
     for col in columns_with_nan:

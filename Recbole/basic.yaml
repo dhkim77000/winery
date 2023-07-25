@@ -1,30 +1,24 @@
 # 수정필요 ->
 data_path: /opt/ml/wine/dataset/
-<<<<<<< HEAD
-additional_feat_suffix: [itememb]
-=======
 
->>>>>>> b49eb06179b0aa894da305455f8ac2998b72689d
+additional_feat_suffix: [itememb]
 USER_ID_FIELD: email
 ITEM_ID_FIELD: wine_id
 RATING_FIELD: user_rating
 
 load_col:
   inter: [email,user_rating,timestamp,wine_id]
-<<<<<<< HEAD
   user : [email, count]
   item :  [wine_id,house, country, region1, winetype, wine_style,vintage,price,wine_rating, num_votes, pairing,Red Fruit, Tropical, Tree Fruit,Oaky,Ageing, Black Fruit,Citrus, Dried Fruit, Earthy, Floral, Microbio, Spices,Vegetal, Light, Bold, Smooth, Tannic, Dry, Sweet,Soft,Acidic,Fizzy, Gentle,vectors]
   itememb: [wine_id, vectors]
+
 
 preload_weight:
     wine_id: vectors
 
 threshold: {'user_rating': 0.69}
-=======
-  user : [email, count, mean]
-  item :  [wine_id,house, country, region1, winetype, wine_style,vintage,price,wine_rating, num_votes, pairing,Red Fruit, Tropical, Tree Fruit,Oaky,Ageing, Black Fruit,Citrus, Dried Fruit, Earthy, Floral, Microbio, Spices,Vegetal, Light, Bold, Smooth, Tannic, Dry, Sweet,Soft,Acidic,Fizzy, Gentle,vectors]
-# threshold: {'user_rating': 4}
->>>>>>> b49eb06179b0aa894da305455f8ac2998b72689d
+
+
 
 normalize_all: True
 show_progress : False
