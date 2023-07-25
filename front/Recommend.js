@@ -9,7 +9,8 @@ import {
 	Dimensions, 
 	SafeAreaView, 
 	ScrollView, 
-	FlatList, 
+	FlatList,
+	Platform, 
 } from "react-native";
 import { emailVar, postApi } from "./Api";
 import { useEffect, useState } from "react";

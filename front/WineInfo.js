@@ -11,7 +11,7 @@ import {
 import { useForm } from "react-hook-form";
 
 import Icon from 'react-native-vector-icons/Ionicons';
-import StarRating from "react-native-star-rating";
+// import StarRating from "react-native-star-rating";
 import { useReactiveVar } from "@apollo/client";
 
 import { emailVar, postApi } from "./Api";
@@ -124,7 +124,7 @@ export default function WineInfo ({navigation: {navigate}, route}) {
         <View style={styles.popupWrapper}>
           <View style={styles.popupView}>
             <Text style={{fontSize: 16}}>와인 평점 남기기</Text>
-            <StarRating
+            {/* <StarRating
               disabled={false}
               maxStars={5}
               rating={ratingValue}
@@ -134,7 +134,7 @@ export default function WineInfo ({navigation: {navigate}, route}) {
               emptyStarColor="#C6C6C6"
               fullStarColor="gold"
               starStyle={{marginTop: 10, paddingRight: 5}}
-            />
+            /> */}
             <View style={{flexDirection:'row'}}>
               <TouchableOpacity
                 onPress={() => {
