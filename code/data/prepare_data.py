@@ -244,7 +244,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--expand_notes", default=False, type=bool)
     parser.add_argument("--with_vector", default=1, type=int)
-    parser.add_argument("--wine_vector", default='/opt/ml/wine/data/wine_vector.json', type = str)
+    parser.add_argument("--wine_vector", default='/opt/ml/wine/data/emb_bert.json', type = str)
     parser.add_argument("--prepare_recbole", default=True, type=bool)
     args = parser.parse_args()
 
