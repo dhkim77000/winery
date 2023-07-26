@@ -7,14 +7,14 @@ ITEM_ID_FIELD: wine_id
 RATING_FIELD: user_rating
 
 load_col:
-  inter: [email,user_rating,timestamp,wine_id]
+  inter: [email,user_rating, wine_id]
   user : [email, count]
-  item :  [wine_id,house, country, region1, winetype, wine_style,vintage,price,wine_rating, num_votes, pairing,Red Fruit, Tropical, Tree Fruit,Oaky,Ageing, Black Fruit,Citrus, Dried Fruit, Earthy, Floral, Microbio, Spices,Vegetal, Light, Bold, Smooth, Tannic, Dry, Sweet,Soft,Acidic,Fizzy, Gentle,vectors]
-  itememb: [wine_id, vectors]
+  item :  [wine_id, house, country, region1, winetype, wine_style,vintage,price,wine_rating, num_votes, pairing,Red Fruit, Tropical, Tree Fruit,Oaky,Ageing, Black Fruit,Citrus, Dried Fruit, Earthy, Floral, Microbio, Spices,Vegetal, Light, Bold, Smooth, Tannic, Dry, Sweet,Soft,Acidic,Fizzy, Gentle]
+  itememb: [wid, vectors]
 
-
+fields_in_same_space: [[wid, wine_id]]
 preload_weight:
-    wine_id: vectors
+    wid: vectors
 
 threshold: {'user_rating': 0.69}
 

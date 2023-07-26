@@ -92,7 +92,8 @@ def prepare_dataset(args):
     inter['wine_id'] = inter['wine_id'].astype(int).astype('category')
     inter = inter[inter['wine_id'].isin(item_data['wine_id'])]
 
-    users = inter['email'].unique()
+    users = list(inter['email'].unique())
+    users.sort()
     user2idx = {feature: index for index, feature in enumerate(users)}
     idx2user = {index: feature for index, feature in enumerate(users)}
     with open('/opt/ml/wine/code/data/feature_map/user2idx.json','w') as f: json.dump(user2idx,f)
@@ -130,10 +131,13 @@ def prepare_dataset(args):
         for id in tqdm(item_data.index):
             item_data = find_most_sim_item(item_data, id, index)
 
+        #item_data['vectors'] = item_data['vectors'].apply(lambda x : x.tolist())
+        
         print(item_data.isnull().sum())
 
     item2idx, user2idx, idx2item, idx2user = load_index_file()
 
+    item_data['vectors'] = item_data['vectors'].apply(lambda x: " ".join(map(str, x))).str.replace('[', '').str.replace(']', '')
 
     inter.drop_duplicates(inplace = True)
 
@@ -152,7 +156,7 @@ def prepare_dataset(args):
 
     inter.rename(columns={'scaled_rating': 'user_rating'}, inplace=True)
 
-
+    pdb.set_trace()
     item_data.reset_index(drop = True, inplace = True)
     train_rating = pd.merge(inter.loc[:,['email','user_rating','timestamp','wine_id']],item_data.loc[:, 'wine_id'],on = 'wine_id', how = 'inner')
 
@@ -168,7 +172,7 @@ def load_data_file():
         train_data = pd.read_csv(os.path.join(data_path, 'train_rating.csv'), encoding = 'utf-8-sig')
         user_data = pd.read_csv(os.path.join(data_path, 'user_data.csv'), encoding = 'utf-8-sig')
         item_data = pd.read_csv(os.path.join(data_path, 'item_data.csv'), encoding = 'utf-8-sig')
-
+    
     except:
         print('No files found, prepare dataste')
         train_data, user_data, item_data = prepare_dataset()
@@ -199,8 +203,8 @@ def save_atomic_file(train_data, user_data, item_data):
 
     item_data['wine_id'] = item_data['wine_id'].astype(int).astype('category')
 
-    item_data['vectors'] = item_data['vectors'].apply(lambda x: " ".join(map(str, x))).str.replace('[', '').str.replace(']', '')
 
+    
     user_data['email'] = user_data['email'].map(user2idx)
     user_data['email'] = user_data['email'].astype(int).astype('category')
 
@@ -214,17 +218,17 @@ def save_atomic_file(train_data, user_data, item_data):
 
     columns_with_nan = item_data.columns[item_data.isnull().any()].tolist()
     for col in columns_with_nan:
-        if col in tok_columns:
+        if col.split(':')[0] in tok_columns:
             item_data[col].fillna(item_data[col].mode().iloc[0], inplace= True)
             item_data[col] = item_data[col].replace('', 'other')
-        elif col in seq_columns:
+        elif col.split(':')[0] in seq_columns:
             item_data[col].fillna(item_data[col].mode().iloc[0], inplace= True)
             item_data[col] = item_data[col].replace('', 'other')
-        elif col in float_columns:
+        elif col.split(':')[0] in float_columns:
             item_data[col] = item_data[col].fillna(item_data[col].mean())
 
-    pdb.set_trace()
     item_emb = item_data.loc[:,['wine_id:token','vectors:float_seq']]
+    item_emb = item_emb.rename(columns = {'wine_id:token':'wid:token'})
     
     item_emb.to_csv(os.path.join(outpath,"train_data.itememb"),sep='\t',index=False, encoding='utf-8')
     train_data.to_csv(os.path.join(outpath,"train_data.inter"),sep='\t',index=False, encoding='utf-8')

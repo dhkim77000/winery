@@ -1,9 +1,1 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-{"0": "Anyjunkfoodwilldo", "1": "Sweetdesserts", "2": "Pork", "3": "CuredMeat", "4": "Game(deer,venison)", "5": "Beef", "6": "Matureandhardcheese", "7": "Vegetarian", "8": "Mildandsoftcheese", "9": "Fruitydesserts", "10": "Veal", "11": "Pasta", "12": "Aperitif", "13": "Lamb", "14": "Bluecheese", "15": "Mushrooms", "16": "Poultry", "17": "Shellfish", "18": "Appetizersandsnacks", "19": "Richfish(salmon,tunaetc)", "20": "nan", "21": "Spicyfood", "22": "Goatcheese", "23": "Leanfish"}
-=======
-{"0": "Mildandsoftcheese", "1": "Veal", "2": "Spicyfood", "3": "Appetizersandsnacks", "4": "Richfish(salmon,tunaetc)", "5": "nan", "6": "CuredMeat", "7": "Poultry", "8": "Pork", "9": "Anyjunkfoodwilldo", "10": "Leanfish", "11": "Mushrooms", "12": "Sweetdesserts", "13": "Aperitif", "14": "Game(deer,venison)", "15": "Shellfish", "16": "Beef", "17": "Pasta", "18": "Goatcheese", "19": "Bluecheese", "20": "Lamb", "21": "Matureandhardcheese", "22": "Fruitydesserts", "23": "Vegetarian"}
->>>>>>> b49eb06179b0aa894da305455f8ac2998b72689d
-=======
-{"0": "Mildandsoftcheese", "1": "Veal", "2": "Spicyfood", "3": "Appetizersandsnacks", "4": "Richfish(salmon,tunaetc)", "5": "nan", "6": "CuredMeat", "7": "Poultry", "8": "Pork", "9": "Anyjunkfoodwilldo", "10": "Leanfish", "11": "Mushrooms", "12": "Sweetdesserts", "13": "Aperitif", "14": "Game(deer,venison)", "15": "Shellfish", "16": "Beef", "17": "Pasta", "18": "Goatcheese", "19": "Bluecheese", "20": "Lamb", "21": "Matureandhardcheese", "22": "Fruitydesserts", "23": "Vegetarian"}
->>>>>>> b49eb06179b0aa894da305455f8ac2998b72689d
+{"0": "Bluecheese", "1": "Beef", "2": "Leanfish", "3": "Game(deer,venison)", "4": "Richfish(salmon,tunaetc)", "5": "CuredMeat", "6": "Veal", "7": "Poultry", "8": "Matureandhardcheese", "9": "Fruitydesserts", "10": "Aperitif", "11": "Anyjunkfoodwilldo", "12": "Mushrooms", "13": "Pasta", "14": "Sweetdesserts", "15": "Vegetarian", "16": "Goatcheese", "17": "Shellfish", "18": "Lamb", "19": "Appetizersandsnacks", "20": "nan", "21": "Spicyfood", "22": "Pork", "23": "Mildandsoftcheese"}

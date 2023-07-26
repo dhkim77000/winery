@@ -1,9 +1,1 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-{"Anyjunkfoodwilldo": 0, "Sweetdesserts": 1, "Pork": 2, "CuredMeat": 3, "Game(deer,venison)": 4, "Beef": 5, "Matureandhardcheese": 6, "Vegetarian": 7, "Mildandsoftcheese": 8, "Fruitydesserts": 9, "Veal": 10, "Pasta": 11, "Aperitif": 12, "Lamb": 13, "Bluecheese": 14, "Mushrooms": 15, "Poultry": 16, "Shellfish": 17, "Appetizersandsnacks": 18, "Richfish(salmon,tunaetc)": 19, "nan": 20, "Spicyfood": 21, "Goatcheese": 22, "Leanfish": 23}
-=======
-{"Mildandsoftcheese": 0, "Veal": 1, "Spicyfood": 2, "Appetizersandsnacks": 3, "Richfish(salmon,tunaetc)": 4, "nan": 5, "CuredMeat": 6, "Poultry": 7, "Pork": 8, "Anyjunkfoodwilldo": 9, "Leanfish": 10, "Mushrooms": 11, "Sweetdesserts": 12, "Aperitif": 13, "Game(deer,venison)": 14, "Shellfish": 15, "Beef": 16, "Pasta": 17, "Goatcheese": 18, "Bluecheese": 19, "Lamb": 20, "Matureandhardcheese": 21, "Fruitydesserts": 22, "Vegetarian": 23}
->>>>>>> b49eb06179b0aa894da305455f8ac2998b72689d
-=======
-{"Mildandsoftcheese": 0, "Veal": 1, "Spicyfood": 2, "Appetizersandsnacks": 3, "Richfish(salmon,tunaetc)": 4, "nan": 5, "CuredMeat": 6, "Poultry": 7, "Pork": 8, "Anyjunkfoodwilldo": 9, "Leanfish": 10, "Mushrooms": 11, "Sweetdesserts": 12, "Aperitif": 13, "Game(deer,venison)": 14, "Shellfish": 15, "Beef": 16, "Pasta": 17, "Goatcheese": 18, "Bluecheese": 19, "Lamb": 20, "Matureandhardcheese": 21, "Fruitydesserts": 22, "Vegetarian": 23}
->>>>>>> b49eb06179b0aa894da305455f8ac2998b72689d
+{"Bluecheese": 0, "Beef": 1, "Leanfish": 2, "Game(deer,venison)": 3, "Richfish(salmon,tunaetc)": 4, "CuredMeat": 5, "Veal": 6, "Poultry": 7, "Matureandhardcheese": 8, "Fruitydesserts": 9, "Aperitif": 10, "Anyjunkfoodwilldo": 11, "Mushrooms": 12, "Pasta": 13, "Sweetdesserts": 14, "Vegetarian": 15, "Goatcheese": 16, "Shellfish": 17, "Lamb": 18, "Appetizersandsnacks": 19, "nan": 20, "Spicyfood": 21, "Pork": 22, "Mildandsoftcheese": 23}

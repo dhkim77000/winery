@@ -10,7 +10,7 @@ from args import parse_args
 from logging import getLogger
 import torch
 import pdb
-from utils import candid2recbole
+from utils import candid2recbole, bayesian_average, string2array
 
 from recbole.model.general_recommender.multivae import MultiVAE
 from recbole.quick_start import run_recbole
@@ -20,6 +20,7 @@ from recbole.data import create_dataset, data_preparation, FullSortEvalDataLoade
 from recbole.utils import init_logger, get_trainer, get_model, init_seed, set_color
 from recbole.utils.case_study import full_sort_topk
 
+import faiss
 
 def main(args):
     """모델 inference 파일
@@ -32,14 +33,32 @@ def main(args):
         idx2user = json.load(f)
 
     item_data = pd.read_csv('/opt/ml/wine/data/item_data.csv', encoding='utf-8-sig')
+    item_data['vectors'] = item_data['vectors'].apply(string2array)
+    min_votes = 20
+    item_data = bayesian_average(item_data, min_votes)
+
+    item_data.set_index('wine_id', inplace = True)
+    item_data['wine_id'] = item_data.index
+
+    wine_vectors = []
+    for vector in item_data['vectors']: wine_vectors.append(vector)
+    wine_vectors = np.array(wine_vectors)
+
+    wine_ids = list(item_data.index) #####wine id 
+    vector_dimension = wine_vectors.shape[1]
+
+    index = faiss.IndexFlatIP(vector_dimension)
+    index = faiss.IndexIDMap2(index)
+    index.add_with_ids(wine_vectors, wine_ids)
 
     item_data_recbole = pd.read_csv("/opt/ml/wine/dataset/train_data/train_data.item", 
                                     sep='\t', 
                                     encoding='utf-8')
 
-    inter = pd.read_csv("/opt/ml/wine/dataset/train_data/train_data.inter", 
-                                    sep='\t',
-                                    encoding='utf-8')
+    inter = pd.read_csv("/opt/ml/wine/dataset/train_data/train_data.inter", sep='\t',encoding='utf-8')
+    item_emb = pd.read_csv("/opt/ml/wine/dataset/train_data/train_data.itememb", sep='\t',encoding='utf-8')
+    
+    inter_per_user = inter.groupby('email:token')['wine_id:token'].agg(list)
 
     general_model = ['Pop', 'ItemKNN', 'BPR', 'NeuMF', 'ConvNCF', 'DMF', 'FISM', 'NAIS', 'SpectralCF', 'GCMC', 'NGCF', 'LightGCN', 'DGCF', 'LINE', 'MultiVAE', 'MultiDAE', 'MacridVAE', 'CDAE', 'ENMF', 'NNCF', 'RaCT', 'RecVAE', 'EASE', 'SLIMElastic', 'SGL', 'ADMMSLIM', 'NCEPLRec', 'SimpleX', 'NCL']
     sequence_model = ['FPMC', 'GRU4Rec', 'NARM', 'STAMP', 'Caser', 'NextItNet', 'TransRec', 'SASRec', 'BERT4Rec', 'SRGNN', 'GCSAN', 'GRU4RecF', 'SASRecF', 'FDSA', 'S3Rec', 'GRU4RecKG', 'KSR', 'FOSSIL', 'SHAN', 'RepeatNet', 'HGN', 'HRM', 'NPE', 'LightSANs', 'SINE', 'CORE' ]
@@ -180,20 +199,6 @@ def main(args):
         item_id = config['ITEM_ID_FIELD']
         user_id2token = init_dataset.field2id_token[user_id]
         item_id2token = init_dataset.field2id_token[item_id]
-
-        candid2recbole(item_data, item_data_recbole, inter)
-
-        
-        ###경로 수정
-        #config.final_config_dict['data_path'] = 'adfsafadfafasfadfa'
-        #pdb.set_trace()
-        
-        train_data, valid_data, test_data = data_preparation(config, dataset)
-        print("create dataset done!")
-        model = get_model(config['model'])(config, test_data.dataset).to(config['device'])
-        model.load_state_dict(checkpoint['state_dict'])
-        model.load_other_parameter(checkpoint.get('other_parameter'))
-
         # device 설정
         device = config.final_config_dict['device']
 
@@ -216,12 +221,34 @@ def main(args):
         user_list = []
 
         # model 평가모드 전환
-        model.eval()
-        matrix = dataset.inter_matrix(form='csr')
+        
+        matrix = init_dataset.inter_matrix(form='csr')
 
         tbar = tqdm(all_user_list, desc=set_color(f"Inference", 'pink'))
+
+        ###경로 수정
+        config.final_config_dict['datfa_path'] = '/opt/ml/wine/dataset/cadidates'
+        
         with torch.no_grad():
             for data in tbar:
+                candid2recbole(item_data, 
+                       item_data_recbole, 
+                       inter_per_user, 
+                       inter, 
+                       item_emb,
+                       index)
+
+                dataset = create_dataset(config)
+                train_data, valid_data, test_data = data_preparation(config, dataset)
+                model = get_model(config['model'])(config, test_data.dataset).to(config['device'])
+                model.load_state_dict(checkpoint['state_dict'])
+                model.load_other_parameter(checkpoint.get('other_parameter'))
+                model.eval()
+                
+    
+                print("create dataset done!")
+
+                
                 if max(data) > len(user_id2token):
                     data = [item for item in data if item <= user_len]
                     data = torch.tensor(data)
@@ -238,7 +265,7 @@ def main(args):
                 # user item별 score 예측
                 score = model.predict(interaction)
                 score = score.view(-1, item_len)
-
+                pdb.set_trace()
                 rating_pred = score.cpu().data.numpy().copy()
 
                 user_index = data.numpy()

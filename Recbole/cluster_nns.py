@@ -9,13 +9,12 @@ from tqdm import tqdm
 from collections import Counter
 from sklearn.metrics import silhouette_score
 
-def get_nns(user: str,
-            inter_per_user: pd.DataFrame,
+def get_nns(inter_wine_ids: pd.DataFrame,
             item_data: pd.DataFrame,
             index: faiss.IndexIDMap2,
             total_k: int = 15000):
 
-    wine_ids = inter_per_user[user]
+    wine_ids = inter_wine_ids
     vectors = item_data.loc[wine_ids, 'vectors']
 
     vectorizer = TfidfVectorizer(tokenizer=lambda x: x, lowercase=False)
@@ -71,6 +70,9 @@ def get_nns(user: str,
             result.append((id, dis))
 
     result.sort(key=lambda x: x[1])
+
+
+
     return result
 
 def get_nns_elbow(user : str,
