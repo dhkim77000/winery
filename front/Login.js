@@ -7,10 +7,12 @@ import {
 	View,
 	Image,
 	TextInput,
-	Button,
 	TouchableOpacity,
+	TouchableWithoutFeedback,
+	Keyboard,
+	KeyboardAvoidingView,
 } from "react-native";
-import { postApi, getApi } from "./Api";
+import { postApi, logUserIn } from "./Api";
 
 export default function Login({ navigation }) {
 	const { register, handleSubmit, setValue, watch } = useForm();
@@ -20,23 +22,25 @@ export default function Login({ navigation }) {
 		nextOne?.current?.focus();
 	};
 	const onValid = async (data) => {
-		postApi("temp/", data)
-			.then((response) => {
-				console.log("return value: ", response.data); // 응답 데이터 출력
-			})
-			.catch((error) => {
-				console.error(error);
-			});
-
-		// getApi("temp/")
-		// 	.then((response) => {
-		// 		console.log("포스팅 유무: ", response.data);
-		// 	})
-		// 	.catch((error) => {
-		// 		console.error(error);
-		// 	});
-
-		// await navigation.navigate("Recommend")
+		const endpoint = "login/login/";
+		const regex = /\w+@\w+\.[\w,\.]+/;
+		console.log(data);
+		if (regex.test(data.email)) {
+			try {
+				const response = await postApi(endpoint, data);
+				console.log(response.data.status);
+				if (response.data.status) {
+					logUserIn(data.email);
+				} else {
+					alert("회원정보를 찾을 수 없습니다");
+				}
+			} catch (error) {
+				alert(error);
+				console.log(error);
+			}
+		} else {
+			alert("이메일 형식이 맞지 않습니다");
+		}
 	};
 
 	useEffect(() => {
@@ -49,38 +53,46 @@ export default function Login({ navigation }) {
 	}, [register]);
 
 	return (
-		<View style={styles.container}>
-			<Image style={styles.image} source={require("./assets/logo.png")} />
-			<StatusBar style="auto" />
-			<View style={styles.inputView}>
-				<TextInput
-					style={styles.TextInput}
-					placeholder="Email"
-					placeholderTextColor="#003f5c"
-					autoCapitalize={"none"}
-					onChangeText={(text) => setValue("email", text)}
-					onSubmitEditing={() => onNext(passwordRef)}
-				/>
-			</View>
-			<View style={styles.inputView}>
-				<TextInput
-					ref={passwordRef}
-					style={styles.TextInput}
-					placeholder="Password"
-					placeholderTextColor="#003f5c"
-					secureTextEntry={true}
-					autoCapitalize={"none"}
-					onChangeText={(text) => setValue("password", text)}
-					onSubmitEditing={handleSubmit(onValid)}
-				/>
-			</View>
-			<TouchableOpacity onPress={() => navigation.navigate("Sign")}>
-				<Text style={styles.signin_button}>Sign IN</Text>
-			</TouchableOpacity>
-			<TouchableOpacity style={styles.loginBtn} onPress={handleSubmit(onValid)}>
-				<Text>LOGIN</Text>
-			</TouchableOpacity>
-		</View>
+		<TouchableWithoutFeedback style={{ flex: 1 }} onPress={Keyboard.dismiss}>
+			<KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" enabled>
+				<View style={styles.container}>
+					<Image style={styles.image} source={require("./assets/logo.png")} />
+					<StatusBar style="auto" />
+					<View style={styles.inputView}>
+						<TextInput
+							style={styles.TextInput}
+							placeholder="Email"
+							placeholderTextColor="#003f5c"
+							autoCapitalize={"none"}
+							onChangeText={(text) => setValue("email", text)}
+							onSubmitEditing={() => onNext(passwordRef)}
+						/>
+					</View>
+					<View style={styles.inputView}>
+						<TextInput
+							ref={passwordRef}
+							style={styles.TextInput}
+							placeholder="Password"
+							placeholderTextColor="#003f5c"
+							secureTextEntry={true}
+							autoCapitalize={"none"}
+							onChangeText={(text) => setValue("password", text)}
+							onSubmitEditing={handleSubmit(onValid)}
+						/>
+					</View>
+					<TouchableOpacity onPress={() => navigation.navigate("Sign")}>
+						<Text style={styles.signin_button}>Sign IN</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={styles.loginBtn}
+						disabled={!watch("email") || !watch("password")}
+						onPress={handleSubmit(onValid)}
+					>
+						<Text>LOGIN</Text>
+					</TouchableOpacity>
+				</View>
+			</KeyboardAvoidingView>
+		</TouchableWithoutFeedback>
 	);
 }
 
@@ -103,7 +115,6 @@ const styles = StyleSheet.create({
 		width: "70%",
 		height: 45,
 		marginBottom: 20,
-		alignItems: "center",
 	},
 	TextInput: {
 		height: 50,
