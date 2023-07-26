@@ -89,7 +89,8 @@ def feature_mapper(df, column):
             return x
     df.loc[:,column] = df.loc[:,column].apply(lambda x: space_remover(x))
 
-    unique_val = df[column].unique()
+    unique_val = list(df[column].unique())
+    unique_val.sort()
     feature2idx = {f:i for i, f in enumerate(unique_val)}
     idx2feature = {i:f for i, f in enumerate(unique_val)}
 

@@ -290,10 +290,15 @@ class MultilabelDataset(Dataset):
         
         self.max_len = max_len
         self.wine_label = wine_label
-        self.wine_id = self.data.wine_id
         self.mode = mode
-        if self.mode != 'inference':
+
+        if self.mode == 'train':
             self.targets = self.data.label
+
+        if self.mode != 'inference_no_label':
+            self.wine_id = self.data.wine_id
+            self.targets = self.data.label
+
 
     def __len__(self):
         return len(self.comment_text)
@@ -314,7 +319,8 @@ class MultilabelDataset(Dataset):
         ids = inputs['input_ids']
         mask = inputs['attention_mask']
         token_type_ids = inputs["token_type_ids"]
-        wine_ids = self.wine_id.loc[index]
+        if self.mode != 'inference_no_label':
+            wine_ids = self.wine_id.loc[index]
 
         if self.mode == 'inference':
             return {
@@ -322,6 +328,12 @@ class MultilabelDataset(Dataset):
                     'mask': torch.tensor(mask, dtype=torch.long),
                     'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
                     'wine_ids' : wine_ids
+                }
+        elif self.mode == 'inference_no_label':
+            return {
+                    'ids': torch.tensor(ids, dtype=torch.long),
+                    'mask': torch.tensor(mask, dtype=torch.long),
+                    'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
                 }
         else:
             if self.wine_label is None:

@@ -56,14 +56,14 @@ def prepare_dataset(args):
 
 
     item_data_cols = [
-        'item_id',
+        'wine_id',
 
         'house', 
 
         'country', 'region1', 
         'winetype',  'wine_style', 'grape','vintage',
 
-       'price', 'wine_rating', 'num_votes', 
+       'price', 'rating', 'num_votes', 
        'pairing',
 
        'Red Fruit', 'Tropical', 'Tree Fruit', 'Oaky', 'Ageing', 'Black Fruit',
@@ -75,11 +75,11 @@ def prepare_dataset(args):
        'Soft','Acidic',
        'Fizzy', 'Gentle']
 
-    item_data = pd.read_csv('/opt/ml/wine/data/item_data_sample.csv',
+    item_data = pd.read_csv('/opt/ml/wine/data/item_data_final.csv',
                             encoding= 'utf-8-sig',
                             usecols = item_data_cols)
     
-    item_data.rename(columns = {'item_id':'wine_id'}, inplace= True)
+    item_data.rename(columns = {'rating':'wine_rating'}, inplace= True)
     item_data = item_data.dropna(subset=['wine_id'], axis=0)
 
     item_data['wine_id'] = item_data['wine_id'].astype(int).astype('category')
@@ -156,7 +156,6 @@ def prepare_dataset(args):
 
     inter.rename(columns={'scaled_rating': 'user_rating'}, inplace=True)
 
-    pdb.set_trace()
     item_data.reset_index(drop = True, inplace = True)
     train_rating = pd.merge(inter.loc[:,['email','user_rating','timestamp','wine_id']],item_data.loc[:, 'wine_id'],on = 'wine_id', how = 'inner')
 
@@ -237,6 +236,8 @@ def save_atomic_file(train_data, user_data, item_data):
     print(train_data.isnull().sum())
     print(item_data.isnull().sum())
     print(user_data.isnull().sum())
+
+    print(train_data['wine_id:token'].nunique())
 
 if __name__ == '__main__':
 

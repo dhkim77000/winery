@@ -24,7 +24,7 @@ normalize_all: True
 show_progress : False
 epochs : 5
 device : torch.device("cuda" if torch.cuda.is_available() else "cpu")
-embedding_size: 64
+embedding_size: 128
 
 train_batch_size: 1024
 eval_batch_size: 1024
