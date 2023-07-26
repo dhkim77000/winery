@@ -28,7 +28,8 @@
     "react-native-screens": "~3.20.0",
     "react-native-star-rating": "^1.1.0",
     "react-native-swiper": "^1.6.0",
-    "react-native-web": "~0.18.10"
+    "react-native-web": "~0.18.10",
+    "react-native-web-swiper": "^2.2.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

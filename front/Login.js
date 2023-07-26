@@ -11,6 +11,7 @@ import {
 	TouchableWithoutFeedback,
 	Keyboard,
 	KeyboardAvoidingView,
+	Platform,
 } from "react-native";
 import { postApi, logUserIn } from "./Api";
 
@@ -53,7 +54,14 @@ export default function Login({ navigation }) {
 	}, [register]);
 
 	return (
-		<TouchableWithoutFeedback style={{ flex: 1 }} onPress={Keyboard.dismiss}>
+		<TouchableWithoutFeedback
+			style={{ flex: 1 }}
+			onPress={() => {
+				if (Platform.OS != "web") {
+					Keyboard.dismiss();
+				}
+			}}
+		>
 			<KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" enabled>
 				<View style={styles.container}>
 					<Image style={styles.image} source={require("./assets/logo.png")} />
