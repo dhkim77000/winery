@@ -70,6 +70,70 @@ def get_all_wine_feature(db: connection):
     
     return result
 
+async def search_wine_by_name2(db: connection, wine_name):
+    min_length = max(len(wine_name) // 3, 2)
+
+    searched_wine_ids = set()
+    with db.cursor() as cur:
+        while len(wine_name) >= min_length:
+            cur.execute("SELECT item_id FROM wine WHERE name ILIKE %s OR house ILIKE %s", ('%' + wine_name + '%', '%' + wine_name + '%'))
+            result = cur.fetchall()
+            if len(result) != 0: # If result is found, break the loop and return the result
+                for id in result: searched_wine_ids.add(id[0])
+                #break
+            # Reduce the search_term by removing the last character
+            wine_name = wine_name[:-1]
+    
+    for wine_result in list(searched_wine_ids):
+        wine_result = Wine(
+        id = result[0],
+        item_id = result[1],
+        winetype = result[2],
+        Red_Fruit = result[3],
+        Tropical = result[4],
+        Tree_Fruit = result[5],
+        Oaky = result[6],
+        Ageing = result[7],
+        Black_Fruit = result[8],
+        Citrus = result[9],
+        Dried_Fruit = result[10],
+        Earthy = result[11],
+        Floral = result[12],
+        Microbio = result[13],
+        Spices = result[14],
+        Vegetal = result[15],
+        Light = result[16],
+        Bold = result[17],
+        Smooth = result[18],
+        Tannic = result[19],
+        Dry = result[20],
+        Sweet = result[21],
+        Soft = result[22],
+        Acidic = result[23],
+        Fizzy = result[24],
+        Gentle = result[25],
+        vintage = result[26],
+        price = result[27],
+        wine_rating = result[28],
+        num_votes = result[29],
+        country = result[30],
+        region1 = result[31],
+        grape = result[32],
+        region2 = result[33],
+        region3 = result[34],
+        region4 = result[35],
+        winery= result[36],
+        name= result[37],
+        wine_style= result[38],
+        house = result[39],
+        pairing = result[40],
+    )
+        return wine
+
+    
+    return list(searched_wine_ids)
+
+
 async def search_wine_by_name(db: connection, wine_name):
     min_length = max(len(wine_name) // 3, 2)
 
@@ -83,6 +147,7 @@ async def search_wine_by_name(db: connection, wine_name):
                 #break
             # Reduce the search_term by removing the last character
             wine_name = wine_name[:-1]
+        
     return list(searched_wine_ids)
 
 async def get_wine_data(db: connection, wine_id):

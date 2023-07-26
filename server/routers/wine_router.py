@@ -48,9 +48,21 @@ async def post_wine_info(wine_id_list: List[int],
 async def text_search(wine_name: str = '',
                             page : Optional[int] = None,
                             db: connection = Depends(get_conn)):
+    wine = {}
     wine_id_lists = await search_wine_by_name(db=db, wine_name = wine_name)
+    for wine_id in wine_id_lists:         
+        wine_contends =  await get_wine_data(db=db, wine_id=wine_id)
+        wine[wine_id] = wine_contends
+    return wine
+
+
+# @router.get("/search_by_name")
+# async def text_search(wine_name: str = '',
+#                             page : Optional[int] = None,
+#                             db: connection = Depends(get_conn)):
+#     wine_id_lists = await search_wine_by_name(db=db, wine_name = wine_name)
     
-    return wine_id_lists
+#     return wine_id_lists
 
 # # 와인 grid 페이지 정보
 # @router.post("/wine_recommend")
