@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { isLoggedInVar, postApi } from "./Api";
 
-export default function Sign({navigation}) {
+export default function Sign({ navigation }) {
 	const { register, setValue, watch } = useForm();
 	const passwordRef = useRef();
 	const passwordCheckRef = useRef();
@@ -26,22 +26,25 @@ export default function Sign({navigation}) {
 	const onValid = async (data) => {
 		const endpoint = "login/check/";
 		const regex = /\w+@\w+\.[\w,\.]+/;
-		console.log(data)
+		console.log(data);
 		if (!regex.test(data.email)) {
 			alert("이메일 형식이 맞지 않습니다");
 		} else if (data.password != data.password_check) {
 			alert("비밀번호가 일치하지 않습니다");
 		} else {
 			delete data.password_check; // password_check 항목 제거
-			console.log(data)
+			console.log(data);
 			try {
 				const response = await postApi(endpoint, data);
 				console.log(response.data);
 				if (!response.data.status) {
 					alert("이미 존재하는 계정입니다");
 				} else {
-					console.log(watch())
-					navigation.navigate('Mbti', {email: watch("email"), password: watch("password")})
+					console.log(watch());
+					navigation.navigate("Mbti", {
+						email: watch("email"),
+						password: watch("password"),
+					});
 				}
 			} catch (error) {
 				alert(error);
@@ -63,7 +66,14 @@ export default function Sign({navigation}) {
 	}, [register]);
 
 	return (
-		<TouchableWithoutFeedback style={{ flex: 1 }} onPress={Keyboard.dismiss}>
+		<TouchableWithoutFeedback
+			style={{ flex: 1 }}
+			onPress={() => {
+				if (Platform.OS != "web") {
+					Keyboard.dismiss();
+				}
+			}}
+		>
 			<KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" enabled>
 				<View style={styles.container}>
 					<StatusBar style="auto" />
@@ -103,13 +113,16 @@ export default function Sign({navigation}) {
 							autoCapitalize={"none"}
 						/>
 					</View>
+					<TouchableOpacity onPress={() => navigation.navigate("Login")}>
+						<Text style={styles.signin_button}>LOGIN</Text>
+					</TouchableOpacity>
 					<TouchableOpacity
 						style={styles.nextBtn}
 						disabled={
 							!watch("email") || !watch("password") || !watch("password_check")
 						}
 						onPress={() => {
-							onValid(watch())
+							onValid(watch());
 						}}
 					>
 						<Text>NEXT</Text>
