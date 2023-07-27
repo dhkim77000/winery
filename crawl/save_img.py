@@ -148,8 +148,7 @@ def save_img(url, wine_id, img_folder):
 def get_img(driver, urls, done, failed, item2idx, img_folder):
     class_name = "mobile-column-3.tablet-column-3.desktop-column-2"
 
-    
-
+    img_dic = {}
 
     i = 0
     for url in tqdm(urls):
@@ -164,27 +163,19 @@ def get_img(driver, urls, done, failed, item2idx, img_folder):
             img_pannel = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CLASS_NAME, class_name)))
             img = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.TAG_NAME, 'img')))
             img_url = img.get_attribute('src')
-            
-            wine_id = item2idx[url]
-            result = save_img(img_url, wine_id, img_folder)
-            
-            if result == False:
-                failed.add(url)
-            else:
-                done.add(url)
-        
+
+            img_dic[url] = img_url
+
         except:
-            pass
+            img_dic[url] = ''
         i += 1
         
         time.sleep(4)
         if i % 500 == 0:
-            with open(os.path.join(data_dir,'img_done.pkl'), 'wb') as f: pickle.dump(done, f)
-            with open(os.path.join(data_dir,'img_failed.pkl'), 'wb') as f: pickle.dump(failed, f)
+            with open(os.path.join(data_dir,'img_dic.json'), 'w') as f: json.dump(img_dic, f)
 
+    with open(os.path.join(data_dir,'img_dic.json'), 'w') as f: json.dump(img_dic, f)
 
-    with open(os.path.join(data_dir,'img_done.pkl'), 'wb') as f: pickle.dump(done, f)
-    with open(os.path.join(data_dir,'img_failed.pkl'), 'wb') as f: pickle.dump(failed, f)
 
 
 if __name__ == '__main__':

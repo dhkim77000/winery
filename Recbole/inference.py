@@ -292,7 +292,7 @@ def main(args):
                 batch_pred_list = ind[
                     np.arange(len(rating_pred))[:, None], arr_ind_argsort
                 ]
-
+                
                 if pred_list is None:
                     pred_list = batch_pred_list
                     user_list = user_index
@@ -307,8 +307,8 @@ def main(args):
 #                 for item in pred:
 #                     result.append((int(user_id2token[user]), int(item_id2token[item])))
 
-
-
+            pdb.set_trace()
+            user_list = [user_id2token[user_idx] for user_idx in user_list]
             # user_list를 key로, pred_list를 value로 갖는 dictionary 생성
             data_dict = {str(user_id): pred_list[i].tolist() for i, user_id in enumerate(user_list)}
 

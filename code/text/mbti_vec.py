@@ -26,6 +26,7 @@ from collections import defaultdict
 from torch.utils.data.dataset import Dataset
 from transformers import DataCollatorForLanguageModeling
 import os
+from transformers import BertConfig, BertForPreTraining, BertTokenizerFast
 from transformers import Trainer, TrainingArguments
 from transformers.utils import logging
 logger = logging.get_logger(__name__)
@@ -90,14 +91,19 @@ def get_embedding_multilabel(df, vector_dic, args):
     df.reset_index(inplace = True)
     review_vectors = {}
 
-
-    model = BERTClass(
-        args = args,
-        num_labels= get_label_num(),
-        mode = 'embedding'
-        )
-    
-
+    if args.mode == 'total':
+        model = BERTClass(
+            args = args,
+            num_labels= get_label_num(),
+            mode = 'embedding'
+            )
+    else:
+        model = BERTClass(
+            args = args,
+            num_labels= len([0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0]),
+            mode = 'embedding'
+            )
+        
     model.load_state_dict(torch.load(args.model_path))
     model.to(device)
 
@@ -128,46 +134,6 @@ def get_embedding_multilabel(df, vector_dic, args):
     return vector_dic
 
 
-def get_embedding_MLM(df, args):
-
-    device = torch.device("cuda")
-    df.reset_index(inplace = True)
-    review_vectors = {}
-
-    tokenizer = BertTokenizerFast(
-                vocab_file='/opt/ml/wine/code//text/models/review_tokenizer-vocab.txt',
-                max_len=156,
-                do_lower_case=True
-                )
-            
-    model = BertModel.from_pretrained('/opt/ml/wine/code/text/models/model_output')
-    model.to(device)
-
-    with torch.no_grad():
-
-        for key in tqdm(dic):
-            text = dic[key]
-            encoded_input = tokenizer.encode_plus(
-                text, 
-                truncation = True,
-                add_special_tokens=True, 
-                return_tensors='pt')
-            
-            for key in encoded_input:
-                encoded_input[key] = encoded_input[key].to(device)
-
-            model_output = model(**encoded_input)
-                
-            embeddings = model_output.last_hidden_state.detach().cpu()
-            sentence_embedding = torch.mean(embeddings[0], dim=0)
-  
-            del embeddings
-            del model_output
-            del encoded_input
-   
-            
-    return review_vectors
-
 
 if __name__ == '__main__':
 
@@ -182,13 +148,8 @@ if __name__ == '__main__':
     parser.add_argument("--pool", default = 'mean', type=str)
     print('cuda' if cuda.is_available() else 'cpu')
 #######Data#############################################################################
-    
-    
-    
-    #mp.set_start_method('spawn')
-    torch.multiprocessing.set_start_method('spawn')
-
     args = parser.parse_args()
+ 
     with open('/opt/ml/wine/data/mbti_answer.json','r') as f:
         mbti_vec = json.load(f)
 
@@ -196,7 +157,6 @@ if __name__ == '__main__':
     data = pd.DataFrame(mbti_vec.values(), index= mbti_vec.keys(), columns = ['text'])
     with open('/opt/ml/wine/code/data/feature_map/item2idx.json','r') as f:
         item2idx = json.load(f)
-
 
     get_embedding_multilabel(data, {}, args)
 

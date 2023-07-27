@@ -84,7 +84,7 @@ def prepare_dataset(args):
 
     item_data['wine_id'] = item_data['wine_id'].astype(int).astype('category')
 
-    inter = pd.read_csv('/opt/ml/wine/data/inter_sample.csv', 
+    inter = pd.read_csv('/opt/ml/wine/data/inter.csv', 
                                       encoding='utf-8-sig',
                                       usecols = ['email','rating','timestamp','wine_id'])
     

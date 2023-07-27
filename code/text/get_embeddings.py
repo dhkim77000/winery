@@ -90,17 +90,14 @@ def get_embedding_multilabel(df, vector_dic, args):
     df.reset_index(inplace = True)
     review_vectors = {}
 
-
     model = BERTClass(
         args = args,
         num_labels= get_label_num(),
         mode = 'embedding'
         )
     
-
     model.load_state_dict(torch.load(args.model_path))
     model.to(device)
-
 
     tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
 
@@ -133,6 +130,8 @@ def get_embedding_multilabel(df, vector_dic, args):
             del ids, mask, token_type_ids, wine_ids
             gc.collect()
             torch.cuda.empty_cache()
+
+    
     return vector_dic
 
 
@@ -202,6 +201,8 @@ def parallel_embedding(df, args, num_cpu):
         with Parallel(n_jobs = num_cpu, backend="multiprocessing") as parallel:
             results = parallel(delayed(get_embedding_MLM)(chunks[i], args) for i in range(num_cpu))
 
+        pdb.set_trace()
+    
         for i,data in enumerate(results):
             if i == 0:
                 output = data

@@ -72,7 +72,7 @@ def main(args):
         print(e)
         print('-------------------Processing review text-------------------')
         review_df = pd.read_csv('/opt/ml/wine/data/review_df_total.csv',encoding = 'utf-8-sig').loc[:,['user_url','rating','text','wine_url']]
-
+        tqdm.pandas() 
         review_df = review_df[review_df['text'].notna()]
         review_df['text'] = review_df['text'].progress_apply(lambda x: x + '.' if x[-1] != '.' else x)
         review_df['text'] = review_df['text'].progress_apply(keep_english_and_digits)
