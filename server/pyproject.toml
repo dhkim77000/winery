@@ -7,7 +7,7 @@ license = "UNLICENSED"
 
 [tool.poetry.dependencies]
 python = ">=3.7,<4.0"
-numpy = "^1.19.4"
+numpy = "^1.19.5"
 uvicorn = "^0.15.0"
 torch = "^1.9.1"
 efficientnet-pytorch = "^0.7.1"
