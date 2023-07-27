@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import joblib
 import ast
+from google.cloud import storage
 from joblib import Parallel, delayed
 import pandas as pd
 from pandas import DataFrame
@@ -18,6 +19,8 @@ import pickle
 from collections import defaultdict, deque
 import re
 import faiss
+from google.cloud import storage
+
 
 def string2array(x):
     x = x.replace('\n', '').strip('[]')
@@ -549,3 +552,16 @@ def data_to_normal(data,user_id,timestamp,rating,wine_id):
     return result
 
 
+def get_data_from_bucket():
+    bucket_name = 'inter_info_db2model'    
+    item_data_source_blob_name = 'item_data_bucket.csv'
+    inter_data_source_blob_name = 'inter_bucket.csv'
+    destination_folder = '/opt/ml/wine/data'    
+
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    item_blob = bucket.blob(item_data_source_blob_name)
+    inter_blob = bucket.blob(inter_data_source_blob_name)
+
+    item_blob.download_to_filename(os.path.join(destination_folder, item_data_source_blob_name))
+    inter_blob.download_to_filename(os.path.join(destination_folder, inter_data_source_blob_name))

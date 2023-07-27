@@ -5,6 +5,21 @@ import os
 import pdb
 from cluster_nns import get_nns
 import numpy as np
+from google.cloud import storage
+from datetime import datetime
+
+def data2bucket():
+    current_time = datetime.now()
+    bucket_name = 'rank_info_db2model'    
+    source_file_name = '/opt/ml/wine/output/inference.json'
+    destination_blob_name = f'{current_time}_inference.json'
+  
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(destination_blob_name)
+
+    blob.upload_from_filename(source_file_name)
+    print("upload success")
 
 def string2array(x):
     x = x.replace('\n', '').strip('[]')

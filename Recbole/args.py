@@ -1,6 +1,6 @@
 import argparse
-
-
+import os
+import pdb
 def parse_args():
     """
     parameter를 전달해주는 함수입니다.
@@ -33,10 +33,19 @@ def parse_args():
     parser.add_argument("--filter_inter", default = False, type=bool)
     
     #inference
-    parser.add_argument("--saved_model" , default = "None", type=str,help ="use model")
+    
     parser.add_argument("--rank_K", default = 300, type=int, help="# of predict number")
     parser.add_argument("--top_K" , default = 10, type=int)
-    
+    models_path = '/opt/ml/wine/Recbole/saved'
+
+    # Get a list of all files in the directory
+    files = os.listdir(models_path)
+    files = [file for file in files if os.path.isfile(os.path.join(models_path, file))]
+
+    sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(models_path, x)), reverse=True)
+    most_recent_model = sorted_files[0]
+
+    parser.add_argument("--saved_model" , default = most_recent_model, type=str,help ="use model")
     args = parser.parse_args()
 
     return args

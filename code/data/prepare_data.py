@@ -17,6 +17,8 @@ import os, pdb
 from datetime import datetime
 import pickle
 import argparse
+from google.cloud import storage
+
 
 def load_index_file():
 
@@ -53,8 +55,6 @@ def prepare_dataset(args):
     with open('/opt/ml/wine/code/data/meta_data/float_columns.json','r',encoding='utf-8') as f:  
         float_columns = json.load(f)
 
-
-
     item_data_cols = [
         'wine_id',
 
@@ -75,7 +75,9 @@ def prepare_dataset(args):
        'Soft','Acidic',
        'Fizzy', 'Gentle']
 
-    item_data = pd.read_csv('/opt/ml/wine/data/item_data_final.csv',
+    get_data_from_bucket()
+    
+    item_data = pd.read_csv('/opt/ml/wine/data/item_data_bucket.csv',
                             encoding= 'utf-8-sig',
                             usecols = item_data_cols)
     
@@ -84,7 +86,7 @@ def prepare_dataset(args):
 
     item_data['wine_id'] = item_data['wine_id'].astype(int).astype('category')
 
-    inter = pd.read_csv('/opt/ml/wine/data/inter.csv', 
+    inter = pd.read_csv('/opt/ml/wine/data/inter_bucket.csv', 
                                       encoding='utf-8-sig',
                                       usecols = ['email','rating','timestamp','wine_id'])
     

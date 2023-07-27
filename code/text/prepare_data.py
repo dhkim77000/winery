@@ -31,9 +31,9 @@ def main(args):
     # Now download the punkt tokenizer data
     nltk.download('punkt')
     print('-------------------Reading Datas-------------------')
-    with open('/opt/ml/wine/code/feature_map/item2idx.json','r') as f: item2idx = json.load(f)
-    with open('/opt/ml/wine/code/feature_map/price_vocab.json','r') as f: price_vocab = json.load(f)
-    with open('/opt/ml/wine/code/feature_map/note.json','r') as f: notes_data = json.load(f)
+    with open('/opt/ml/wine/code/data/feature_map/item2idx.json','r') as f: item2idx = json.load(f)
+    with open('/opt/ml/wine/code/data/feature_map/price_vocab.json','r') as f: price_vocab = json.load(f)
+    with open('/opt/ml/wine/code/data/feature_map/note.json','r') as f: notes_data = json.load(f)
 
     basic_info = pd.read_csv('/opt/ml/wine/data/basic_info_total.csv')
     wine_df = pd.read_csv('/opt/ml/wine/data/wine_df.csv')
@@ -111,9 +111,9 @@ def main(args):
         gc.collect()
 
         gc.collect()
-        with open('/opt/ml/wine/code/feature_map/grape2idx.json','w') as f: json.dump(grape2idx, f)
-        with open('/opt/ml/wine/code/feature_map/country2idx.json','w') as f: json.dump(country2idx, f)
-        with open('/opt/ml/wine/code/feature_map/winetype2idx.json','w') as f: json.dump(winetype2idx, f)
+        with open('/opt/ml/wine/code/data/feature_map/grape2idx.json','w') as f: json.dump(grape2idx, f)
+        with open('/opt/ml/wine/code/data/feature_map/country2idx.json','w') as f: json.dump(country2idx, f)
+        with open('/opt/ml/wine/code/data/feature_map/winetype2idx.json','w') as f: json.dump(winetype2idx, f)
 
     
 if __name__ == '__main__':

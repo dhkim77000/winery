@@ -10,7 +10,7 @@ from args import parse_args
 from logging import getLogger
 import torch
 import pdb
-from utils import candid2recbole, bayesian_average, string2array
+from utils import candid2recbole, bayesian_average, string2array, data2bucket
 
 from recbole.model.general_recommender.multivae import MultiVAE
 from recbole.quick_start import run_recbole
@@ -29,7 +29,7 @@ def main(args):
         (모델경로)로 사용할 모델을 선택합니다.
         --rank_K로 몇개의 추천아이템을 뽑아낼지 선택합니다.
     """
-    with open('/opt/ml/wine/code/feature_map/idx2user.json','r') as f:
+    with open('/opt/ml/wine/code/data/feature_map/idx2user.json','r') as f:
         idx2user = json.load(f)
 
     item_data = pd.read_csv('/opt/ml/wine/data/item_data.csv', encoding='utf-8-sig')
@@ -307,8 +307,7 @@ def main(args):
                     user_list = np.append(
                         user_list, user_index, axis=0
                     )
-                if len(user_list) > 5:
-                    pdb.set_trace()
+
 #             result = []
 #             for user, pred in zip(user_list, pred_list):
 #                 for item in pred:
@@ -324,17 +323,13 @@ def main(args):
             # user_list를 key로, pred_list를 value로 갖는 dictionary 생성
             data_dict = {user_email: pred_list[i].tolist() for i, user_email in enumerate(user_list)}
 
-            # dictionary를 JSON 형태로 변환
-            json_data = json.dumps(data_dict)
-
-            # JSON 문자열을 다시 딕셔너리로 디코딩
-            # decoded_data = json.loads(json_data)
-
             # JSON 데이터를 파일에 저장
-            file_path = "inference.json"  # 원하는 파일 경로와 이름 설정
-            with open(file_path, 'w') as f:
-                f.write(json_data)
+            output_foler = '/opt/ml/wine/output'
 
+            filename = "inference.json"  # 원하는 파일 경로와 이름 설정
+            with open(os.path.join(output_foler, filename), 'w') as f:
+                json.dump(data_dict, f)
+            data2bucket()
 
 
 
