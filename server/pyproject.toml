@@ -28,6 +28,7 @@ bcrypt = "^4.0.1"
 tqdm = "^4.65.0"
 faiss-cpu = "^1.7.4"
 pymongo = "^4.4.1"
+pip install markupsafe = "^2.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
