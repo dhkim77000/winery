@@ -34,11 +34,15 @@ def main(args):
 
     item_data = pd.read_csv('/opt/ml/wine/data/item_data.csv', encoding='utf-8-sig')
     item_data['vectors'] = item_data['vectors'].apply(string2array)
+
     min_votes = 20
     item_data = bayesian_average(item_data, min_votes)
 
     item_data.set_index('wine_id', inplace = True)
     item_data['wine_id'] = item_data.index
+
+    popular = set(item_data.sort_values(by='popularity_adjusted_rating', ascending=False).head(500)['wine_id'].tolist())
+    
 
     wine_vectors = []
     for vector in item_data['vectors']: wine_vectors.append(vector)
@@ -51,9 +55,11 @@ def main(args):
     index = faiss.IndexIDMap2(index)
     index.add_with_ids(wine_vectors, wine_ids)
 
-    item_data_recbole = pd.read_csv("/opt/ml/wine/dataset/train_data/train_data.item", 
+    user_data = pd.read_csv("/opt/ml/wine/dataset/train_data/train_data.user", 
                                     sep='\t', 
                                     encoding='utf-8')
+    user_data.set_index('email:token', inplace = True)
+    user_data['user_id'] = user_data.index
 
     inter = pd.read_csv("/opt/ml/wine/dataset/train_data/train_data.inter", sep='\t',encoding='utf-8')
     item_emb = pd.read_csv("/opt/ml/wine/dataset/train_data/train_data.itememb", sep='\t',encoding='utf-8')
@@ -262,15 +268,15 @@ def main(args):
                 rating_pred = score.cpu().data.numpy().copy()
 
                 user_index = data.numpy()
+                user_inter_count = user_data.loc[int(user_id2token[user_index[0]]), 'count:float']
 
                 idx = matrix[user_index].toarray() > 0
 
                 
                 candid_item_ids = candid2recbole(item_data, 
-                                                item_data_recbole, 
-                                                inter_per_user, 
-                                                inter, 
-                                                item_emb,
+                                                user_inter_count, 
+                                                inter_per_user,
+                                                popular,
                                                 index)
                 
                 candid_item_idx = []
@@ -301,16 +307,22 @@ def main(args):
                     user_list = np.append(
                         user_list, user_index, axis=0
                     )
- 
+                if len(user_list) > 5:
+                    pdb.set_trace()
 #             result = []
 #             for user, pred in zip(user_list, pred_list):
 #                 for item in pred:
 #                     result.append((int(user_id2token[user]), int(item_id2token[item])))
 
-            pdb.set_trace()
-            user_list = [user_id2token[user_idx] for user_idx in user_list]
+            
+            user_id2token[user_list[0]]
+
+
+            # Token화된 유저 이메일을 실제 이메일로 전환
+            user_list = [idx2user[str(user_id2token[user_idx])] for user_idx in user_list]
+    
             # user_list를 key로, pred_list를 value로 갖는 dictionary 생성
-            data_dict = {str(user_id): pred_list[i].tolist() for i, user_id in enumerate(user_list)}
+            data_dict = {user_email: pred_list[i].tolist() for i, user_email in enumerate(user_list)}
 
             # dictionary를 JSON 형태로 변환
             json_data = json.dumps(data_dict)

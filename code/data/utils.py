@@ -262,18 +262,6 @@ def parallel(func, df, args, num_cpu):
         if 'Unnamed:' in c:
             result.drop(c, axis = 1, inplace= True)  
 
-
-    if 'uid' in result.columns:
-
-        urls = result['uid'].unique()
-        user2idx = {v:k for k,v in enumerate(urls)}
-        idx2user = {k:v for k,v in enumerate(urls)}
-
-        with open(f'/opt/ml/wine/code/data/feature_map/user2idx.json','w',encoding='utf-8') as f:  
-            json.dump(user2idx, f, ensure_ascii=False)
-        with open(f'/opt/ml/wine/code/data/feature_map/idx2user.json','w',encoding='utf-8') as f:  
-            json.dump(idx2user, f, ensure_ascii=False)
-
     return result
 
 def to_recbole_columns(columns):
