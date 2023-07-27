@@ -193,17 +193,21 @@ def main(args):
         config['dataset'] = 'train_data'
         init_seed(config['seed'], config['reproducibility'])
         print("create dataset start!")
-        init_dataset = create_dataset(config)
+        dataset = create_dataset(config)
 
         user_id = config['USER_ID_FIELD']
         item_id = config['ITEM_ID_FIELD']
-        user_id2token = init_dataset.field2id_token[user_id]
-        item_id2token = init_dataset.field2id_token[item_id]
+        user_id2token = dataset.field2id_token[user_id]
+        item_id2token = dataset.field2id_token[item_id]
+
+        user_id2idx = {user_id: i for i, user_id in enumerate(user_id2token)}
+        item_id2idx = {item_id: i for i, item_id in enumerate(item_id2token)}
+
         # device 설정
         device = config.final_config_dict['device']
 
         # user id list
-        batch_size = 32
+        batch_size = 1
         user_count = len(user_id2token)
         remainder = user_count % batch_size
         padding_size = batch_size - remainder if remainder != 0 else 0
@@ -222,33 +226,22 @@ def main(args):
 
         # model 평가모드 전환
         
-        matrix = init_dataset.inter_matrix(form='csr')
+        matrix = dataset.inter_matrix(form='csr')
 
         tbar = tqdm(all_user_list, desc=set_color(f"Inference", 'pink'))
 
         ###경로 수정
-        config.final_config_dict['datfa_path'] = '/opt/ml/wine/dataset/cadidates'
-        
+
+        train_data, valid_data, test_data = data_preparation(config, dataset)
+        model = get_model(config['model'])(config, test_data.dataset).to(config['device'])
+        model.load_state_dict(checkpoint['state_dict'])
+        model.load_other_parameter(checkpoint.get('other_parameter'))
+        model.eval()
+        print("create dataset done!")
+
         with torch.no_grad():
             for data in tbar:
-                candid2recbole(item_data, 
-                       item_data_recbole, 
-                       inter_per_user, 
-                       inter, 
-                       item_emb,
-                       index)
 
-                dataset = create_dataset(config)
-                train_data, valid_data, test_data = data_preparation(config, dataset)
-                model = get_model(config['model'])(config, test_data.dataset).to(config['device'])
-                model.load_state_dict(checkpoint['state_dict'])
-                model.load_other_parameter(checkpoint.get('other_parameter'))
-                model.eval()
-                
-    
-                print("create dataset done!")
-
-                
                 if max(data) > len(user_id2token):
                     data = [item for item in data if item <= user_len]
                     data = torch.tensor(data)
@@ -265,13 +258,29 @@ def main(args):
                 # user item별 score 예측
                 score = model.predict(interaction)
                 score = score.view(-1, item_len)
-                pdb.set_trace()
+
                 rating_pred = score.cpu().data.numpy().copy()
 
                 user_index = data.numpy()
 
                 idx = matrix[user_index].toarray() > 0
 
+                
+                candid_item_ids = candid2recbole(item_data, 
+                                                item_data_recbole, 
+                                                inter_per_user, 
+                                                inter, 
+                                                item_emb,
+                                                index)
+                
+                candid_item_idx = []
+                for item_id in candid_item_ids: candid_item_idx.append(item_id2idx[str(item_id)])
+                
+
+                mask = np.zeros(rating_pred.shape[1], dtype=bool)
+                mask[candid_item_idx] = True
+                mask = mask[np.newaxis, :]
+                rating_pred[~mask] = -np.inf
                 rating_pred[idx] = -np.inf
                 rating_pred[:, 0] = -np.inf
                 ind = np.argpartition(rating_pred, -K)[:, -K:]
@@ -292,7 +301,7 @@ def main(args):
                     user_list = np.append(
                         user_list, user_index, axis=0
                     )
-
+ 
 #             result = []
 #             for user, pred in zip(user_list, pred_list):
 #                 for item in pred:
