@@ -15,7 +15,7 @@ import uvicorn
 from fastapi.responses import  HTMLResponse
 
 
-from function import get_top_10_items
+from util import get_top_10_items
 
 #app = FastAPI()
 

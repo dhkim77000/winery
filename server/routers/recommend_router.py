@@ -83,6 +83,14 @@ def string2array(x):
 #######Wine Vector에 접근해서 FAISS 실행 후 TOP - K 리턴
 async def post_mbti_question(mbti_result):
     item_data = pd.read_csv("/opt/ml/wine/data/item_data (6).csv")
+    if mbti_result[2] == "c1":
+        item_data = item_data[item_data['price'] <= 50]
+    elif mbti_result[2] == "c2":
+        item_data = item_data[item_data['price'] <= 150]
+    elif mbti_result[2] == "c3":
+        item_data = item_data[item_data['price'] <= 500]
+    else:
+        item_data = item_data[item_data['price'] > 500]
     #### Example data
     num_wines = item_data.shape[0]
     item_data['vectors'] = item_data['vectors'].apply(string2array)

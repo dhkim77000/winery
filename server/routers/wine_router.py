@@ -6,7 +6,7 @@ from crud import get_wine_data,get_wine_data_simple,get_user, search_wine_by_nam
 from crud_mongo import check_rating_datas, rating_update , rating_push, rating_delete
 from schema import UserAdd , Usertype, UserInteraction,CheckInteraction , Search
 from uuid import UUID, uuid4
-from function import get_top_10_items
+from util import get_top_10_items
 from typing import List, Optional
 import numpy as np
 import pdb

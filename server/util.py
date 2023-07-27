@@ -9,8 +9,10 @@ def get_top_10_items():
     cursor = conn.cursor()
 
     # SQL 쿼리 실행 (nan 값 제외)
-    cursor.execute("SELECT item_id FROM wine WHERE NOT wine_rating IS NULL AND NOT num_votes IS NULL AND NOT wine_rating = 'nan' AND NOT num_votes = 'nan' ORDER BY wine_rating DESC, num_votes DESC LIMIT 10;")
-    
+    # cursor.execute("SELECT item_id FROM wine WHERE NOT wine_rating IS NULL AND NOT num_votes IS NULL AND NOT wine_rating = 'nan' AND NOT num_votes = 'nan' ORDER BY wine_rating DESC, num_votes DESC LIMIT 10;")
+    cursor.execute("SELECT item_id, ((num_votes / (num_votes + 20)) * wine_rating + (20 / (num_votes + 20)) * COALESCE(AVG(wine_rating) OVER ())) AS popularity_adjusted_rating FROM wine WHERE wine_rating IS NOT NULL AND num_votes IS NOT NULL AND wine_rating <> 'nan' AND num_votes <> 'nan' ORDER BY popularity_adjusted_rating DESC LIMIT 10;")
+
+
     # 결과 가져오기
     result = cursor.fetchall()
     # 연결 종료
