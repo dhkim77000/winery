@@ -4,7 +4,7 @@ from psycopg2.extensions import connection
 from database import get_db, get_conn, get_mongo_db
 from crud import get_wine_data,get_wine_data_simple,get_user, search_wine_by_name
 from crud_mongo import check_rating_datas, rating_update , rating_push, rating_delete
-from schema import UserAdd , Usertype, UserInteraction,CheckInteraction
+from schema import UserAdd , Usertype, UserInteraction,CheckInteraction , Search
 from uuid import UUID, uuid4
 from function import get_top_10_items
 from typing import List, Optional
@@ -44,12 +44,11 @@ async def post_wine_info(wine_id_list: List[int],
         wines[wine_id] = wine
     return wines
 
-@router.get("/search_by_name")
-async def text_search(wine_name: str = '',
-                            page : Optional[int] = None,
+@router.post("/search_by_name")
+async def text_search(request: Request, search: Search, page : Optional[int] = None,
                             db: connection = Depends(get_conn)):
     wine = {}
-    wine_id_lists = await search_wine_by_name(db=db, wine_name = wine_name)
+    wine_id_lists = await search_wine_by_name(db=db, wine_name = search.name)
     for wine_id in wine_id_lists:         
         wine_contends =  await get_wine_data(db=db, wine_id=wine_id)
         wine[wine_id] = wine_contends

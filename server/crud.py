@@ -139,15 +139,24 @@ async def search_wine_by_name(db: connection, wine_name):
 
     searched_wine_ids = set()
     with db.cursor() as cur:
+        cnt = 0
         while len(wine_name) >= min_length:
+            if cnt > 100:
+                break
             cur.execute("SELECT item_id FROM wine WHERE name ILIKE %s OR house ILIKE %s", ('%' + wine_name + '%', '%' + wine_name + '%'))
             result = cur.fetchall()
             if len(result) != 0: # If result is found, break the loop and return the result
-                for id in result: searched_wine_ids.add(id[0])
-                #break
+                for id in result: 
+                    searched_wine_ids.add(id[0])
+                    cnt +=1
+                    if cnt > 100:
+                        break
+
+
+                #breakex
             # Reduce the search_term by removing the last character
             wine_name = wine_name[:-1]
-        
+
     return list(searched_wine_ids)
 
 async def get_wine_data(db: connection, wine_id):

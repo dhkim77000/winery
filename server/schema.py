@@ -12,6 +12,9 @@ class Token(BaseModel):
     token_type: str
     id: UUID
 
+class Search(BaseModel):
+    name : str
+
 
 class UserAdd(BaseModel):
     email: EmailStr
@@ -91,4 +94,5 @@ class ReturnValue(BaseModel):
 
 class GetMBTI(BaseModel):
     result : List[str]
+    style : str
 

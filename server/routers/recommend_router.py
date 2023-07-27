@@ -83,26 +83,29 @@ async def info():
 async def post_mbti_question(mbti_result : GetMBTI):
 
     #### Example data
-    num_wines = 12000
+    # num_wines = 12000
     vector_dimension = 768
 
-    # answer_list = mbti_result.result
-    # with open("/opt/ml/wine/server/data/mbti_vectors.json","r") as f:
-    #     answer_vector = json.load(f)
+    answer_list = mbti_result.result
+    with open("/opt/ml/wine/server/data/mbti_vectors.json","r") as f:
+        answer_vector = json.load(f)
 
-    # vector_list = []
-    # for answer in answer_list:
-    #     vector_list.append(answer_vector[answer])
+    vector_list = []
+    for answer in answer_list:
+        vector_list.append(answer_vector[answer])
 
 
-    vector_list = np.random.rand(num_wines, vector_dimension).astype(np.float32)
+    # vector_list = np.random.rand(num_wines, vector_dimension).astype(np.float32)
     mean_vector = get_avg_vectors(vector_list)
     
     
-    wine_ids = np.arange(num_wines)
-    datas =  np.random.rand(num_wines, vector_dimension).astype(np.float32)
+    wine_ids = np.arange(74000)
+    
+    datas =  np.random.rand(74000, vector_dimension).astype(np.float32)
+    # json 스타일로 필터링
 
     search_result = faiss_search(mean_vector, wine_ids, datas)
+
     top_10 = [int(x[0]) for x in search_result[0]]
 
     
