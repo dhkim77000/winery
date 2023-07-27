@@ -75,23 +75,26 @@ def faiss_search(to_search, wine_ids, datas):
 async def info():
     return {'page':'mbti_survey'}
 
+def string2array(x):
+    x = x.replace('\n', '').strip('[]')
+    x_list = [float(i) for i in x.split(' ') if len(i) != 0]
+    return np.array(x_list)
 
 @router.post("/loading")
 
 #######mbti 결과 받아서 미리 계산해둔 벡터에 인덱싱 후-> 평균
 #######Wine Vector에 접근해서 FAISS 실행 후 TOP - K 리턴
-async def post_mbti_question(mbti_result : GetMBTI):
-
+async def post_mbti_question(mbti_result):
+    item_data = pd.read_csv("/opt/ml/wine/data/item_data.csv")
     #### Example data
-    # num_wines = 12000
-    vector_dimension = 768
-
-    answer_list = mbti_result.result
-    with open("/opt/ml/wine/server/data/mbti_vectors.json","r") as f:
+    num_wines = item_data.shape[0]
+    item_data['vectors'] = item_data['vectors'].apply(string2array)
+    # print(num_wines)
+    answer_list = mbti_result
+    with open("/opt/ml/wine/data/mbti_vector.json","r") as f:
         answer_vector = json.load(f)
-
     vector_list = []
-    for answer in answer_list:
+    for answer in list(answer_list):
         vector_list.append(answer_vector[answer])
 
 
@@ -99,13 +102,21 @@ async def post_mbti_question(mbti_result : GetMBTI):
     mean_vector = get_avg_vectors(vector_list)
     
     
-    wine_ids = np.arange(74000)
-    
-    datas =  np.random.rand(74000, vector_dimension).astype(np.float32)
-    # json 스타일로 필터링
+    wine_ids = item_data['wine_id'].values
 
-    search_result = faiss_search(mean_vector, wine_ids, datas)
+    # 실제 전체 와인들의 벡터
+    wine_vectors = []
+    for vector in item_data['vectors']: wine_vectors.append(vector)
+    wine_vectors = np.array(wine_vectors)
 
+    print(wine_vectors.shape, mean_vector.shape)
+    # wine_ids = np.arange(num_wines) 
+    # # 실제 전체 와인들의 벡터
+    # datas =  np.random.rand(num_wines, vector_dimension).astype(np.float32)
+
+    # json 스타일로 필터링(T)
+
+    search_result = faiss_search(mean_vector, wine_ids, wine_vectors)
     top_10 = [int(x[0]) for x in search_result[0]]
 
     

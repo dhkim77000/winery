@@ -14,7 +14,7 @@ def create_user_table(db):
         email VARCHAR NOT NULL UNIQUE,
         password VARCHAR NOT NULL,
         wine_list INTEGER[],
-        mbti_result INTEGER[]
+        mbti_result text[]
     );"""
     print(create_table_query)
     

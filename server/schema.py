@@ -94,5 +94,5 @@ class ReturnValue(BaseModel):
 
 class GetMBTI(BaseModel):
     result : List[str]
-    style : str
+    style : Optional[str] = None
 
