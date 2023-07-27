@@ -20,7 +20,7 @@ from database import get_db, get_conn
 from crud import get_user_for_add , update_wine_list_by_email , get_all_wine_feature
 from crud_mongo import *
 from models import User
-
+import os
 pd.set_option('mode.chained_assignment', None)
 
 router = APIRouter(
@@ -82,22 +82,35 @@ def string2array(x):
 #######mbti 결과 받아서 미리 계산해둔 벡터에 인덱싱 후-> 평균
 #######Wine Vector에 접근해서 FAISS 실행 후 TOP - K 리턴
 async def post_mbti_question(mbti_result):
+    print(mbti_result[2],mbti_result[0])
     item_data = pd.read_csv("/opt/ml/wine/data/item_data (6).csv")
+
+    #winetype 필터링
+    if mbti_result[0] == "a1":
+        item_data = item_data[(item_data['winetype'] == 'redwine') | (item_data['winetype'] == 'fortifiedwine')]
+    elif mbti_result[0] == "a2":
+        item_data = item_data[(item_data['winetype'] == 'whitewine') | (item_data['winetype'] == 'roswine')]
+    else:
+        item_data = item_data[(item_data['winetype'] == 'sparklingwine') | (item_data['winetype'] == 'dessertwine')]
+
+    #price 필터링
     if mbti_result[2] == "c1":
         item_data = item_data[item_data['price'] <= 50]
     elif mbti_result[2] == "c2":
-        item_data = item_data[item_data['price'] <= 150]
+        item_data = item_data[(item_data['price'] > 50) & (item_data['price'] <= 150)]
     elif mbti_result[2] == "c3":
-        item_data = item_data[item_data['price'] <= 500]
+        item_data = item_data[ (item_data['price'] <= 150) & (item_data['price'] <= 500)]
     else:
         item_data = item_data[item_data['price'] > 500]
+
     #### Example data
+    print(item_data.shape)
     num_wines = item_data.shape[0]
     item_data['vectors'] = item_data['vectors'].apply(string2array)
 
     # print(num_wines)
     answer_list = mbti_result
-    with open("/opt/ml/wine/data/mbti_vector.json","r") as f:
+    with open(os.getcwd()+"/data/mbti_vector.json","r") as f:
         answer_vector = json.load(f)
     vector_list = []
     for answer in list(answer_list):

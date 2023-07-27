@@ -21,7 +21,7 @@ import models, database, crud
 
 def get_item_data():
     # data_path = "/opt/ml/api/server/data"
-    data = pd.read_csv(os.getcwd()+"/data/item_df_allfeature.csv",encoding='utf-8-sig')
+    data = pd.read_csv(os.getcwd()+"/data/item_df_final_process.csv",encoding='utf-8-sig')
 
 
 

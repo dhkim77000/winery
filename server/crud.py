@@ -156,7 +156,7 @@ async def search_wine_by_name(db: connection, wine_name):
                 #breakex
             # Reduce the search_term by removing the last character
             wine_name = wine_name[:-1]
-
+            print(wine_name)
     return list(searched_wine_ids)
 
 async def get_wine_data(db: connection, wine_id):
