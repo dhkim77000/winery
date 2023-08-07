@@ -1,11 +1,15 @@
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, DBSCAN
+from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import faiss
 import pandas as pd
+import pdb
+import gc
 from tqdm import tqdm
+import umap
 from collections import Counter
 from sklearn.metrics import silhouette_score
 
@@ -15,32 +19,54 @@ def get_nns(inter_wine_ids: pd.DataFrame,
             total_k: int = 15000):
 
     wine_ids = inter_wine_ids
+    X = np.array(item_data.loc[wine_ids, 'vectors'].tolist(), dtype=np.float32)
     vectors = item_data.loc[wine_ids, 'vectors']
-
-    vectorizer = TfidfVectorizer(tokenizer=lambda x: x, lowercase=False)
-    X = vectorizer.fit_transform(vectors).toarray()
-
-    # Step 2: Normalize the vectors
-    scaler = StandardScaler()
-    X_normalized = scaler.fit_transform(X)
+    
+    
+    umap_model =  umap.UMAP(init = 'random', n_components=256)
+    X_reduced = umap_model.fit_transform(X)
 
     # Determine the optimal number of clusters using the Silhouette Score
     max_k = len(vectors) if len(vectors) < 12 else 12
     best_silhouette_score = -1
     optimal_k = 1
 
+    
     for k in tqdm(range(2, max_k + 1)):
-        kmeans = KMeans(n_clusters=k, random_state=42)
-        kmeans.fit(X_normalized)
-        labels = kmeans.labels_
-        silhouette_avg = silhouette_score(X_normalized, labels)
-        if silhouette_avg > best_silhouette_score:
-            best_silhouette_score = silhouette_avg
-            optimal_k = k
+        nn = NearestNeighbors(n_neighbors=k).fit(X_reduced)
+        distances, indices = nn.kneighbors(X_reduced)
+        distances = np.sort(distances, axis=0)
+        distances = distances[:,1]
+        num_elements = len(distances)
+        lower_10_percent_idx = int(num_elements * 0.1)
+        upper_10_percent_idx = int(num_elements * 0.9)
+        
+        middle_data = distances[lower_10_percent_idx:upper_10_percent_idx]
+
+        min_value = middle_data.min()
+        max_value = middle_data.max()
+
+        bin_edges = np.linspace(min_value, max_value, 5 + 1)
+
+        for eps in bin_edges:
+            clustering = DBSCAN(eps=eps, min_samples=k)
+            #kmeans = KMeans(n_clusters=k, random_state=42)
+            clustering.fit(X_reduced)
+            labels = clustering.labels_
+
+            if len(set(labels)) > 1:
+                silhouette_avg = silhouette_score(X_reduced, labels)
+                if silhouette_avg > best_silhouette_score:
+                    best_silhouette_score = silhouette_avg
+                    optimal_k = k
+                    optimal_eps = eps
+            else: continue
 
     # Step 4: Apply K-Means with the optimal K value
-    kmeans = KMeans(n_clusters=optimal_k, random_state=42)
-    clusters = kmeans.fit_predict(X_normalized)
+    clustering = DBSCAN(eps=optimal_eps, min_samples=optimal_k)
+    #kmeans = KMeans(n_clusters=optimal_k, random_state=42)
+    clusters = clustering.fit_predict(X_reduced)
+    print(len(set(clusters)))
     cluster_k = Counter(clusters)
 
     num_cluster = len(set(clusters))
@@ -68,6 +94,10 @@ def get_nns(inter_wine_ids: pd.DataFrame,
 
         for dis, id in zip(distances[0], searched_wine_ids[0]):
             result.append((id, dis))
+
+
+    del mean_vectors, X, X_reduced, clusters, clustering, umap_model, distances, searched_wine_ids
+    gc.collect()
 
     result.sort(key=lambda x: x[1])
 

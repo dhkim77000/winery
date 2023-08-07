@@ -9,7 +9,7 @@ from tqdm import tqdm
 from args import parse_args
 from logging import getLogger
 import torch
-import pdb
+import gc
 from utils import candid2recbole, bayesian_average, string2array, data2bucket
 
 from recbole.model.general_recommender.multivae import MultiVAE
@@ -307,7 +307,9 @@ def main(args):
                     user_list = np.append(
                         user_list, user_index, axis=0
                     )
-
+                del batch_pred_list, user_index, rating_pred, arr_ind, arr_ind_argsort, mask, candid_item_idx
+                del interaction, user_inter_count, score
+                gc.collect()
 #             result = []
 #             for user, pred in zip(user_list, pred_list):
 #                 for item in pred:

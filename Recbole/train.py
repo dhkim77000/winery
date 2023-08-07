@@ -17,12 +17,18 @@ from recbole.utils import init_logger, get_trainer, get_model, init_seed, set_co
 
 data_path = os.getcwd()
 def run(args):
-
-    return run_recbole(
-        model=args.model_name,
-        dataset='train_data',
-        config_file_list=['/opt/ml/wine/Recbole/basic.yaml'],
-    )
+    if args.mode == 'cont':
+        return run_recbole(
+            model=args.model_name,
+            dataset='train_data',
+            config_file_list=['/opt/ml/wine/Recbole/basic.yaml'],
+        )
+    elif args.mode == 'binary':
+        return run_recbole(
+            model=args.model_name,
+            dataset='train_data_binary',
+            config_file_list=['/opt/ml/wine/Recbole/binary.yaml'],
+        )
 
 def main(args):
     # 메모리 부족 문제 해결을 위해 CUDA 캐시 비우기

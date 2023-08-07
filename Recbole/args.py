@@ -14,7 +14,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--epochs", default=10, type=int)
-
+    parser.add_argument("--mode", default="binary", type=str)
     parser.add_argument("--model_name", default="DCN", type=str)
 
     parser.add_argument("--dataset_name", default="train_data", type=str)
@@ -41,7 +41,7 @@ def parse_args():
     # Get a list of all files in the directory
     files = os.listdir(models_path)
     files = [file for file in files if os.path.isfile(os.path.join(models_path, file))]
-
+    
     sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(models_path, x)), reverse=True)
     most_recent_model = sorted_files[0]
 

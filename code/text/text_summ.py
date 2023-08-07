@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
     eng_review = parallel_dataframe_1input(remove_non_eng, review_df, 8)
     eng_review = pd.merge(eng_review, basic_info.loc[:,['wine_id','wine_style']], on = 'wine_id',how ='inner')
-    eng_review =eng_review[eng_review['wine_style'].isna()==False]
+    eng_review = eng_review[eng_review['wine_style'].isna()==False]
 
 
     if args.mode == 'wine_style':

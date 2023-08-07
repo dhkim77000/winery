@@ -1,5 +1,3 @@
-from utils import *
-
 import pandas as pd
 import numpy as np
 import joblib
@@ -18,7 +16,7 @@ from datetime import datetime
 import pickle
 import argparse
 from google.cloud import storage
-
+from utils import *
 
 def load_index_file():
 
