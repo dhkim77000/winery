@@ -17,6 +17,12 @@ with DAG(
     tags=["model"],
 ) as dag:
 
+    t0 = BashOperator(
+    task_id="credential",
+    bash_command='export GOOGLE_APPLICATION_CREDENTIALS="/opt/ml/wine/airflow/deep-theorem-391805-8dd50cc51ba5.json"',
+    dag=dag,
+    )
+
     t1 = BashOperator(
     task_id="preprocess",
     bash_command="python /opt/ml/wine/code/data/prepare_data.py",
@@ -36,4 +42,4 @@ with DAG(
     )
     # 테스크 순서를 정합니다.
     # t1 실행 후 t2를 실행합니다.
-    t1 >> t2 >> t3
+    t0 >> t1 >> t2 >> t3

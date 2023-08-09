@@ -29,6 +29,18 @@ def run(args):
             dataset='train_data_binary',
             config_file_list=['/opt/ml/wine/Recbole/binary.yaml'],
         )
+    
+
+    files = os.listdir('/opt/ml/wine/Recbole/saved')
+    files = [file for file in files if os.path.isfile(os.path.join('/opt/ml/wine/Recbole/saved', file))]
+    
+    sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join('/opt/ml/wine/Recbole/saved', x)), reverse=True)
+
+    most_recent_model = sorted_files[0]
+
+    os.rename(most_recent_model, os.path.join('/opt/ml/wine/Recbole/saved', 'DCN-latest.pth'))
+
+
 
 def main(args):
     # 메모리 부족 문제 해결을 위해 CUDA 캐시 비우기

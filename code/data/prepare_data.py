@@ -241,6 +241,7 @@ def save_atomic_file(train_data, user_data, item_data):
 
 if __name__ == '__main__':
 
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/opt/ml/wine/airflow/deep-theorem-391805-8dd50cc51ba5.json"
     parser = argparse.ArgumentParser()
     parser.add_argument("--expand_notes", default=False, type=bool)
     parser.add_argument("--with_vector", default=1, type=int)

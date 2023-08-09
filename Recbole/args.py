@@ -14,7 +14,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--epochs", default=10, type=int)
-    parser.add_argument("--mode", default="binary", type=str)
+    parser.add_argument("--mode", default="cont", type=str)
     parser.add_argument("--model_name", default="DCN", type=str)
 
     parser.add_argument("--dataset_name", default="train_data", type=str)
@@ -39,13 +39,13 @@ def parse_args():
     models_path = '/opt/ml/wine/Recbole/saved'
 
     # Get a list of all files in the directory
-    files = os.listdir(models_path)
-    files = [file for file in files if os.path.isfile(os.path.join(models_path, file))]
+    #files = os.listdir(models_path)
+    #files = [file for file in files if os.path.isfile(os.path.join(models_path, file))]
     
-    sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(models_path, x)), reverse=True)
-    most_recent_model = sorted_files[0]
+    #sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(models_path, x)), reverse=True)
+    #most_recent_model = sorted_files[0]
 
-    parser.add_argument("--saved_model" , default = most_recent_model, type=str,help ="use model")
+    parser.add_argument("--saved_model" , default = '/opt/ml/wine/saved/DCN-latest.pth', type=str,help ="use model")
     args = parser.parse_args()
 
     return args
