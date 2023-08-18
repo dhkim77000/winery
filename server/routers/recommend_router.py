@@ -51,7 +51,7 @@ def faiss_search(to_search, wine_ids, datas):
         # Faiss expects the query vectors to be normalized
         to_search = np.expand_dims(to_search, axis=0)
         k = index.ntotal
-        distances, searched_wine_ids = index.search(to_search, k=10)
+        distances, searched_wine_ids = index.search(to_search, k=30)
         result = []
         for ids, dists in zip(searched_wine_ids, distances): 
             result.append(list(zip(ids, dists)))
@@ -81,7 +81,7 @@ def string2array(x):
 
 #######mbti 결과 받아서 미리 계산해둔 벡터에 인덱싱 후-> 평균
 #######Wine Vector에 접근해서 FAISS 실행 후 TOP - K 리턴
-async def post_mbti_question(mbti_result):
+async def post_mbti_question(mbti_result,wine_style):
     print(mbti_result[2],mbti_result[0])
     item_data = pd.read_csv("/opt/ml/wine/data/item_data (6).csv")
 
@@ -102,7 +102,15 @@ async def post_mbti_question(mbti_result):
         item_data = item_data[ (item_data['price'] <= 150) & (item_data['price'] <= 500)]
     else:
         item_data = item_data[item_data['price'] > 500]
-
+    wine_style = wine_style.lower()
+    wine_style = wine_style.replace(" ","")
+    result = []
+    style_item = item_data[item_data['wine_style'] == wine_style].sort_values(by = 'wine_rating')['wine_id'].values
+    print(len(style_item))
+    for i in range(len(style_item)):
+        result.append(i)
+        if len(result) >=10:
+            break
     #### Example data
     print(item_data.shape)
     num_wines = item_data.shape[0]
@@ -135,9 +143,10 @@ async def post_mbti_question(mbti_result):
     # json 스타일로 필터링(T)
     search_result = faiss_search(mean_vector[0], wine_ids, wine_vectors)
     top_10 = [int(x[0]) for x in search_result[0]]
-
+    result.extend(top_10)
+    result = result[:30]
     
-    return top_10
+    return result
 
 
 
@@ -188,7 +197,6 @@ async def get_wine_to_recbole(db: connection = Depends(get_conn)):
 async def preprocess_user_interaction(db: Database = Depends(get_mongo_db)):
     answer = input("csv 불러올건가요 yes or no")
     # 예시로 for 루프를 사용하여 가상의 데이터를 생성하고 처리합니다.
-    pdb.set_trace()
     if answer == 'yes':
         print("train_data.inter 파일 불러오기")
         file_path_inter = '/opt/ml/server/winery/server/data/train_data.inter' 
@@ -204,22 +212,22 @@ async def preprocess_user_interaction(db: Database = Depends(get_mongo_db)):
     else:
         train_data_inter = 0
         await rating_data_generator(train_data_inter, db,answer)
-
+    
 async def rating_data_generator(train_data_inter,db,answer):
     #pdb.set_trace()
-    pdb.set_trace()
+    # pdb.set_trace()
     # 예시로 for 루프를 사용하여 가상의 데이터를 생성하고 처리합니다.
-
-    for idx in range(train_data_inter.shape[0]):
-        result = train_data_inter.iloc[idx,:]
-        user_interaction = UserInteraction(
-            email = f"user_{result['user_id:token']}@example.com",
-            wine_id = result['item_id:token'],
-            timestamp = result['timestamp:float'],
-            rating = result['user_rating:float']
-        )
-        # 비동기 함수를 호출합니다.
-        push = await update_rating(user_interaction, db)
+    if answer == "yes":
+        for idx in range(train_data_inter.shape[0]):
+            result = train_data_inter.iloc[idx,:]
+            user_interaction = UserInteraction(
+                email = f"user_{result['user_id:token']}@example.com",
+                wine_id = result['item_id:token'],
+                timestamp = result['timestamp:float'],
+                rating = result['user_rating:float']
+            )
+            # 비동기 함수를 호출합니다.
+            push = await update_rating(user_interaction, db)
     
 
         
@@ -231,15 +239,15 @@ async def rating_data_generator(train_data_inter,db,answer):
         
         inter_column = ["_id","email","timestamp","rating","wine_id"]
         result_df = pd.DataFrame(all_rating_data, columns=inter_column)
-        result_df.to_csv("/opt/ml/server/winery/server/data/sample_all_rating_data_to_recbole.csv", index = False, encoding='utf-8-sig')
-        return "save all data : '/opt/ml/server/winery/server/data/sample_all_rating_data_to_recbole.csv'"
+        result_df.to_csv("/opt/ml/poetry/server/data/sample_all_rating_data_to_recbole.csv", index = False, encoding='utf-8-sig')
+        return "save all data : '/opt/ml/poetry/server/data/sample_all_rating_data_to_recbole.csv'"
     
     else:
         rating_datas = await get_rating_datas(numbers,db)
         inter_column = ["_id","email","timestamp","rating","wine_id"]
         result_df = pd.DataFrame(rating_datas, columns=inter_column)
-        result_df.to_csv("/opt/ml/server/winery/server/data/sample_rating_data_to_recbole.csv", index = False, encoding='utf-8-sig')
-        return "save all data : '/opt/ml/server/winery/server/data/sample_rating_data_to_recbole.csv'"
+        result_df.to_csv("/opt/ml/poetry/server/data/sample_rating_data_to_recbole.csv", index = False, encoding='utf-8-sig')
+        return "save all data : '/opt/ml/poetry/server/data/sample_rating_data_to_recbole.csv'"
         
 
 

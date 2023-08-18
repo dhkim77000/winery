@@ -96,7 +96,7 @@ async def user_create(request: Request, user:UserCreate, db: connection = Depend
         new_data = UserAdd(
             email=user.email,
             
-            wine_list = await post_mbti_question(user.mbti_result)
+            wine_list = await post_mbti_question(user.mbti_result,user.wine_style)
             
 
         )

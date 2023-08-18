@@ -48,7 +48,6 @@ async def post_wine_info(wine_id_list: List[int],
 async def text_search(request: Request, search: Search, page : Optional[int] = None,
                             db: connection = Depends(get_conn)):
     wine = {}
-    print(search.name)
     wine_id_lists = await search_wine_by_name(db=db, wine_name = search.name)
     for wine_id in wine_id_lists:         
         wine_contends =  await get_wine_data(db=db, wine_id=wine_id)
