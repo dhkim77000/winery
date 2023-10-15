@@ -21,7 +21,7 @@ SECRET_KEY = "4ab2fce7a6bd79e1c014396315ed322dd6edb1c5d975c6b74a2904135172c03c"
 ALGORITHM = "HS256"
 
 app = FastAPI()
-templates = Jinja2Templates(directory='/opt/ml/wine/server/templates')
+templates = Jinja2Templates(directory='//home/dhkim/wineryserver/templates')
 
 router = APIRouter(
     prefix="/login",

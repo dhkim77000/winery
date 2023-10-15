@@ -13,7 +13,7 @@ import pdb
 import uvicorn
 from fastapi.responses import RedirectResponse,HTMLResponse
 app = FastAPI()
-templates = Jinja2Templates(directory='/opt/ml/wine/server/templates')
+templates = Jinja2Templates(directory='//home/dhkim/wineryserver/templates')
 
 router = APIRouter(
     prefix="/home",
