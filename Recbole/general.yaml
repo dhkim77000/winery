@@ -1,5 +1,5 @@
 
-data_path: /opt/ml/wine/dataset/
+data_path: /opt/ml/backend/Recbole/dataset/
 
 USER_ID_FIELD: user_id
 ITEM_ID_FIELD: item_id
@@ -8,15 +8,17 @@ RATING_FIELD: user_rating
 load_col:
   inter: [user_id,user_rating, item_id]
   user : [user_id, count, mean]
-  item : [item_id, country, region, winery, winetype, grape, vintage, price, rating, num_votes, wine_style, Red Fruit_count, Tropical_count, Tree Fruit_count, Oaky_count, Ageing_count, Black Fruit_count, Citrus_count, Dried Fruit_count, Earthy_count, Floral_count, Microbio_count, Spices_count,Vegetal_count]
+  item : [item_id, country, region, winetype, vintage, price, rating, num_votes, wine_style , Red Fruit_count, Tropical_count, Tree Fruit_count, Oaky_count, Ageing_count, Black Fruit_count, Citrus_count, Dried Fruit_count, Earthy_count, Floral_count, Microbio_count, Spices_count,Vegetal_count]
+    # item : [item_id, country, region, winery, winetype, grape, vintage, price, rating, num_votes, wine_style , Red Fruit_count, Tropical_count, Tree Fruit_count, Oaky_count, Ageing_count, Black Fruit_count, Citrus_count, Dried Fruit_count, Earthy_count, Floral_count, Microbio_count, Spices_count,Vegetal_count]
 threshold: {'user_rating': 4}
+
 
 normalize_all: True
 show_progress : False
-epochs : 10
+epochs : 1
 device : torch.device("cuda" if torch.cuda.is_available() else "cpu")
+embedding_size: 64
 
-epochs: 500
 train_batch_size: 1024
 eval_batch_size: 1024
 eval_args:
@@ -25,7 +27,8 @@ eval_args:
   group_by: ~
   mode: labeled
 train_neg_sample_args: ~
-metrics: ['AUC', 'LogLoss']
-valid_metric: AUC
+
+metrics: ['RMSE','MAE','LogLoss','AUC']
+valid_metric: RMSE
 
 
