@@ -1,0 +1,41 @@
+# 수정필요 ->
+data_path: /opt/ml/wine/dataset/
+
+additional_feat_suffix: [itememb]
+USER_ID_FIELD: email
+ITEM_ID_FIELD: wine_id
+RATING_FIELD: user_rating
+
+load_col:
+  inter: [email,user_rating, wine_id]
+  user : [email, count]
+  item :  [wine_id, house, country, region1, winetype, wine_style,vintage,price,wine_rating, num_votes, pairing,Red Fruit, Tropical, Tree Fruit,Oaky,Ageing, Black Fruit,Citrus, Dried Fruit, Earthy, Floral, Microbio, Spices,Vegetal, Light, Bold, Smooth, Tannic, Dry, Sweet,Soft,Acidic,Fizzy, Gentle]
+  itememb: [wid, vectors]
+
+fields_in_same_space: [[wid, wine_id]]
+preload_weight:
+    wid: vectors
+
+threshold: {'user_rating': 0.69}
+
+
+
+normalize_all: True
+show_progress : False
+epochs : 5
+device : torch.device("cuda" if torch.cuda.is_available() else "cpu")
+embedding_size: 128
+
+train_batch_size: 1024
+eval_batch_size: 1024
+eval_args:
+  split: {'RS':[8,1,1]}
+  order: RO
+  mode: labeled
+  group_by_user: False
+  training_neg_sample_num: 0
+
+metrics: ['RMSE','MAE','LogLoss','AUC']
+valid_metric: RMSE
+
+
