@@ -13,8 +13,11 @@
 *.gz
 *.pth
 *.zip
-*.pyc
 *.wandb
 *.log
 *.txt
 *.pyc
+*.png
+*user_data_generator.ipynb
+.ipynb_checkpoints/
+routers/.ipynb_checkpoints/

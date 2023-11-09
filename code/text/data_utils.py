@@ -107,6 +107,7 @@ def marking_note_data(df, notes_data):
         note_onehot = check_note_in_review(df.loc[i,'text'], notes_data)
         tmp = {}
         tmp['wine_id'] = df.loc[i,'wine_id']
+        tmp['text'] = df.loc[i,'text']
         tmp['note_label'] = note_onehot
         data.append(tmp)
         
@@ -130,6 +131,25 @@ def parallel_dataframe_2input(func, df, mapping_data, num_cpu):
             output = pd.concat([output, data], axis=0)
     output.reset_index(inplace = True, drop = True)
     return output
+
+def parallel_dataframe_1input(func, df, num_cpu):
+
+
+    chunks = np.array_split(df, num_cpu)
+
+    print('Parallelizing with ' +str(num_cpu)+'cores')
+    with Parallel(n_jobs = num_cpu, backend="multiprocessing") as parallel:
+        results = parallel(delayed(func)(chunks[i]) for i in range(num_cpu))
+
+    for i,data in enumerate(results):
+        if i == 0:
+            output = data
+        else:
+            output = pd.concat([output, data], axis=0)
+    output.reset_index(inplace = True, drop = True)
+    
+    return output
+
 
 def cut_lowcount_feat(df, col, threshold):
     feats = {}
@@ -201,6 +221,7 @@ def marking_price_data(df, price_vocab):
     for i in tqdm(range(len(df))):
         tmp = {}
         tmp['wine_id'] = df.loc[i,'wine_id']
+        tmp['text'] = df.loc[i,'text']
         tmp['note_label'] = df.loc[i,'note_label']
         tmp['price_label'] = check_price_in_review(df.loc[i,'text'], price_vocab)
         data.append(tmp)

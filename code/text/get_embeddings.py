@@ -104,4 +104,4 @@ if __name__ == "__main__":
     review_vectors = parallel_embedding(merged_reviews, 8)
     
     with open('/opt/ml/wine/data/wine_vector.json', 'w') as f:
-        json.dump(review_vectors)
+        json.dump(review_vectors, f)

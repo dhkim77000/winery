@@ -15,15 +15,25 @@ import pdb
 from uuid import UUID, uuid4
 import models, database, crud
 
+
+#[ 'region1', 'grape', 'region2', 'region3', 'region4']
+
+
 def get_item_data():
     # data_path = "/opt/ml/api/server/data"
-    data = pd.read_csv(os.getcwd()+"/data/item_df_allfeature.csv")
+    data = pd.read_csv(os.getcwd()+"/data/item_df_final_process.csv",encoding='utf-8-sig')
+
+
+
+
     # "grape"
-    wine_column = ['winetype','Red Fruit', 'Tropical', 'Tree Fruit', 'Oaky',\
+    wine_column = ['item_id','winetype','Red Fruit', 'Tropical', 'Tree Fruit', 'Oaky',\
         'Ageing', 'Black Fruit', 'Citrus', 'Dried Fruit', 'Earthy', 'Floral', \
         'Microbio','Spices', 'Vegetal', 'Light', 'Bold', 'Smooth', 'Tannic', 'Dry',\
-        'Sweet', 'Soft', 'Acidic', 'Fizzy', 'Gentle']
-    
+        'Sweet', 'Soft', 'Acidic', 'Fizzy', 'Gentle','vintage','price',\
+        'wine_rating','num_votes','country','region1', 'grape', 'region2', 'region3', 'region4','winery','name','wine_style','house',\
+         'pairing']
+
     # EX
     rename_rule = {
         'Red Fruit' : 'Red_Fruit',
@@ -36,6 +46,12 @@ def get_item_data():
     
     df = data[wine_column]
     df = data.rename(columns=rename_rule)
+    #df.loc[df['vintage'].isna(), 'vintage'] = 0
+    df[['grape','pairing']] = df[['grape','pairing']].astype(str)
+    df['grape'] = df['grape'].copy().apply(lambda x: x[1:-1])
+    df['grape'] = df['grape'].astype(str).str.replace(r"[',\[\]]", '', regex=True)
+    df['grape'] = df['grape'].copy().apply(lambda x: x.split() if x is not None else [])
+    df['pairing'] = df['pairing'].copy().apply(lambda x: x.split() if x is not None else [])
     #df['winetype'].fillna(0, inplace=True)
     # for data in range(df.shape[0]):
     #     df['rating'][data] = float(df['rating'][data])
@@ -46,17 +62,18 @@ def get_item_data():
 
 
 def insert_wine_data(db=connection):
-   
-
     insert_query = """
-    INSERT INTO "wine" (id, winetype, Red_Fruit, Tropical, Tree_Fruit, Oaky, Ageing, Black_Fruit, Citrus, Dried_Fruit, Earthy, Floral, Microbio, Spices, Vegetal, Light, Bold, Smooth, Tannic, Dry, Sweet, Soft, Acidic, Fizzy, Gentle)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    INSERT INTO "wine" (id,item_id,winetype, Red_Fruit, Tropical, Tree_Fruit, Oaky, Ageing, Black_Fruit, Citrus, Dried_Fruit, Earthy, Floral, Microbio, Spices, Vegetal, Light, Bold, Smooth, Tannic, Dry, Sweet, Soft, Acidic, Fizzy, Gentle
+    ,vintage,price,wine_rating,num_votes,country,region1, grape,region2,region3,region4,winery,name,wine_style,house,pairing)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s,%s, %s,%s,%s,%s,%s,%s,%s,%s,%s)
     """
     print("------- Making wine table --------")
     with db.cursor() as cur, tqdm(total=total_rows, desc="Inserting data") as pbar:
         for _, row in df.iterrows():
+            #print(row["price"])
             data = {
                 'id': str(uuid4()),
+                'item_id' : int(row['item_id']),
                 'winetype': row['winetype'],
                 'Red_Fruit': int(row['Red_Fruit']),
                 'Tropical': int(row['Tropical']),
@@ -80,7 +97,22 @@ def insert_wine_data(db=connection):
                 'Soft': int(row['Soft']),
                 'Acidic': int(row['Acidic']),
                 'Fizzy': int(row['Fizzy']),
-                'Gentle': int(row['Gentle'])
+                'Gentle': int(row['Gentle']),
+                'vintage': row['vintage'],
+                'price': row['price'],
+                'wine_rating': row['wine_rating'],
+                'num_votes': row['num_votes'],
+                'country': str(row['country']),
+                'region1': str(row['region1']),
+                'grape' : row['grape'],
+                'region2' : str(row['region2']), 
+                'region3' : str(row['region3']),  
+                'region4' : str(row['region4']),
+                'winery': str(row['winery']),
+                'name': str(row['name']),
+                'wine_style': str(row['wine_style']),
+                'house': str(row['house']),
+                'pairing' : row['pairing'],
             }
             values = tuple(data.values())
             cur.execute(insert_query, values)
@@ -135,7 +167,7 @@ if __name__ == "__main__":
     
     # Check if wine table is empty
     with conn.cursor() as cur:
-        cur.execute("SELECT EXISTS (SELECT 1 FROM wine)")
+        cur.execute('SELECT EXISTS (SELECT 1 FROM "wine")')
         is_empty = cur.fetchone()[0]
 
         if is_empty:
@@ -144,6 +176,6 @@ if __name__ == "__main__":
     df = get_item_data()
     total_rows = df.shape[0]
 
-    # DB에 data넣기
+    #DB에 data넣기
     insert_wine_data(conn)
-    create_mbti_data(conn)
+    #create_mbti_data(conn)
