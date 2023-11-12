@@ -16,6 +16,13 @@ if __name__ == "__main__":
                         shutil.rmtree('/tmp/'+directory)
                     except NotADirectoryError:
                         continue
+
+                if re.fullmatch('.*.org.chromium.Chromium.*',directory) != None:
+                    try:
+                        print("Deleting------"+directory)
+                        shutil.rmtree('/tmp/'+directory)
+                    except NotADirectoryError:
+                        continue
         except Exception:
             continue
         time.sleep(5*60)

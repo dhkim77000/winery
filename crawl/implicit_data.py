@@ -87,7 +87,7 @@ def get_driver(chrome_options, url):
 
 
 def screenshot(driver, error):
-    driver.save_screenshot('/opt/ml/wine/'+error + '.png')
+    driver.save_screenshot('/home/dhkim/winery/'+error + '.png')
 
     
 def reset_driver(driver, chrome_options, url):
@@ -167,7 +167,17 @@ def rated_or_not(wishlist):
         return False
     except:
         return True
-    
+
+def get_image_url(wishlist):
+    image_class = "col-sm-3 col-xs-12 wine-image-container".replace(' ','.')
+    postfix = ");"
+    prefix = 'background-image: url("//'
+    try:
+        img_url = wishlist.find_element(By.CLASS_NAME,image_class).get_attribute('style')
+        return img_url.replace(postfix,'').replace(prefix,'').replace('"','') 
+    except: return None
+
+
 def get_item(wishlists):
     wine_url_class = 'link-muted.bold'
     
@@ -175,7 +185,8 @@ def get_item(wishlists):
     for wishlist in tqdm(wishlists):
         try:
             wine_url = wishlist.find_element(By.CLASS_NAME,wine_url_class).get_attribute('href')
-            items.append(wine_url)
+            img_url = get_image_url(wishlist)
+            items.append((wine_url, img_url))
         except:
             continue
     
@@ -202,28 +213,47 @@ def get_implicit_feedback(driver, url):
     wishlists = find_all_likes(driver)
     return get_item(wishlists)
 
+def save_img(img_url, wine_url, img_folder):
 
+    save_folder = os.path.join(img_folder, wine_url.replace('/','_'))
+    if not os.path.exists(save_folder): 
+        os.mkdir(save_folder)
+
+    num_imgs = len(os.listdir(save_folder))
+    try:
+        response = requests.get(img_url)
+        if response.status_code == 200:
+            save_to = os.path.join(save_folder, f'{num_imgs+1}.png')
+            with open(save_to, 'wb') as f: f.write(response.content)
+            return True
+        else: return False
+
+    except: return False
 
 #------------------------------------------------------------------------------------------------
-def main(driver, urls, done, df):
-    
+def main(driver, urls, done):
+    img_folder = '/home/dhkim/winery/data/images'
+
     for url in tqdm(urls):
         if url not in done:
     
             items = get_implicit_feedback(driver, url)
             print('----------------------Saving----------------------')
-            inter = [{'user_url': url, 'wine_url':w} for w in items]
+            for wine_url, img_url in tqdm(items):
+                save_img(img_url, wine_url, img_folder)
+            
+            #inter = [{'user_url': url, 'wine_url':w} for w in items]
 
-            df = write_data(df, inter)
+            #df = write_data(df, inter)
             done.add(url)
-            df.to_csv('/opt/ml/wine/data/implicit.csv', encoding = 'utf-8-sig',index= False)
-            with open('/opt/ml/wine/data/user_done.pkl','wb') as f: pickle.dump(done,f)
+            #df.to_csv('/home/dhkim/winery/data/implicit.csv', encoding = 'utf-8-sig',index= False)
+            with open('/home/dhkim/winery/data/user_done.pkl','wb') as f: pickle.dump(done,f)
 
             time.sleep(5)
 
-    df = write_data(df, inter)
-    df.to_csv('/opt/ml/wine/data/implicit.csv', encoding = 'utf-8-sig',index= False)
-    with open('/opt/ml/wine/data/user_done.pkl','wb') as f: pickle.dump(done,f)
+    #df = write_data(df, inter)
+    #df.to_csv('/home/dhkim/winery/data/implicit.csv', encoding = 'utf-8-sig',index= False)
+    with open('/home/dhkim/winery/data/user_done.pkl','wb') as f: pickle.dump(done,f)
 #------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------
 def write_data(write_file, datas):
@@ -266,7 +296,7 @@ if __name__ == '__main__':
     my_idx = int(sys.argv[-1])
 
 
-    with open('/opt/ml/wine/data/urls.json', 'r') as f: urls = json.load(f)
+    with open('/home/dhkim/winery/data/urls.json', 'r') as f: urls = json.load(f)
 
     def split_list(lst, n):
         # Calculate the length of each sublist
@@ -292,29 +322,28 @@ if __name__ == '__main__':
 
     user_urls = set()
 
-    for i in tqdm(range(6)):
 
-        if i == 0:
-            url = pd.read_csv(f'/opt/ml/wine/data/review_df0.csv', encoding = 'utf-8-sig').loc[:,'user_url']
-        else:
-            url = pd.read_csv(f'/opt/ml/wine/data/review_df{i}.csv', encoding = 'utf-8-sig').loc[:,'user_url']
-        url.dropna(inplace = True)
-
-        user_urls = user_urls.union(set(list(url)))
-
+        
+    url = pd.read_csv(f'/home/dhkim/winery/data/review_df_total.csv', encoding = 'utf-8-sig',
+                      ).loc[:, 'user_url']
+    
+    url.dropna(inplace = True)
+    user_urls = set(list(url))
+    print(len(user_urls))
     urls_for_me = split_list(list(user_urls), 5)[my_idx]
 
         
 
     try:
-        with open('/opt/ml/wine/data/user_done.pkl', 'rb') as f: done  = pickle.load(f)
+        with open('/home/dhkim/winery/data/user_done.pkl', 'rb') as f: done  = pickle.load(f)
     except: done = set()
 
     try:
-        df = pd.read_csv('/opt/ml/wine/data/implicit.csv', encoding = 'utf-8-sig')
+        df = pd.read_csv('/home/dhkim/winery/data/implicit.csv', encoding = 'utf-8-sig')
     except:
         columns = ['user_url','wine_url']
         df = pd.DataFrame(columns = columns)
     print(len(urls_for_me))
-    main(driver, urls_for_me, done, df)
+    main(driver, urls_for_me, set())
+   #main(driver, urls_for_me, done, df)
     

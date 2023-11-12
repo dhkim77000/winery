@@ -291,7 +291,7 @@ model_type:
   value: bert
 output_dir:
   desc: null
-  value: /opt/ml/wine/code/models
+  value: /home/dhkim/winery/code/models
 overwrite_output_dir:
   desc: null
   value: true
@@ -375,7 +375,7 @@ log_on_each_node:
   value: true
 logging_dir:
   desc: null
-  value: /opt/ml/wine/code/models/runs/Jul11_23-23-56_385140fe42c2
+  value: /home/dhkim/winery/code/models/runs/Jul11_23-23-56_385140fe42c2
 logging_strategy:
   desc: null
   value: steps
@@ -471,7 +471,7 @@ past_index:
   value: -1
 run_name:
   desc: null
-  value: /opt/ml/wine/code/models
+  value: /home/dhkim/winery/code/models
 disable_tqdm:
   desc: null
   value: false

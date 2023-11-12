@@ -3,6 +3,7 @@
 *.item
 *.user
 *.inter
+*.itememb
 *.npy
 *.html
 *.json
@@ -13,7 +14,8 @@
 *.gz
 *.pth
 *.zip
-*.pyc
 *.wandb
 *.log
 *.txt
+*.pyc
+*.ipynb_checkpoints
