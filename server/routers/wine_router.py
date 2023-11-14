@@ -23,14 +23,12 @@ async def get_wine_list():
     return {'request': "wine_page"}
 
 # 와인 상세 페이지 정보 
-@router.post("/wine_detail")
-async def post_wine_info(wine_id_list: List[int],
+@router.get("/wine_detail{wine_id}")
+async def post_wine_info(wine_id: int,
                          db: connection = Depends(get_conn)):
     wines = {}
-    for wine_id in wine_id_list:
-        wine = await get_wine_data(db=db, wine_id=wine_id)
-        wines[wine_id] = wine
-    return wines
+    wine = await get_wine_data(db=db, wine_id=wine_id)
+    return wine
 
 # 와인 상세 페이지 정보 
 @router.post("/wine_simple")
@@ -42,13 +40,12 @@ async def post_wine_info(wine_id_list: List[int],
         wines[wine_id] = wine
     return wines
 
-@router.get("/search_by_name")
+@router.post("/search_by_name")
 async def text_search(wine_name: str = '',
                             page : Optional[int] = None,
                             db: connection = Depends(get_conn)):
-    wine_id_lists = await search_wine_by_name(db=db, wine_name = wine_name)
-    
-    return wine_id_lists
+    result = await search_wine_by_name(db=db, wine_name = wine_name)
+    return result
 
 # # 와인 grid 페이지 정보
 # @router.post("/wine_recommend")
@@ -97,5 +94,3 @@ async def update_rating(user_interaction: UserInteraction,
     
     push = await rating_update(collection, uid, wine_id, rating, timestamp)
     return push
-
-     

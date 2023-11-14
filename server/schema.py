@@ -25,7 +25,7 @@ class UserCreate(BaseModel):
     id :UUID = Field(default_factory=uuid4)
     email:EmailStr
     password: str
-    wine_list : Optional[List] = None
+    wine_list : Optional[List[int]] = None
     mbti_result : List
 
     # @validator('email', 'password1', 'password2')
@@ -38,7 +38,9 @@ class UserCreate(BaseModel):
     # def passwords_match(cls, v, values):
     #     if 'password1' in values and v != values['password1']:
     #         raise HTTPException(status_code=404, detail=f"비밀번호가 일치하지 않습니다")
-       
+
+
+      
 class UserInteraction(BaseModel):
     uid :UUID
     wine_id : int

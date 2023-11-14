@@ -15,6 +15,7 @@ from database import get_db, get_conn
 from models import User
 import pdb,os
 import uvicorn
+import uuid
 from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -65,11 +66,19 @@ async def get_register_form(request: Request):
 
 # Pydantic UserCrate table로 data 받아서 User class로 db에 넣기
 @router.post("/register", response_model=None)
-async def user_create(request: Request, user:UserCreate, db: connection = Depends(get_conn)):
+async def user_create(request: Request, db: connection = Depends(get_conn)):
 
+    #user.wine_list = [int(value) for value in user.wine_list] if user.wine_list else None
+    #user.mbti_result = [int(value) for value in user.mbti_result]
     # Create a new user instance
+    user = await request.json()
+    user['id'] = uuid.uuid4()
+    user['wine_list'] = None
+    user['mbti_result'] = []
+    user_model = UserCreate(**user)
+
     retVal = ReturnValue(status=False)
-    result = await create_user(db=db, user_create=user) #True
+    result = await create_user(db =db, user=user_model) #True
     print(result)
     # mbti = await(db=db, user_create=user.email, w)
     ## email, password, mbti_servey -> email,password, mbti_servery,wine_list

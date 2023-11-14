@@ -17,6 +17,7 @@ import pdb , math
 from fastapi.security import OAuth2PasswordRequestForm
 from psycopg2.extensions import connection
 import numpy as np
+from function import wine2json
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -59,26 +60,40 @@ async def get_user_for_add(new_data:UserAdd, db: connection):
         return mbti
 
 async def search_wine_by_name(db: connection, wine_name):
-    min_length = len(wine_name) // 3
+    min_length = len(wine_name) // 2
 
     searched_wine_ids = set()
+    wines = []
     with db.cursor() as cur:
         while len(wine_name) >= min_length:
-            cur.execute("SELECT item_id FROM wine WHERE name ILIKE %s OR house ILIKE %s", ('%' + wine_name + '%', '%' + wine_name + '%'))
+            cur.execute("SELECT item_id, wine_rating, name, region, price, country FROM wine WHERE name ILIKE %s OR house ILIKE %s", ('%' + wine_name + '%', '%' + wine_name + '%'))
             result = cur.fetchall()
             if len(result) != 0: # If result is found, break the loop and return the result
-                for id in result: searched_wine_ids.add(id[0])
+                for wine in result: 
+                    if wine[0] not in searched_wine_ids:
+                        
+                        wine = Wine(
+                                item_id= wine[0],
+                                wine_rating= wine[1] if not math.isnan(wine[1]) else None,
+                                name =  wine[2],
+                                region= wine[3],
+                                price= wine[4] if not math.isnan(wine[4]) else None,
+                                country= wine[5]
+                            )
+                        
+                        searched_wine_ids.add(wine.item_id)
+                        wines.append(wine)
                 break
             # Reduce the search_term by removing the last character
             wine_name = wine_name[:-1]
-    return list(searched_wine_ids)
+    return wines
 
 async def get_wine_data(db: connection, wine_id):
 
     with db.cursor() as cur:
         cur.execute("SELECT * FROM wine WHERE item_id = %s", (wine_id,))
         result = cur.fetchone()
-    pdb.set_trace()
+        
     if result is None:
         raise HTTPException(status_code=404, detail=f"존재하지 않는 와인입니다.")
     else:
@@ -174,14 +189,14 @@ async def check_email_exist(email, cur):
         return False
     
 
-async def create_user(db: connection, user_create: UserCreate):
-    create_user_table(db)
+async def create_user(db: connection, user: UserCreate):
+
     register_uuid()
-    db_user = User(id=user_create.id,
-                   password=user_create.password,
-                   email=user_create.email,
-                   wine_list = user_create.wine_list,
-                   mbti_result = user_create.mbti_result)
+    db_user = User(id=user.id,
+                   password=user.password,
+                   email=user.email,
+                   wine_list = user.wine_list,
+                   mbti_result = user.mbti_result)
     insert_user_query = f"""
     INSERT INTO "{db_user.__tablename__}"
         (id, email, password, wine_list, mbti_result)
@@ -192,7 +207,7 @@ async def create_user(db: connection, user_create: UserCreate):
     
     # Execute the query
     with db.cursor() as cur:
-        exist = await check_email_exist(user_create.email, cur)
+        exist = await check_email_exist(user.email, cur)
         if exist:
             return False
         else:

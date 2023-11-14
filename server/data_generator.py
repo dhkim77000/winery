@@ -16,14 +16,14 @@ from uuid import UUID, uuid4
 import models, database, crud
 
 def get_item_data():
-    # data_path = "/opt/ml/api/server/data"
-    data = pd.read_csv(os.getcwd()+"/data/item_df_allfeature.csv")
+    data_path = "/home/dhkim/server_front/winery_server/data"
+    data = pd.read_csv(os.path.join(data_path, "item_data.csv"))
     # "grape"
-    wine_column = ['item_id','winetype','Red Fruit', 'Tropical', 'Tree Fruit', 'Oaky',\
+    wine_column = ['wine_id','winetype','Red Fruit', 'Tropical', 'Tree Fruit', 'Oaky',\
         'Ageing', 'Black Fruit', 'Citrus', 'Dried Fruit', 'Earthy', 'Floral', \
         'Microbio','Spices', 'Vegetal', 'Light', 'Bold', 'Smooth', 'Tannic', 'Dry',\
         'Sweet', 'Soft', 'Acidic', 'Fizzy', 'Gentle','vintage','price',\
-        'wine_rating','num_votes','country','region','winery','name','wine_style','house',\
+        'rating','num_votes','country','region1','winery','name','wine_style','house',\
         'grape', 'pairing']
 
     # EX
@@ -35,7 +35,6 @@ def get_item_data():
 
     }
 
-    
     df = data[wine_column]
     df = data.rename(columns=rename_rule)
     df.loc[df['vintage'].isna(), 'vintage'] = 0
@@ -63,7 +62,7 @@ def insert_wine_data(db=connection):
             #print(row["price"])
             data = {
                 'id': str(uuid4()),
-                'item_id' : int(row['item_id']),
+                'item_id' : int(row['wine_id']),
                 'winetype': row['winetype'],
                 'Red_Fruit': int(row['Red_Fruit']),
                 'Tropical': int(row['Tropical']),
@@ -90,10 +89,10 @@ def insert_wine_data(db=connection):
                 'Gentle': int(row['Gentle']),
                 'vintage': row['vintage'],
                 'price': row['price'],
-                'wine_rating': row['wine_rating'],
+                'wine_rating': row['rating'],
                 'num_votes': row['num_votes'],
                 'country': str(row['country']),
-                'region': str(row['region']),
+                'region': str(row['region1']),
                 'winery': str(row['winery']),
                 'name': str(row['name']),
                 'wine_style': str(row['wine_style']),
@@ -149,18 +148,22 @@ if __name__ == "__main__":
 
     # generate wine db
     models.create_wine_table(conn)
+    models.create_user_table(conn)
+    models.create_mbiti_table(conn)
     
     # Check if wine table is empty
     with conn.cursor() as cur:
         cur.execute("SELECT EXISTS (SELECT 1 FROM wine)")
-        is_empty = cur.fetchone()[0]
-
+        is_empty = not cur.fetchone()[0]
+        
         if is_empty:
+            df = get_item_data()
+            total_rows = df.shape[0]
+
+            #DB에 data넣기
+            insert_wine_data(conn)
+            #create_mbti_data(conn)
+        else:
             raise ValueError("Wine table already contains data. Skipping insertion.")
-
-    df = get_item_data()
-    total_rows = df.shape[0]
-
-    #DB에 data넣기
-    insert_wine_data(conn)
-    #create_mbti_data(conn)
+            
+    

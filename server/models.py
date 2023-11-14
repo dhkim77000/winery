@@ -95,7 +95,7 @@ class User(Base):
 class MBTI(Base):
     __tablename__ = "mbti"
     mbti_id = Column(Integer, primary_key=True, nullable=False, unique=True)
-    wine_list = Column(ARRAY(String),  nullable=False)
+    wine_list = Column(ARRAY(Integer),  nullable=False)
 
 
 class Wine(Base):

@@ -1,7 +1,13 @@
 from psycopg2.extras import execute_values, register_uuid
 from psycopg2.extensions import connection
 import database , models
+import pdb
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
+import json
 
+def handle_nan(value):
+    return None if isinstance(value, float) and math.isnan(value) else value
 
 def get_top_10_items():
     # 데이터베이스 연결 설정
@@ -61,3 +67,48 @@ def sort_wine_by_distance(data):
 #         # User does not exist or password is incorrect
 #         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
     
+
+     
+def wine2json(result):
+    data = {
+        'id': result[0],
+        'item_id': result[1],
+        'winetype': result[2],
+        'Red_Fruit': result[3],
+        'Tropical': result[4],
+        'Tree_Fruit': result[5],
+        'Oaky': result[6],
+        'Ageing': result[7],
+        'Black_Fruit': result[8],
+        'Citrus': result[9],
+        'Dried_Fruit': result[10],
+        'Earthy': result[11],
+        'Floral': result[12],
+        'Microbio': result[13],
+        'Spices': result[14],
+        'Vegetal': result[15],
+        'Light': result[16],
+        'Bold': result[17],
+        'Smooth': result[18],
+        'Tannic': result[19],
+        'Dry': result[20],
+        'Sweet': result[21],
+        'Soft': result[22],
+        'Acidic': result[23],
+        'Fizzy': result[24],
+        'Gentle': result[25],
+        'vintage': result[26],
+        'price': result[27],
+        'wine_rating': result[28],
+        'num_votes': result[29],
+        'country': result[30],
+        'region': result[31],
+        'winery': result[32],
+        'name': result[33],
+        'wine_style': result[34],
+        'house': result[35],
+        'grape': result[36],
+        'pairing': result[37]
+    }
+    json_data = json.dumps(data, default=handle_nan)
+    return JSONResponse(content=json_data)
