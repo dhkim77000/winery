@@ -10,14 +10,13 @@ from sqlalchemy import func
 from passlib.context import CryptContext
 from psycopg2.extras import execute_values, register_uuid
 from datetime import datetime
-
+import json
 from schema import UserCreate, WinePost , Login_User, UserAdd
 from models import User, Wine,MBTI, create_user_table,create_wine_table
 import pdb , math
 from fastapi.security import OAuth2PasswordRequestForm
 from psycopg2.extensions import connection
 import numpy as np
-from function import wine2json
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -217,6 +216,31 @@ async def create_user(db: connection, user: UserCreate):
             return True
     
 
+async def set_user_mbti(db: connection, data, user, mbti):
+
+    user = await get_user(db=db, email=data.email)
+    email = user.email
+
+    file_path = '/home/dhkim/server_front/winery_server/server/mbti2idx.json'
+    
+    with open(file_path, 'r') as file:
+        mbti2idx = json.load(file)
+
+    mbti = mbti2idx[mbti]
+
+    update_query = """
+    UPDATE "user"
+    SET mbti_result = %s
+    WHERE email = %s;
+    """
+    values = (mbti, email)
+
+    # 쿼리 실행
+    with db.cursor() as cur:
+        cur.execute(update_query, values)
+        db.commit()
+    
+    
 async def update_wine_list_by_email(db: connection, db_user):
     new_wine_list = db_user.wine_list
     email = db_user.email

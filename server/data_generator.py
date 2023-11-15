@@ -11,19 +11,20 @@ import time
 import csv
 import sys
 import pdb
-
 from uuid import UUID, uuid4
 import models, database, crud
+from function import bayesian_adj_rating
 
 def get_item_data():
     data_path = "/home/dhkim/server_front/winery_server/data"
     data = pd.read_csv(os.path.join(data_path, "item_data.csv"))
+    data = bayesian_adj_rating(data)
     # "grape"
     wine_column = ['wine_id','winetype','Red Fruit', 'Tropical', 'Tree Fruit', 'Oaky',\
         'Ageing', 'Black Fruit', 'Citrus', 'Dried Fruit', 'Earthy', 'Floral', \
         'Microbio','Spices', 'Vegetal', 'Light', 'Bold', 'Smooth', 'Tannic', 'Dry',\
         'Sweet', 'Soft', 'Acidic', 'Fizzy', 'Gentle','vintage','price',\
-        'rating','num_votes','country','region1','winery','name','wine_style','house',\
+        'rating','b_rating', 'num_votes','country','region1','winery','name','wine_style','house',\
         'grape', 'pairing']
 
     # EX
@@ -53,12 +54,13 @@ def get_item_data():
 def insert_wine_data(db=connection):
     insert_query = """
     INSERT INTO "wine" (id,item_id,winetype, Red_Fruit, Tropical, Tree_Fruit, Oaky, Ageing, Black_Fruit, Citrus, Dried_Fruit, Earthy, Floral, Microbio, Spices, Vegetal, Light, Bold, Smooth, Tannic, Dry, Sweet, Soft, Acidic, Fizzy, Gentle
-    ,vintage,price,wine_rating,num_votes,country,region,winery,name,wine_style,house,grape,pairing)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s,%s, %s,%s,%s,%s,%s)
+    ,vintage,price,wine_rating,bayesian_rating,num_votes,country,region,winery,name,wine_style,house,grape,pairing)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s,%s, %s,%s,%s,%s,%s,%s)
     """
     print("------- Making wine table --------")
     with db.cursor() as cur, tqdm(total=total_rows, desc="Inserting data") as pbar:
         for _, row in df.iterrows():
+
             #print(row["price"])
             data = {
                 'id': str(uuid4()),
@@ -90,6 +92,7 @@ def insert_wine_data(db=connection):
                 'vintage': row['vintage'],
                 'price': row['price'],
                 'wine_rating': row['rating'],
+                'bayesian_rating':row['b_rating'],
                 'num_votes': row['num_votes'],
                 'country': str(row['country']),
                 'region': str(row['region1']),

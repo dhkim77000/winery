@@ -74,7 +74,7 @@ async def user_create(request: Request, db: connection = Depends(get_conn)):
     user = await request.json()
     user['id'] = uuid.uuid4()
     user['wine_list'] = None
-    user['mbti_result'] = []
+    user['mbti_result'] = -1
     user_model = UserCreate(**user)
 
     retVal = ReturnValue(status=False)
@@ -87,6 +87,21 @@ async def user_create(request: Request, db: connection = Depends(get_conn)):
     else:
         retVal.status = False
     return retVal
+
+
+# Pydantic UserCrate table로 data 받아서 User class로 db에 넣기
+@router.post("/set_mbti")
+async def user_create(request: Request, db: connection = Depends(get_conn)):
+
+    user = await request.json()
+    import pdb
+    pdb.set_trace()
+    print(user)
+
+
+    retVal = ReturnValue(status=False)
+    
+    return
 
 # 로그인
 @router.get("/")

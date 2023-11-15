@@ -5,6 +5,7 @@ import pdb
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 import json
+import pandas as pd
 
 def handle_nan(value):
     return None if isinstance(value, float) and math.isnan(value) else value
@@ -27,10 +28,6 @@ def get_top_10_items():
     item_ids = [row[0] for row in result]
     return item_ids
 
-
-# 함수 호출 및 결과 출력
-top_items = get_top_10_items()
-print(top_items)
 
 
 def sort_wine_by_distance(data):
@@ -69,7 +66,7 @@ def sort_wine_by_distance(data):
     
 
      
-def wine2json(result):
+def wine2dic(result):
     data = {
         'id': result[0],
         'item_id': result[1],
@@ -100,15 +97,31 @@ def wine2json(result):
         'vintage': result[26],
         'price': result[27],
         'wine_rating': result[28],
-        'num_votes': result[29],
-        'country': result[30],
-        'region': result[31],
-        'winery': result[32],
-        'name': result[33],
-        'wine_style': result[34],
-        'house': result[35],
-        'grape': result[36],
-        'pairing': result[37]
+        'b_rating': result[29],
+        'num_votes': result[30],
+        'country': result[31],
+        'region': result[32],
+        'winery': result[33],
+        'name': result[34],
+        'wine_style': result[35],
+        'house': result[36],
+        'grape': result[37],
+        'pairing': result[38]
     }
-    json_data = json.dumps(data, default=handle_nan)
-    return JSONResponse(content=json_data)
+    return 
+
+
+def bayesian_adj_rating(df):
+    min_votes = 30
+
+    tmp_df = df.dropna(subset=['rating', 'num_votes'])
+
+    tmp_df['w_rating'] = tmp_df['rating'] * tmp_df['num_votes'] / (tmp_df['num_votes'].sum())
+    bayesian_weight = 4  # Bayesian 가중치 (조절 가능)
+    tmp_df['b_rating'] = (
+        (tmp_df['num_votes'] / (tmp_df['num_votes'] + min_votes)) * tmp_df['rating'] +
+        (min_votes / (tmp_df['num_votes'] + min_votes)) * tmp_df['rating'].mean()
+    )
+    df = pd.merge(tmp_df[['wine_id', 'b_rating']], df, how='right', on='wine_id')
+
+    return df

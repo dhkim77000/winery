@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from uuid import UUID, uuid4
 from typing import List, Union, Optional, Dict, Any
 from pydantic import EmailStr, validator
-
+from psycopg2.extras import register_uuid
 from datetime import datetime
 
 class Token(BaseModel):
@@ -22,11 +22,12 @@ class Usertype(BaseModel):
     type : str
 
 class UserCreate(BaseModel):
+    
     id :UUID = Field(default_factory=uuid4)
     email:EmailStr
     password: str
     wine_list : Optional[List[int]] = None
-    mbti_result : List
+    mbti_result : int
 
     # @validator('email', 'password1', 'password2')
     # def not_empty(cls, v):
@@ -78,6 +79,7 @@ class WinePost(BaseModel):
     vintage : int
     price : int
     wine_rating : int
+    bayesian_rating : int
     num_votes : int
 
 class Login_User(BaseModel):

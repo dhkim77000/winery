@@ -11,7 +11,7 @@ def create_user_table(db):
         email VARCHAR NOT NULL UNIQUE,
         password VARCHAR NOT NULL,
         wine_list INTEGER[],
-        mbti_result INTEGER[]
+        mbti_result int
     );"""
     print(create_table_query)
     with db.cursor() as cur:
@@ -23,7 +23,7 @@ def create_mbiti_table(db):
     create_table_query = """
     CREATE TABLE IF NOT EXISTS "mbti" (
         mbti_id int PRIMARY KEY,
-        item text[]
+        item int[]
     );
     """
     print(create_table_query)
@@ -64,6 +64,7 @@ def create_wine_table(db_connect):
         vintage float,
         price float,
         wine_rating float,
+        bayesian_rating float,
         num_votes float,
         country TEXT,
         region TEXT,
@@ -129,6 +130,7 @@ class Wine(Base):
     vintage = Column(Float, nullable=True)
     price = Column(Float, nullable=True)
     wine_rating = Column(Float, nullable=True)
+    bayesian_rating = Column(Float, nullable=True)
     num_votes = Column(Float, nullable=True)
     country = Column(String, nullable=True)
     region= Column(String, nullable=True)
