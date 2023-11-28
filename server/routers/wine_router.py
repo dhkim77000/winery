@@ -7,6 +7,7 @@ from crud import (get_wine_datas,
                   get_user, 
                   search_wine_by_name, 
                   rating_update,
+                  rating_check,
                 )
 from schema import UserAdd, UserInteraction, Usertype
 from function import get_top_10_items
@@ -14,6 +15,7 @@ from typing import List, Optional
 import numpy as np
 import pdb
 import pymongo
+from datetime import datetime
 from pymongo.database import Database
 #app = FastAPI()
 
@@ -82,15 +84,27 @@ async def post_wine_simpleinfo(user_wine: Usertype, db: connection = Depends(get
 
 
 @router.post("/rating")
-async def update_rating(user_interaction: UserInteraction, 
+async def update_rating(request: Request, 
                         db: Database = Depends(get_mongo_db)):
+    request = await request.json()
     
-    collection = db.rating
 
-    uid = user_interaction.uid
-    wine_id = user_interaction.wine_id
-    rating = user_interaction.rating
-    timestamp = user_interaction.timestamp
+    collection = db.interaction
+    email = request['email']
+    wine_id = request['wine_id']
+    rating = request['rating']
+    timestamp = datetime.utcnow()
     
-    push = await rating_update(collection, uid, wine_id, rating, timestamp)
+    push = await rating_update(collection, email, wine_id, rating, timestamp)
     return push
+
+@router.post("/rating_check")
+async def check_rating(request: Request, 
+                        db: Database = Depends(get_mongo_db)):
+    request = await request.json()
+
+    collection = db.interaction
+    email = request['email']
+    wine_id = request['wine_id']
+    find = await rating_check(collection, email, wine_id)
+    return find

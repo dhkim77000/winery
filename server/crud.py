@@ -59,7 +59,7 @@ async def get_user_for_add(new_data:UserAdd, db: connection):
         return mbti
 
 async def search_wine_by_name(db: connection, wine_name):
-    min_length = int(len(wine_name) * 0.7)
+    min_length = max( int(len(wine_name) * 0.7), 1)
 
     searched_wine_ids = set()
     wines = []
@@ -70,7 +70,6 @@ async def search_wine_by_name(db: connection, wine_name):
             if len(result) != 0: # If result is found, break the loop and return the result
                 for wine in result: 
                     if wine[0] not in searched_wine_ids:
-                        pdb.set_trace()
                         wine = Wine(
                                 item_id= wine[0],
                                 wine_rating= wine[1] if not math.isnan(wine[1]) else None,
@@ -242,16 +241,22 @@ async def update_wine_list_by_email(db: connection, db_user):
         print(f"{email}의 wine_list가 업데이트되었습니다.")
     
 
-async def rating_update(collection, uid, wine_id, rating, timestamp):
+async def rating_check(collection, email, wine_id):
+    if not email:
+        raise HTTPException(status_code=400, detail="Missing UID parameter")
+    
+    # UID가 있는지 확인
+    result = collection.find_one({'email': email, 'wine_id': wine_id})
+    if result:
+        return True
+    else:
+        return False
+    
+async def rating_update(collection, email, wine_id, rating, timestamp):
     try:
-        data = [
-        {'uid': 1, 'timestamp': int(datetime.now().timestamp()), 'rating': 4.5, 'wine_id': 1},
-        {'uid': 2, 'timestamp': int(datetime.now().timestamp()), 'rating': 3.8, 'wine_id': 2},
-        {'uid': 1, 'timestamp': int(datetime.now().timestamp()), 'rating': 5.0, 'wine_id': 5}
-        ]
-        #data = {'uid': uid, 'timestamp': int(timestamp), 'rating': rating, 'wine_id':  wine_id}
-        collection.insert_many(data)
-        #collection.insert_one(data)
+        data =  {'email': email, 'timestamp': timestamp, 'rating': rating, 'wine_id': wine_id}
+        collection.insert_one(data)
+        print('Update rating')
         return True
     except Exception as e:
         print(e)
