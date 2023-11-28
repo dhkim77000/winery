@@ -89,6 +89,7 @@ async def search_wine_by_name(db: connection, wine_name):
 
 async def get_wine_data(db: connection, wine_id):
 
+    recommends = []
     with db.cursor() as cur:
         cur.execute("SELECT * FROM wine WHERE item_id = %s", (wine_id,))
         result = cur.fetchone()
@@ -96,57 +97,24 @@ async def get_wine_data(db: connection, wine_id):
     if result is None:
         raise HTTPException(status_code=404, detail=f"존재하지 않는 와인입니다.")
     else:
-        result = ['Null' if ((isinstance(value, float) and math.isnan(value)) or
-                     (isinstance(value, str) and value.lower() == 'nan')) 
-                  else value for value in result]
+        for wine in result: 
+            wine = Wine(
+                    item_id= wine[0],
+                    wine_rating= wine[1] if not math.isnan(wine[1]) else None,
+                    name =  wine[2],
+                    region= wine[3],
+                    price= wine[4] if not math.isnan(wine[4]) else None,
+                    country= wine[5]
+                )
+            recommends.append(wine)
         
-        wine = Wine(
-            id = result[0],
-            item_id = result[1],
-            winetype = result[2],
-            Red_Fruit = result[3],
-            Tropical = result[4],
-            Tree_Fruit = result[5],
-            Oaky = result[6],
-            Ageing = result[7],
-            Black_Fruit = result[8],
-            Citrus = result[9],
-            Dried_Fruit = result[10],
-            Earthy = result[11],
-            Floral = result[12],
-            Microbio = result[13],
-            Spices = result[14],
-            Vegetal = result[15],
-            Light = result[16],
-            Bold = result[17],
-            Smooth = result[18],
-            Tannic = result[19],
-            Dry = result[20],
-            Sweet = result[21],
-            Soft = result[22],
-            Acidic = result[23],
-            Fizzy = result[24],
-            Gentle = result[25],
-            vintage = result[26],
-            price = result[27],
-            wine_rating = result[28],
-            num_votes = result[29],
-            country = result[30],
-            region= result[31],
-            winery= result[32],
-            name= result[33],
-            wine_style= result[34],
-            house = result[35],
-            grape = result[36],
-            pairing = result[37],
-        )
-        return wine
+        return recommends
 
 async def get_wine_data_simple(db: connection, wine_id):
     
 
     with db.cursor() as cur:
-        cur.execute("SELECT * FROM wine WHERE item_id = %s", (wine_id,))
+        cur.execute("SELECT * FROM wine WHERE item_id = ANY(%s)", (wine_id,))
         result = cur.fetchone()
 
     if result is None:
@@ -215,32 +183,46 @@ async def create_user(db: connection, user: UserCreate):
             db.commit()
             return True
     
+#Update
+async def set_user_mbti(db: connection, data, topK, min_p, max_p):
+    try:
+        user = await get_user(db=db, email=data['email'])
+        email = user.email
 
-async def set_user_mbti(db: connection, data, user, mbti):
+        file_path = '/home/dhkim/server_front/winery_server/server/mbti2idx.json'
+        
+        with open(file_path, 'r') as file:
+            mbti2idx = json.load(file)
+ 
+        mbti = mbti2idx[data['wine_style']]
 
-    user = await get_user(db=db, email=data.email)
-    email = user.email
+        # 쿼리 실행
+        query = "SELECT item_id FROM wine WHERE item_id IN %s AND price BETWEEN %s AND %s;"
+        
+        with db.cursor() as cur:
+            cur.execute(query, (tuple(topK), min_p, max_p))
+            wine_list = cur.fetchall()
+            wine_list = [int(id[0]) for id in wine_list]
 
-    file_path = '/home/dhkim/server_front/winery_server/server/mbti2idx.json'
+        update_query = """
+        UPDATE "user"
+        SET mbti_result = %s,
+            wine_list = %s
+        WHERE email = %s;
+        """
+        values = (mbti, wine_list, email)
+
+        with db.cursor() as cur:
+            print("Update wine List")
+            cur.execute(update_query, values)
+            db.commit()
+        return True
     
-    with open(file_path, 'r') as file:
-        mbti2idx = json.load(file)
-
-    mbti = mbti2idx[mbti]
-
-    update_query = """
-    UPDATE "user"
-    SET mbti_result = %s
-    WHERE email = %s;
-    """
-    values = (mbti, email)
-
-    # 쿼리 실행
-    with db.cursor() as cur:
-        cur.execute(update_query, values)
-        db.commit()
+    except Exception as e: 
+        print(e)
+        return False
     
-    
+
 async def update_wine_list_by_email(db: connection, db_user):
     new_wine_list = db_user.wine_list
     email = db_user.email
@@ -272,4 +254,4 @@ async def rating_update(collection, uid, wine_id, rating, timestamp):
     except Exception as e:
         print(e)
         return False
-    
+

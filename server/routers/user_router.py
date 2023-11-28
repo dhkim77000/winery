@@ -9,13 +9,14 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
 from datetime import timedelta, datetime
-from crud import create_user, get_user, verify_password 
+from crud import create_user, get_user, verify_password, set_user_mbti
 from schema import UserCreate ,Login_User , ReturnValue
 from database import get_db, get_conn
 from models import User
 import pdb,os
 import uvicorn
 import uuid
+import json
 from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -94,14 +95,36 @@ async def user_create(request: Request, db: connection = Depends(get_conn)):
 async def user_create(request: Request, db: connection = Depends(get_conn)):
 
     user = await request.json()
-    import pdb
-    pdb.set_trace()
-    print(user)
+    path = '/home/dhkim/server_front/winery_server/data/styletopK.json'
+    with open(path, 'r') as f:  styletopK = json.load(f)
 
+    mbti_result = user['mbti_result']
+    wine_style = user['wine_style']
+
+    if mbti_result[2] == 'c1':
+        min_p = 0
+        max_p = 50
+    elif mbti_result[2] == 'c2':
+        min_p = 50
+        max_p = 150
+    elif mbti_result[2] == 'c3':
+        min_p = 150
+        max_p = 300
+    elif mbti_result[2] == 'c4':
+        min_p = 300
+        max_p = 100000000
+
+    styletopK[wine_style].extend(styletopK['Popular'])
+    
+    result = await set_user_mbti(db, user, set(styletopK[wine_style]), min_p, max_p)
 
     retVal = ReturnValue(status=False)
-    
-    return
+    if result:
+        retVal.status = True
+    else:
+        retVal.status = False
+
+    return retVal
 
 # 로그인
 @router.get("/")

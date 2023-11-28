@@ -16,7 +16,7 @@ def get_top_10_items():
     cursor = conn.cursor()
 
     # SQL 쿼리 실행 (nan 값 제외)
-    cursor.execute("SELECT item_id FROM wine WHERE NOT wine_rating IS NULL AND NOT num_votes IS NULL AND NOT wine_rating = 'nan' AND NOT num_votes = 'nan' ORDER BY wine_rating DESC, num_votes DESC LIMIT 10;")
+    cursor.execute("SELECT item_id FROM wine WHERE NOT wine_rating IS NULL AND NOT num_votes IS NULL AND NOT wine_rating = 'nan' AND NOT num_votes = 'nan' ORDER BY bayesian_rating DESC, num_votes DESC LIMIT 10;")
     
     # 결과 가져오기
     result = cursor.fetchall()
