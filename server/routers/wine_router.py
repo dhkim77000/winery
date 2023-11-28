@@ -2,7 +2,12 @@ from fastapi import FastAPI, Form, Request, Response
 from fastapi import APIRouter , Depends
 from psycopg2.extensions import connection
 from database import get_db, get_conn, get_mongo_db
-from crud import get_wine_data,get_wine_data_simple,get_user, search_wine_by_name, rating_update
+from crud import (get_wine_datas,
+                  get_wine_datas_simple,
+                  get_user, 
+                  search_wine_by_name, 
+                  rating_update,
+                )
 from schema import UserAdd, UserInteraction, Usertype
 from function import get_top_10_items
 from typing import List, Optional
@@ -36,15 +41,16 @@ async def post_wine_info(wine_id_list: List[int],
                          db: connection = Depends(get_conn)):
     wines = {}
     for wine_id in wine_id_list:
-        wine = await get_wine_data_simple(db=db, wine_id=wine_id)
+        wine = await get_wine_datas_simple(db=db, wine_id=wine_id)
         wines[wine_id] = wine
     return wines
 
 @router.post("/search_by_name")
-async def text_search(wine_name: str = '',
+async def text_search(request: Request,
                             page : Optional[int] = None,
                             db: connection = Depends(get_conn)):
-    result = await search_wine_by_name(db=db, wine_name = wine_name)
+    request = await request.json()
+    result = await search_wine_by_name(db=db, wine_name = request['name'])
     return result
 
 # # 와인 grid 페이지 정보
@@ -63,15 +69,14 @@ async def text_search(wine_name: str = '',
 async def post_wine_simpleinfo(user_wine: Usertype, db: connection = Depends(get_conn)):
     db_user = await get_user(db=db, email=user_wine.email)
     
-
     wine_id = db_user.wine_list
     popular_wines = get_top_10_items()
     wine_id.extend(popular_wines)
     wine_id = list(set(wine_id))
     
 
-    wines_json =  await get_wine_data(db=db, wine_id=wine_id)
-    print(wines_json)
+    wines_json =  await get_wine_datas_simple(db=db, wine_id=wine_id)
+
     return wines_json
 
 

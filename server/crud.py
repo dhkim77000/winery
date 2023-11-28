@@ -59,7 +59,7 @@ async def get_user_for_add(new_data:UserAdd, db: connection):
         return mbti
 
 async def search_wine_by_name(db: connection, wine_name):
-    min_length = len(wine_name) // 2
+    min_length = int(len(wine_name) * 0.7)
 
     searched_wine_ids = set()
     wines = []
@@ -70,7 +70,7 @@ async def search_wine_by_name(db: connection, wine_name):
             if len(result) != 0: # If result is found, break the loop and return the result
                 for wine in result: 
                     if wine[0] not in searched_wine_ids:
-                        
+                        pdb.set_trace()
                         wine = Wine(
                                 item_id= wine[0],
                                 wine_rating= wine[1] if not math.isnan(wine[1]) else None,
@@ -87,12 +87,12 @@ async def search_wine_by_name(db: connection, wine_name):
             wine_name = wine_name[:-1]
     return wines
 
-async def get_wine_data(db: connection, wine_id):
+async def get_wine_datas(db: connection, wine_id):
 
     recommends = []
     with db.cursor() as cur:
-        cur.execute("SELECT * FROM wine WHERE item_id = %s", (wine_id,))
-        result = cur.fetchone()
+        cur.execute("SELECT * FROM wine WHERE item_id IN %s", (tuple(wine_id),))
+        result = cur.fetchall()
         
     if result is None:
         raise HTTPException(status_code=404, detail=f"존재하지 않는 와인입니다.")
@@ -110,36 +110,38 @@ async def get_wine_data(db: connection, wine_id):
         
         return recommends
 
-async def get_wine_data_simple(db: connection, wine_id):
-    
+async def get_wine_datas_simple(db: connection, wine_id):
 
+    recommends = []
     with db.cursor() as cur:
-        cur.execute("SELECT * FROM wine WHERE item_id = ANY(%s)", (wine_id,))
-        result = cur.fetchone()
+        cur.execute("SELECT * FROM wine WHERE item_id IN %s", (tuple(wine_id),))
+        result = cur.fetchall()
 
     if result is None:
         raise HTTPException(status_code=404, detail=f"존재하지 않는 와인입니다.")
     else:
-        result = ['Null' if ((isinstance(value, float) and math.isnan(value)) or
-                     (isinstance(value, str) and value.lower() == 'nan')) 
-                  else value for value in result]
+        for wine_info in result: 
+            wine = Wine(
+                id = wine_info[0],
+                item_id = wine_info[1],
+                winetype = wine_info[2],
+                vintage = wine_info[26] if not math.isnan(wine_info[26]) else None,
+                price = wine_info[27] if not math.isnan(wine_info[27]) else None,
+                wine_rating = wine_info[28] if not math.isnan(wine_info[28]) else None,
+                num_votes = wine_info[-9] if not math.isnan(wine_info[-9]) else None,
+                country = wine_info[-8],
+                region= wine_info[-7],
+                winery= wine_info[-6],
+                name= wine_info[-5],
+                wine_style= wine_info[-4],
+                pairing = wine_info[-1],
+            )
 
-        wine = Wine(
-            id = result[0],
-            item_id = result[1],
-            winetype = result[2],
-            vintage = result[26],
-            price = result[27],
-            wine_rating = result[28],
-            num_votes = result[29],
-            country = result[30],
-            region= result[31],
-            winery= result[32],
-            name= result[33],
-            wine_style= result[34],
-            pairing = result[37],
-        )
-        return wine
+            recommends.append(wine)
+        
+
+    return recommends
+    
     
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
