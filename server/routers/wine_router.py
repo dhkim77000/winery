@@ -93,7 +93,7 @@ async def update_rating(request: Request,
     email = request['email']
     wine_id = request['wine_id']
     rating = request['rating']
-    timestamp = datetime.utcnow()
+    timestamp = int(datetime.utcnow().timestamp())
     
     push = await rating_update(collection, email, wine_id, rating, timestamp)
     return push
