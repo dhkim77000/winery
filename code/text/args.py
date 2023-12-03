@@ -9,9 +9,9 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", default='total', type=str)
     parser.add_argument("--model_path", 
-                    default='/home/dhkim/winery/code/text/models/model_outputmodel_state_dict_4.pt', 
+                    default='/home/dhkim/server_front/winery_AI/winery/code/text/models/model_outputmodel_state_dict_4.pt', 
                     type=str)
-    parser.add_argument("--data", default='/home/dhkim/winery/data/review_df_cleaned.csv', type=str)
+    parser.add_argument("--data", default='/home/dhkim/server_front/winery_AI/winery/data/review_df_cleaned.csv', type=str)
     parser.add_argument("--max_len", default = 152, type=int)
     parser.add_argument("--batch_size", default = 16, type=int)
     parser.add_argument("--pool", default = 'mean', type=str)

@@ -1,0 +1,31 @@
+Traceback (most recent call last):
+  File "/home/dhkim/anaconda3/lib/python3.8/site-packages/lockfile/pidlockfile.py", line 77, in acquire
+    write_pid_to_pidfile(self.path)
+  File "/home/dhkim/anaconda3/lib/python3.8/site-packages/lockfile/pidlockfile.py", line 161, in write_pid_to_pidfile
+    pidfile_fd = os.open(pidfile_path, open_flags, open_mode)
+PermissionError: [Errno 13] Permission denied: './airflow-scheduler.pid'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/dhkim/anaconda3/bin/airflow", line 8, in <module>
+    sys.exit(main())
+  File "/home/dhkim/anaconda3/lib/python3.8/site-packages/airflow/__main__.py", line 40, in main
+    args.func(args)
+  File "/home/dhkim/anaconda3/lib/python3.8/site-packages/airflow/cli/cli_parser.py", line 48, in command
+    return func(*args, **kwargs)
+  File "/home/dhkim/anaconda3/lib/python3.8/site-packages/airflow/utils/cli.py", line 92, in wrapper
+    return f(*args, **kwargs)
+  File "/home/dhkim/anaconda3/lib/python3.8/site-packages/airflow/cli/commands/scheduler_command.py", line 69, in scheduler
+    with ctx:
+  File "/home/dhkim/anaconda3/lib/python3.8/site-packages/daemon/daemon.py", line 365, in __enter__
+    self.open()
+  File "/home/dhkim/anaconda3/lib/python3.8/site-packages/daemon/daemon.py", line 357, in open
+    self.pidfile.__enter__()
+  File "/home/dhkim/anaconda3/lib/python3.8/site-packages/lockfile/__init__.py", line 197, in __enter__
+    self.acquire()
+  File "/home/dhkim/anaconda3/lib/python3.8/site-packages/daemon/pidfile.py", line 49, in acquire
+    super().acquire(timeout, *args, **kwargs)
+  File "/home/dhkim/anaconda3/lib/python3.8/site-packages/lockfile/pidlockfile.py", line 91, in acquire
+    raise LockFailed("failed to create %s" % self.path)
+lockfile.LockFailed: failed to create ./airflow-scheduler.pid

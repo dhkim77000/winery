@@ -29,10 +29,10 @@ def main(args):
         (모델경로)로 사용할 모델을 선택합니다.
         --rank_K로 몇개의 추천아이템을 뽑아낼지 선택합니다.
     """
-    with open('/home/dhkim/winery/code/data/feature_map/idx2user.json','r') as f:
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/idx2user.json','r') as f:
         idx2user = json.load(f)
 
-    item_data = pd.read_csv('/home/dhkim/winery/data/item_data.csv', encoding='utf-8-sig')
+    item_data = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/data/item_data.csv', encoding='utf-8-sig')
     item_data['vectors'] = item_data['vectors'].apply(string2array)
 
     min_votes = 20
@@ -55,14 +55,14 @@ def main(args):
     index = faiss.IndexIDMap2(index)
     index.add_with_ids(wine_vectors, wine_ids)
 
-    user_data = pd.read_csv("/home/dhkim/winery/dataset/train_data/train_data.user", 
+    user_data = pd.read_csv("/home/dhkim/server_front/winery_AI/winery/dataset/train_data/train_data.user", 
                                     sep='\t', 
                                     encoding='utf-8')
     user_data.set_index('email:token', inplace = True)
     user_data['user_id'] = user_data.index
 
-    inter = pd.read_csv("/home/dhkim/winery/dataset/train_data/train_data.inter", sep='\t',encoding='utf-8')
-    item_emb = pd.read_csv("/home/dhkim/winery/dataset/train_data/train_data.itememb", sep='\t',encoding='utf-8')
+    inter = pd.read_csv("/home/dhkim/server_front/winery_AI/winery/dataset/train_data/train_data.inter", sep='\t',encoding='utf-8')
+    item_emb = pd.read_csv("/home/dhkim/server_front/winery_AI/winery/dataset/train_data/train_data.itememb", sep='\t',encoding='utf-8')
     
     inter_per_user = inter.groupby('email:token')['wine_id:token'].agg(list)
 
@@ -326,7 +326,7 @@ def main(args):
             data_dict = {user_email: pred_list[i].tolist() for i, user_email in enumerate(user_list)}
 
             # JSON 데이터를 파일에 저장
-            output_foler = '/home/dhkim/winery/output'
+            output_foler = '/home/dhkim/server_front/winery_AI/winery/output'
 
             filename = "inference.json"  # 원하는 파일 경로와 이름 설정
             with open(os.path.join(output_foler, filename), 'w') as f:

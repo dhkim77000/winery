@@ -62,11 +62,11 @@ if __name__ == '__main__':
     parser.add_argument("--min_len", default = 5, type=int)
     args = parser.parse_args()
         
-    with open('/home/dhkim/winery/code/feature_map/item2idx.json','r') as f: item2idx = json.load(f)
-    basic_info = pd.read_csv('/home/dhkim/winery/data/wine_df.csv')
+    with open('/home/dhkim/server_front/winery_AI/winery/code/feature_map/item2idx.json','r') as f: item2idx = json.load(f)
+    basic_info = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/data/wine_df.csv')
     basic_info['wine_id'] = basic_info['url'].map(item2idx)
     basic_info = basic_info[basic_info['wine_id'].isnull() == False]
-    review_df = pd.read_csv('/home/dhkim/winery/data/review_df_cleaned.csv',encoding = 'utf-8-sig')
+    review_df = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/data/review_df_cleaned.csv',encoding = 'utf-8-sig')
 
     basic_info['wine_id'] = basic_info['wine_id'].astype('int').astype('category')
     review_df['wine_id'] = review_df['wine_id'].astype('int').astype('category')
@@ -94,4 +94,4 @@ if __name__ == '__main__':
         text = text[:1000000]
         style_summary[style] = ''.join(GPT2_model(text, min_length=args.min_len, max_length=args.max_len))
 
-    with open('/home/dhkim/winery/data/{args.out_name}','w') as f: json.dump(style_summary, f)
+    with open('/home/dhkim/server_front/winery_AI/winery/data/{args.out_name}','w') as f: json.dump(style_summary, f)

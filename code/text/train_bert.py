@@ -100,10 +100,10 @@ def main(args):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_output_path", default='/home/dhkim/winery/code/text/models/model_output', type=str)
-    parser.add_argument("--trainer_output_path", default='/home/dhkim/winery/code/text/models', type=str)
-    parser.add_argument("--vocab_file", default='/home/dhkim/winery/code/text/models/review_tokenizer-vocab.txt', type=str)
-    parser.add_argument("--text_file", default="/home/dhkim/winery/data/text_data.txt", type=str)
+    parser.add_argument("--model_output_path", default='/home/dhkim/server_front/winery_AI/winery/code/text/models/model_output', type=str)
+    parser.add_argument("--trainer_output_path", default='/home/dhkim/server_front/winery_AI/winery/code/text/models', type=str)
+    parser.add_argument("--vocab_file", default='/home/dhkim/server_front/winery_AI/winery/code/text/models/review_tokenizer-vocab.txt', type=str)
+    parser.add_argument("--text_file", default="/home/dhkim/server_front/winery_AI/winery/data/text_data.txt", type=str)
 #######Data#############################################################################
     parser.add_argument("--max_len", default=128, type=int)
     parser.add_argument("--vocab_size", default=40000, type=int)

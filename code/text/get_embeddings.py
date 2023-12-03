@@ -44,7 +44,7 @@ from multiprocessing import Manager, Pool
 
 def get_label_num():
     #model = BERTClass(num_labels= )
-    labeled_review = pd.read_csv('/home/dhkim/winery/data/sample_labeled_review.csv', 
+    labeled_review = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/data/sample_labeled_review.csv', 
                         encoding = 'utf-8', 
                         usecols=['wine_id','text','price_label','note_label'],
                         nrows=3)
@@ -59,7 +59,7 @@ def get_label_num():
         
     labeled_review.drop(['note_label','price_label'], axis = 1, inplace = True)
     columns_to_load = ['wine_id','grape_label','winetype_label','country_label']
-    wine_label = pd.read_csv('/home/dhkim/winery/data/sample_wine_label.csv', 
+    wine_label = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/data/sample_wine_label.csv', 
                                 encoding = 'utf-8',
                                 usecols=columns_to_load)
     
@@ -142,12 +142,12 @@ def get_embedding_MLM(df, args):
     review_vectors = {}
 
     tokenizer = BertTokenizerFast(
-                vocab_file='/home/dhkim/winery/code//text/models/review_tokenizer-vocab.txt',
+                vocab_file='/home/dhkim/server_front/winery_AI/winery/code//text/models/review_tokenizer-vocab.txt',
                 max_len=156,
                 do_lower_case=True
                 )
             
-    model = BertModel.from_pretrained('/home/dhkim/winery/code/text/models/model_output')
+    model = BertModel.from_pretrained('/home/dhkim/server_front/winery_AI/winery/code/text/models/model_output')
     model.to(device)
 
     with torch.no_grad():
@@ -217,9 +217,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", default='total', type=str)
     parser.add_argument("--model_path", 
-                        default='/home/dhkim/winery/code/text/models/model_outputmodel_state_dict_4.pt', 
+                        default='/home/dhkim/server_front/winery_AI/winery/code/text/models/model_outputmodel_state_dict_4.pt', 
                         type=str)
-    parser.add_argument("--data", default='/home/dhkim/winery/data/review_df_cleaned.csv', type=str)
+    parser.add_argument("--data", default='/home/dhkim/server_front/winery_AI/winery/data/review_df_cleaned.csv', type=str)
     parser.add_argument("--max_len", default = 152, type=int)
     parser.add_argument("--batch_size", default = 16, type=int)
     parser.add_argument("--device", default = 'cuda' if cuda.is_available() else 'cpu', type=str)
@@ -234,7 +234,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     data = pd.read_csv(args.data, encoding= 'utf-8-sig')
-    with open('/home/dhkim/winery/code/data/feature_map/item2idx.json','r') as f:
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/item2idx.json','r') as f:
         item2idx = json.load(f)
     if 'wine_url' in data.columns:
         data['wine_id'] = data['wine_url'].map(item2idx)
@@ -245,7 +245,7 @@ if __name__ == '__main__':
     #get_embedding_multilabel(data, {}, args)
     try:
         for key in tqdm(review_vectors): review_vectors[key] = review_vectors[key].tolist()
-        with open('/home/dhkim/winery/data/wine_vector_multilabel.json', 'w') as f: json.dump(review_vectors, f)    
+        with open('/home/dhkim/server_front/winery_AI/winery/data/wine_vector_multilabel.json', 'w') as f: json.dump(review_vectors, f)    
     except:
         import pdb
         pdb.set_trace()

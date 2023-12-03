@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/home/dhkim/winery/crawl/env"
+VIRTUAL_ENV="/home/dhkim/server_front/winery_AI/winery/crawl/env"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

@@ -21,24 +21,24 @@ def run(args):
         return run_recbole(
             model=args.model_name,
             dataset='train_data',
-            config_file_list=['/home/dhkim/winery/Recbole/basic.yaml'],
+            config_file_list=['/home/dhkim/server_front/winery_AI/winery/Recbole/basic.yaml'],
         )
     elif args.mode == 'binary':
         return run_recbole(
             model=args.model_name,
             dataset='train_data_binary',
-            config_file_list=['/home/dhkim/winery/Recbole/binary.yaml'],
+            config_file_list=['/home/dhkim/server_front/winery_AI/winery/Recbole/binary.yaml'],
         )
     
 
-    files = os.listdir('/home/dhkim/winery/Recbole/saved')
-    files = [file for file in files if os.path.isfile(os.path.join('/home/dhkim/winery/Recbole/saved', file))]
+    files = os.listdir('/home/dhkim/server_front/winery_AI/winery/Recbole/saved')
+    files = [file for file in files if os.path.isfile(os.path.join('/home/dhkim/server_front/winery_AI/winery/Recbole/saved', file))]
     
-    sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join('/home/dhkim/winery/Recbole/saved', x)), reverse=True)
+    sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join('/home/dhkim/server_front/winery_AI/winery/Recbole/saved', x)), reverse=True)
 
     most_recent_model = sorted_files[0]
 
-    os.rename(most_recent_model, os.path.join('/home/dhkim/winery/Recbole/saved', 'DCN-latest.pth'))
+    os.rename(most_recent_model, os.path.join('/home/dhkim/server_front/winery_AI/winery/Recbole/saved', 'DCN-latest.pth'))
 
 
 

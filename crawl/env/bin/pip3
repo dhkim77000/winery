@@ -1,4 +1,4 @@
-#!/home/dhkim/winery/crawl/env/bin/python3
+#!/home/dhkim/server_front/winery_AI/winery/crawl/env/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

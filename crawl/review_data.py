@@ -87,7 +87,7 @@ def get_driver(chrome_options, url):
 
 
 def screenshot(driver, error):
-    driver.save_screenshot('/home/dhkim/winery/'+error + '.png')
+    driver.save_screenshot('/home/dhkim/server_front/winery_AI/winery/'+error + '.png')
 
     
 def reset_driver(driver, chrome_options, url):
@@ -301,14 +301,14 @@ def main(driver, urls, done, df):
             print('----------------------Saving----------------------')
             df = write_data(df, review)
             done.add(url)
-            df.to_csv('/home/dhkim/winery/data/review_df.csv', encoding = 'utf-8-sig',index= False)
-            with open('/home/dhkim/winery/data/review_done.pkl','wb') as f: pickle.dump(done,f)
+            df.to_csv('/home/dhkim/server_front/winery_AI/winery/data/review_df.csv', encoding = 'utf-8-sig',index= False)
+            with open('/home/dhkim/server_front/winery_AI/winery/data/review_done.pkl','wb') as f: pickle.dump(done,f)
 
             time.sleep(5)
 
     df = write_data(df, review)
-    df.to_csv('/home/dhkim/winery/data/review_df.csv', encoding = 'utf-8-sig',index= False)
-    with open('/home/dhkim/winery/data/review_done.pkl','wb') as f: pickle.dump(done,f)
+    df.to_csv('/home/dhkim/server_front/winery_AI/winery/data/review_df.csv', encoding = 'utf-8-sig',index= False)
+    with open('/home/dhkim/server_front/winery_AI/winery/data/review_done.pkl','wb') as f: pickle.dump(done,f)
 #------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------
 def write_data(write_file, datas):
@@ -351,7 +351,7 @@ if __name__ == '__main__':
     my_idx = int(sys.argv[-1])
 
 
-    with open('/home/dhkim/winery/data/urls.json', 'r') as f: urls = json.load(f)
+    with open('/home/dhkim/server_front/winery_AI/winery/data/urls.json', 'r') as f: urls = json.load(f)
 
     def split_list(lst, n):
         # Calculate the length of each sublist
@@ -376,11 +376,11 @@ if __name__ == '__main__':
     urls_for_me = split_list(urls, 5)[my_idx]
 
     try:
-        with open('/home/dhkim/winery/data/review_done.pkl', 'rb') as f: done  = pickle.load(f)
+        with open('/home/dhkim/server_front/winery_AI/winery/data/review_done.pkl', 'rb') as f: done  = pickle.load(f)
     except: done = set()
 
     try:
-        df = pd.read_csv('/home/dhkim/winery/data/review_df.csv', encoding = 'utf-8-sig')
+        df = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/data/review_df.csv', encoding = 'utf-8-sig')
     except:
         columns = ['user_url','rating','date','like','bad', 'text','wine_url']
         df = pd.DataFrame(columns = columns)

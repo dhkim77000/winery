@@ -275,14 +275,14 @@ def get_data(driver, urls, done, df):
             if len(datas) == 100:
                 print('Saving')
                 df = write_data(df, datas)
-                df.to_csv('/home/dhkim/winery/data/basic_info.csv', encoding = 'utf-8-sig',index= False)
+                df.to_csv('/home/dhkim/server_front/winery_AI/winery/data/basic_info.csv', encoding = 'utf-8-sig',index= False)
                 datas.clear()
-                with open('/home/dhkim/winery/data/basic_done.pkl','wb') as f: pickle.dump(done,f)
+                with open('/home/dhkim/server_front/winery_AI/winery/data/basic_done.pkl','wb') as f: pickle.dump(done,f)
     print('Saving')
     df = write_data(df, datas)
-    df.to_csv('/home/dhkim/winery/data/basic_info.csv', encoding = 'utf-8-sig',index= False)
+    df.to_csv('/home/dhkim/server_front/winery_AI/winery/data/basic_info.csv', encoding = 'utf-8-sig',index= False)
     datas.clear()
-    with open('/home/dhkim/winery/data/basic_done.pkl','wb') as f: pickle.dump(done,f)
+    with open('/home/dhkim/server_front/winery_AI/winery/data/basic_done.pkl','wb') as f: pickle.dump(done,f)
 
 
 if __name__ == '__main__':
@@ -318,7 +318,7 @@ if __name__ == '__main__':
     driver = get_driver(chrome_options, 'https://www.vivino.com/US-CA/en/')
     
 
-    with open('/home/dhkim/winery/data/urls.json', 'r') as f: urls = json.load(f)
+    with open('/home/dhkim/server_front/winery_AI/winery/data/urls.json', 'r') as f: urls = json.load(f)
 
     def split_list(lst, n):
         # Calculate the length of each sublist
@@ -343,14 +343,14 @@ if __name__ == '__main__':
     urls_for_me = split_list(urls, 6)[my_idx]
 
     try:
-        with open('/home/dhkim/winery/data/basic_done.pkl', 'rb') as f: done  = pickle.load(f)
+        with open('/home/dhkim/server_front/winery_AI/winery/data/basic_done.pkl', 'rb') as f: done  = pickle.load(f)
     except:
         done = set()
 
     #done = set()
     #df = pd.DataFrame()
     try:
-        df = pd.read_csv('/home/dhkim/winery/data/basic_info.csv', encoding = 'utf-8-sig')
+        df = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/data/basic_info.csv', encoding = 'utf-8-sig')
         done = done | set(df['url'])
     except:
         df = pd.DataFrame(columns = ['winery','grapes','country','region1','region2','region3', 'wine style','allergens'])

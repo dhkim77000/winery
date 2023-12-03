@@ -87,7 +87,7 @@ def get_driver(chrome_options, url):
 
 
 def screenshot(driver, error):
-    driver.save_screenshot('/home/dhkim/winery/crawl/'+error + '.png')
+    driver.save_screenshot('/home/dhkim/server_front/winery_AI/winery/crawl/'+error + '.png')
 
     
 def reset_driver(driver, chrome_options, url):

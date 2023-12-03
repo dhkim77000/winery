@@ -381,14 +381,14 @@ def get_data(driver, urls, vine_dic, done, df):
             if len(datas) == 100:
                 print('Saving')
                 df = write_data(df, datas)
-                df.to_csv('/home/dhkim/winery/data/wine_df.csv', encoding = 'utf-8-sig',index= False)
+                df.to_csv('/home/dhkim/server_front/winery_AI/winery/data/wine_df.csv', encoding = 'utf-8-sig',index= False)
                 datas.clear()
-                with open('/home/dhkim/winery/data/done.pkl','wb') as f: pickle.dump(done,f)
+                with open('/home/dhkim/server_front/winery_AI/winery/data/done.pkl','wb') as f: pickle.dump(done,f)
     print('Saving')
     df = write_data(df, datas)
-    df.to_csv('/home/dhkim/winery/data/wine_df.csv', index= False, encoding = 'utf-8-sig')
+    df.to_csv('/home/dhkim/server_front/winery_AI/winery/data/wine_df.csv', index= False, encoding = 'utf-8-sig')
     datas.clear()
-    with open('/home/dhkim/winery/data/done.pkl','wb') as f: pickle.dump(done,f)
+    with open('/home/dhkim/server_front/winery_AI/winery/data/done.pkl','wb') as f: pickle.dump(done,f)
 
 
 if __name__ == '__main__':
@@ -423,12 +423,12 @@ if __name__ == '__main__':
     warnings.filterwarnings("ignore", category=DeprecationWarning) 
     driver = get_driver(chrome_options, 'https://www.vivino.com/US-CA/en/')
     #urls_set = set()
-    with open('/home/dhkim/winery/crawl/urls.pkl', 'rb') as f: urls = pickle.load(f)
+    with open('/home/dhkim/server_front/winery_AI/winery/crawl/urls.pkl', 'rb') as f: urls = pickle.load(f)
     with open('/opt/ml/winedata/vine_dic.pkl', 'rb') as f: vine_dic = pickle.load(f)
-    with open('/home/dhkim/winery/data/done.pkl', 'rb') as f: done  = pickle.load(f)
+    with open('/home/dhkim/server_front/winery_AI/winery/data/done.pkl', 'rb') as f: done  = pickle.load(f)
 
     #done = set()
     #df = pd.DataFrame()
-    df = pd.read_csv('/home/dhkim/winery/data/wine_df.csv', encoding = 'utf-8-sig')
+    df = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/data/wine_df.csv', encoding = 'utf-8-sig')
     get_data(driver, urls, vine_dic, done, df)
     

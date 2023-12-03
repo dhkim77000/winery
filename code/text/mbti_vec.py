@@ -45,7 +45,7 @@ from multiprocessing import Manager, Pool
 
 def get_label_num():
     #model = BERTClass(num_labels= )
-    labeled_review = pd.read_csv('/home/dhkim/winery/data/sample_labeled_review.csv', 
+    labeled_review = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/data/sample_labeled_review.csv', 
                         encoding = 'utf-8', 
                         usecols=['wine_id','text','price_label','note_label'],
                         nrows=3)
@@ -60,7 +60,7 @@ def get_label_num():
         
     labeled_review.drop(['note_label','price_label'], axis = 1, inplace = True)
     columns_to_load = ['wine_id','grape_label','winetype_label','country_label']
-    wine_label = pd.read_csv('/home/dhkim/winery/data/sample_wine_label.csv', 
+    wine_label = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/data/sample_wine_label.csv', 
                                 encoding = 'utf-8',
                                 usecols=columns_to_load)
     
@@ -129,7 +129,7 @@ def get_embedding_multilabel(df, vector_dic, args):
             vector_dic[answer_ids[i]] = output.tolist()
             i+=1
 
-    with open('/home/dhkim/winery/data/mbti_vector.json','w') as f: json.dump(vector_dic, f)
+    with open('/home/dhkim/server_front/winery_AI/winery/data/mbti_vector.json','w') as f: json.dump(vector_dic, f)
 
     return vector_dic
 
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", default='total', type=str)
     parser.add_argument("--model_path", 
-                        default='/home/dhkim/winery/code/text/models/model_outputmodel_state_dict_4.pt', 
+                        default='/home/dhkim/server_front/winery_AI/winery/code/text/models/model_outputmodel_state_dict_4.pt', 
                         type=str)
     parser.add_argument("--max_len", default = 152, type=int)
     parser.add_argument("--batch_size", default = 1, type=int)
@@ -150,12 +150,12 @@ if __name__ == '__main__':
 #######Data#############################################################################
     args = parser.parse_args()
  
-    with open('/home/dhkim/winery/data/mbti_answer.json','r') as f:
+    with open('/home/dhkim/server_front/winery_AI/winery/data/mbti_answer.json','r') as f:
         mbti_vec = json.load(f)
 
     
     data = pd.DataFrame(mbti_vec.values(), index= mbti_vec.keys(), columns = ['text'])
-    with open('/home/dhkim/winery/code/data/feature_map/item2idx.json','r') as f:
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/item2idx.json','r') as f:
         item2idx = json.load(f)
 
     get_embedding_multilabel(data, {}, args)

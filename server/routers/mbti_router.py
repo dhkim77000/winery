@@ -71,7 +71,7 @@ async def post_mbti_question(mbti_result : GetMBTI):
     vector_dimension = 768
 
     answer_list = mbti_result.result
-    with open("/home/dhkim/winery/server/data/mbti_vectors.json","r") as f:
+    with open("/home/dhkim/server_front/winery_AI/winery/server/data/mbti_vectors.json","r") as f:
         answer_vector = json.load(f)
 
     vector_list = []

@@ -11,7 +11,7 @@ from datetime import datetime
 def data2bucket():
     current_time = datetime.now()
     bucket_name = 'rank_info_db2model'    
-    source_file_name = '/home/dhkim/winery/output/inference.json'
+    source_file_name = '/home/dhkim/server_front/winery_AI/winery/output/inference.json'
     destination_blob_name = f'{current_time}_inference.json'
   
     storage_client = storage.Client()
@@ -32,7 +32,7 @@ def candid2recbole(item_data : pd.DataFrame,
                    popular : set,
                    index : faiss.IndexIDMap2):
     
-    #outpath = '/home/dhkim/winery/dataset/cadidates'
+    #outpath = '/home/dhkim/server_front/winery_AI/winery/dataset/cadidates'
 
     #item_data_recbole.set_index('wine_id:token', inplace= True)
     #item_data_recbole['wine_id:token'] = item_data_recbole.index

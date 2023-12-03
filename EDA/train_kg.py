@@ -43,8 +43,8 @@ def str2dtype(x, dtype):
 
 def to_kg():
 
-    df = pd.read_csv('/home/dhkim/winery/data/item_data_expand.csv', encoding = 'utf-8-sig')
-    wine = pd.read_csv('/home/dhkim/winery/data/wine_df.csv', encoding = 'utf-8-sig')
+    df = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/data/item_data_expand.csv', encoding = 'utf-8-sig')
+    wine = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/data/wine_df.csv', encoding = 'utf-8-sig')
     
     knowledge_df = pd.DataFrame(columns=['from','rel','to'])
 
@@ -159,7 +159,7 @@ def pykeen_main(args):
     return result
 
 def main(args):
-    kg = pd.read_csv('/home/dhkim/winery/wine_kg.csv')
+    kg = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/wine_kg.csv')
     kg = kg.dropna()
     for col in kg.columns: kg[col] = kg[col].astype(str)
 
@@ -231,10 +231,10 @@ if __name__ == "__main__":
     pdb.set_trace()
     entity_embedding = result.model.entity_representations[0]._embeddings.weight.data.cpu().numpy()
     relation_embedding = result.model.relation_representations[0]._embeddings.weight.data.cpu().numpy()
-    np.save('/home/dhkim/winery/EDA/graph/embedding/entity_embedding.npy', entity_embedding)
+    np.save('/home/dhkim/server_front/winery_AI/winery/EDA/graph/embedding/entity_embedding.npy', entity_embedding)
     relation_to_id = result.training.relation_to_id
     entity_to_id = result.training.entity_to_id
-    with open('/home/dhkim/winery/EDA/graph/embedding/relation2idx.json','w') as f: 
+    with open('/home/dhkim/server_front/winery_AI/winery/EDA/graph/embedding/relation2idx.json','w') as f: 
         json.dump(relation_to_id,f)
-    with open('/home/dhkim/winery/EDA/graph/embedding/entity2idx.json','w') as f: 
+    with open('/home/dhkim/server_front/winery_AI/winery/EDA/graph/embedding/entity2idx.json','w') as f: 
         json.dump(entity_to_id,f)

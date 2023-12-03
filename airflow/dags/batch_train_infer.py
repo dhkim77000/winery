@@ -19,25 +19,25 @@ with DAG(
 
     t0 = BashOperator(
     task_id="credential",
-    bash_command='export GOOGLE_APPLICATION_CREDENTIALS="/home/dhkim/winery/airflow/deep-theorem-391805-8dd50cc51ba5.json"',
+    bash_command='export GOOGLE_APPLICATION_CREDENTIALS="/home/dhkim/server_front/winery_AI/winery/airflow/polished-cocoa-404816-b981d3d391d9.json"',
     dag=dag,
     )
 
     t1 = BashOperator(
     task_id="preprocess",
-    bash_command="python /home/dhkim/winery/code/data/prepare_data.py",
+    bash_command="python /home/dhkim/server_front/winery_AI/winery/code/data/prepare_data.py",
     dag=dag,
     )
  
     t2 = BashOperator(
     task_id="train",
-    bash_command="python /home/dhkim/winery/Recbole/train.py --model_name DCN",
+    bash_command="python /home/dhkim/server_front/winery_AI/winery/Recbole/train.py --model_name DCN",
     dag=dag,
     )
 
     t3 = BashOperator(
     task_id="inference",
-    bash_command="python /home/dhkim/winery/Recbole/inference.py",
+    bash_command="python /home/dhkim/server_front/winery_AI/winery/Recbole/inference.py",
     dag=dag,
     )
     # 테스크 순서를 정합니다.

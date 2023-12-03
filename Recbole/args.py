@@ -36,7 +36,7 @@ def parse_args():
     
     parser.add_argument("--rank_K", default = 300, type=int, help="# of predict number")
     parser.add_argument("--top_K" , default = 10, type=int)
-    models_path = '/home/dhkim/winery/Recbole/saved'
+    models_path = '/home/dhkim/server_front/winery_AI/winery/Recbole/saved'
 
     # Get a list of all files in the directory
     #files = os.listdir(models_path)
@@ -45,7 +45,7 @@ def parse_args():
     #sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(models_path, x)), reverse=True)
     #most_recent_model = sorted_files[0]
 
-    parser.add_argument("--saved_model" , default = '/home/dhkim/winery/saved/DCN-latest.pth', type=str,help ="use model")
+    parser.add_argument("--saved_model" , default = '/home/dhkim/server_front/winery_AI/winery/saved/DCN-latest.pth', type=str,help ="use model")
     args = parser.parse_args()
 
     return args

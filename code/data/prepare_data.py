@@ -46,11 +46,11 @@ def load_index_file():
 def prepare_dataset(args):
     num_cpu = os.cpu_count()
 
-    with open('/home/dhkim/winery/code/data/meta_data/seq_columns.json','r',encoding='utf-8') as f:  
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/meta_data/seq_columns.json','r',encoding='utf-8') as f:  
         seq_columns = json.load(f)
-    with open('/home/dhkim/winery/code/data/meta_data/token_columns.json','r',encoding='utf-8') as f:  
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/meta_data/token_columns.json','r',encoding='utf-8') as f:  
         tok_columns = json.load(f)
-    with open('/home/dhkim/winery/code/data/meta_data/float_columns.json','r',encoding='utf-8') as f:  
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/meta_data/float_columns.json','r',encoding='utf-8') as f:  
         float_columns = json.load(f)
 
     item_data_cols = [
@@ -75,7 +75,7 @@ def prepare_dataset(args):
 
     get_data_from_bucket()
     
-    item_data = pd.read_csv('/home/dhkim/winery/data/item_data.csv',
+    item_data = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/data/item_data.csv',
                             encoding= 'utf-8-sig',
                             usecols = item_data_cols)
     
@@ -84,10 +84,12 @@ def prepare_dataset(args):
 
     item_data['wine_id'] = item_data['wine_id'].astype(int).astype('category')
 
-    inter = pd.read_csv('/home/dhkim/winery/data/inter.csv', 
-                                      encoding='utf-8-sig',
-                                      usecols = ['email','rating','timestamp','wine_id'])
+    #inter = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/data/inter.csv', 
+    #                                 encoding='utf-8-sig',
+    #                                usecols = ['email','rating','timestamp','wine_id'])
     
+    inter = table2df(table_id= 'user_item', dataset_id = 'inter')
+
     inter = inter.dropna(subset=['wine_id'], axis=0)
     inter['wine_id'] = inter['wine_id'].astype(int).astype('category')
     inter = inter[inter['wine_id'].isin(item_data['wine_id'])]
@@ -96,8 +98,8 @@ def prepare_dataset(args):
     users.sort()
     user2idx = {feature: index for index, feature in enumerate(users)}
     idx2user = {index: feature for index, feature in enumerate(users)}
-    with open('/home/dhkim/winery/code/data/feature_map/user2idx.json','w') as f: json.dump(user2idx,f)
-    with open('/home/dhkim/winery/code/data/feature_map/idx2user.json','w') as f: json.dump(idx2user,f)
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/user2idx.json','w') as f: json.dump(user2idx,f)
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/idx2user.json','w') as f: json.dump(idx2user,f)
 
     item_data = parallel(item_preprocess, item_data, args, num_cpu)
     inter = parallel(inter_preprocess, inter, args, num_cpu)
@@ -143,11 +145,11 @@ def prepare_dataset(args):
     inter.drop_duplicates(inplace = True)
 
     if args.expand_notes:
-        item_data.to_csv('/home/dhkim/winery/data/item_data_expand.csv', encoding='utf-8-sig', index=False)
+        item_data.to_csv('/home/dhkim/server_front/winery_AI/winery/data/item_data_expand.csv', encoding='utf-8-sig', index=False)
     else:
-        item_data.to_csv('/home/dhkim/winery/data/item_data.csv', encoding='utf-8-sig', index=False)
+        item_data.to_csv('/home/dhkim/server_front/winery_AI/winery/data/item_data.csv', encoding='utf-8-sig', index=False)
 
-    inter.to_csv('/home/dhkim/winery/data/inter.csv', encoding='utf-8-sig', index=False)
+    inter.to_csv('/home/dhkim/server_front/winery_AI/winery/data/inter.csv', encoding='utf-8-sig', index=False)
 
 
 
@@ -160,13 +162,13 @@ def prepare_dataset(args):
     item_data.reset_index(drop = True, inplace = True)
     train_rating = pd.merge(inter.loc[:,['email','user_rating','timestamp','wine_id']],item_data.loc[:, 'wine_id'],on = 'wine_id', how = 'inner')
 
-    train_rating.to_csv('/home/dhkim/winery/data/train_rating.csv', encoding='utf-8', index=False)
-    user_data.to_csv('/home/dhkim/winery/data/user_data.csv', encoding='utf-8', index=False)
+    train_rating.to_csv('/home/dhkim/server_front/winery_AI/winery/data/train_rating.csv', encoding='utf-8', index=False)
+    user_data.to_csv('/home/dhkim/server_front/winery_AI/winery/data/user_data.csv', encoding='utf-8', index=False)
 
     return train_rating, user_data, item_data
 
 def load_data_file():
-    data_path = '/home/dhkim/winery/data'
+    data_path = '/home/dhkim/server_front/winery_AI/winery/data'
     
     try:
         train_data = pd.read_csv(os.path.join(data_path, 'train_rating.csv'), encoding = 'utf-8-sig')
@@ -186,11 +188,11 @@ def prepare_recbole_dataset():
 
 def save_atomic_file(train_data, user_data, item_data):
     
-    with open('/home/dhkim/winery/code/data/meta_data/seq_columns.json','r',encoding='utf-8') as f:  
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/meta_data/seq_columns.json','r',encoding='utf-8') as f:  
         seq_columns = json.load(f)
-    with open('/home/dhkim/winery/code/data/meta_data/token_columns.json','r',encoding='utf-8') as f:  
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/meta_data/token_columns.json','r',encoding='utf-8') as f:  
         tok_columns = json.load(f)
-    with open('/home/dhkim/winery/code/data/meta_data/float_columns.json','r',encoding='utf-8') as f:  
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/meta_data/float_columns.json','r',encoding='utf-8') as f:  
         float_columns = json.load(f)
         
     dataset_name = 'train_data'
@@ -213,7 +215,7 @@ def save_atomic_file(train_data, user_data, item_data):
     item_data.columns = to_recbole_columns(item_data.columns)
     
     # to_csv
-    outpath = f"/home/dhkim/winery/dataset/{dataset_name}"
+    outpath = f"/home/dhkim/server_front/winery_AI/winery/dataset/{dataset_name}"
     os.makedirs(outpath, exist_ok=True)
 
     columns_with_nan = item_data.columns[item_data.isnull().any()].tolist()
@@ -229,7 +231,9 @@ def save_atomic_file(train_data, user_data, item_data):
 
     item_emb = item_data.loc[:,['wine_id:token','vectors:float_seq']]
     item_emb = item_emb.rename(columns = {'wine_id:token':'wid:token'})
-    
+
+    item_data.drop('vectors:float_seq', axis =1 , inplace = True)
+
     item_emb.to_csv(os.path.join(outpath,"train_data.itememb"),sep='\t',index=False, encoding='utf-8')
     train_data.to_csv(os.path.join(outpath,"train_data.inter"),sep='\t',index=False, encoding='utf-8')
     item_data.to_csv(os.path.join(outpath,"train_data.item"),sep='\t',index=False, encoding='utf-8')
@@ -242,11 +246,11 @@ def save_atomic_file(train_data, user_data, item_data):
 
 if __name__ == '__main__':
 
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/home/dhkim/winery/airflow/polished-cocoa-404816-b981d3d391d9.json"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/home/dhkim/server_front/winery_AI/winery/airflow/polished-cocoa-404816-b981d3d391d9.json"
     parser = argparse.ArgumentParser()
     parser.add_argument("--expand_notes", default=False, type=bool)
     parser.add_argument("--with_vector", default=1, type=int)
-    parser.add_argument("--wine_vector", default='/home/dhkim/winery/data/emb_bert.json', type = str)
+    parser.add_argument("--wine_vector", default='/home/dhkim/server_front/winery_AI/winery/data/emb_bert.json', type = str)
     parser.add_argument("--prepare_recbole", default=True, type=bool)
     args = parser.parse_args()
 

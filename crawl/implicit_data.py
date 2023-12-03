@@ -87,7 +87,7 @@ def get_driver(chrome_options, url):
 
 
 def screenshot(driver, error):
-    driver.save_screenshot('/home/dhkim/winery/'+error + '.png')
+    driver.save_screenshot('/home/dhkim/server_front/winery_AI/winery/'+error + '.png')
 
     
 def reset_driver(driver, chrome_options, url):
@@ -232,7 +232,7 @@ def save_img(img_url, wine_url, img_folder):
 
 #------------------------------------------------------------------------------------------------
 def main(driver, urls, done):
-    img_folder = '/home/dhkim/winery/data/images'
+    img_folder = '/home/dhkim/server_front/winery_AI/winery/data/images'
 
     for url in tqdm(urls):
         if url not in done:
@@ -246,14 +246,14 @@ def main(driver, urls, done):
 
             #df = write_data(df, inter)
             done.add(url)
-            #df.to_csv('/home/dhkim/winery/data/implicit.csv', encoding = 'utf-8-sig',index= False)
-            with open('/home/dhkim/winery/data/user_done.pkl','wb') as f: pickle.dump(done,f)
+            #df.to_csv('/home/dhkim/server_front/winery_AI/winery/data/implicit.csv', encoding = 'utf-8-sig',index= False)
+            with open('/home/dhkim/server_front/winery_AI/winery/data/user_done.pkl','wb') as f: pickle.dump(done,f)
 
             time.sleep(5)
 
     #df = write_data(df, inter)
-    #df.to_csv('/home/dhkim/winery/data/implicit.csv', encoding = 'utf-8-sig',index= False)
-    with open('/home/dhkim/winery/data/user_done.pkl','wb') as f: pickle.dump(done,f)
+    #df.to_csv('/home/dhkim/server_front/winery_AI/winery/data/implicit.csv', encoding = 'utf-8-sig',index= False)
+    with open('/home/dhkim/server_front/winery_AI/winery/data/user_done.pkl','wb') as f: pickle.dump(done,f)
 #------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------
 def write_data(write_file, datas):
@@ -296,7 +296,7 @@ if __name__ == '__main__':
     my_idx = int(sys.argv[-1])
 
 
-    with open('/home/dhkim/winery/data/urls.json', 'r') as f: urls = json.load(f)
+    with open('/home/dhkim/server_front/winery_AI/winery/data/urls.json', 'r') as f: urls = json.load(f)
 
     def split_list(lst, n):
         # Calculate the length of each sublist
@@ -324,7 +324,7 @@ if __name__ == '__main__':
 
 
         
-    url = pd.read_csv(f'/home/dhkim/winery/data/review_df_total.csv', encoding = 'utf-8-sig',
+    url = pd.read_csv(f'/home/dhkim/server_front/winery_AI/winery/data/review_df_total.csv', encoding = 'utf-8-sig',
                       ).loc[:, 'user_url']
     
     url.dropna(inplace = True)
@@ -335,11 +335,11 @@ if __name__ == '__main__':
         
 
     try:
-        with open('/home/dhkim/winery/data/user_done.pkl', 'rb') as f: done  = pickle.load(f)
+        with open('/home/dhkim/server_front/winery_AI/winery/data/user_done.pkl', 'rb') as f: done  = pickle.load(f)
     except: done = set()
 
     try:
-        df = pd.read_csv('/home/dhkim/winery/data/implicit.csv', encoding = 'utf-8-sig')
+        df = pd.read_csv('/home/dhkim/server_front/winery_AI/winery/data/implicit.csv', encoding = 'utf-8-sig')
     except:
         columns = ['user_url','wine_url']
         df = pd.DataFrame(columns = columns)

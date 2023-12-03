@@ -1,5 +1,5 @@
 # 수정필요 ->
-data_path: /home/dhkim/winery/dataset/
+data_path: /home/dhkim/server_front/winery_AI/winery/dataset/
 
 additional_feat_suffix: [itememb]
 USER_ID_FIELD: email
@@ -12,7 +12,8 @@ load_col:
   item :  [wine_id, house, country, region1, winetype, wine_style,vintage,price,wine_rating, num_votes, pairing,Red Fruit, Tropical, Tree Fruit,Oaky,Ageing, Black Fruit,Citrus, Dried Fruit, Earthy, Floral, Microbio, Spices,Vegetal, Light, Bold, Smooth, Tannic, Dry, Sweet,Soft,Acidic,Fizzy, Gentle]
   itememb: [wid, vectors]
 
-fields_in_same_space: [[wid, wine_id]]
+alias_of_item_id: [wid]
+
 preload_weight:
     wid: vectors
 

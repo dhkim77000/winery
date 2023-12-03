@@ -9,7 +9,8 @@ from pandas import DataFrame
 import numpy as np
 import joblib
 import ast
-from joblib import Parallel, delayed
+from google.cloud import bigquery_storage_v1, bigquery_storage
+from google.cloud.bigquery_storage_v1.types import ReadSession
 import json
 import os
 from tqdm import tqdm
@@ -45,22 +46,22 @@ def drop_columns(df):
 
 
 def fill_na(df):
-    with open('/home/dhkim/winery/code/data/meta_data/string_columns.json','r',encoding='utf-8') as f:  
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/meta_data/string_columns.json','r',encoding='utf-8') as f:  
         cols = json.load(f)
         for col in cols:
             if col in df.columns: df[col] = df[col].fillna('Empty')
 
-    with open('/home/dhkim/winery/code/data/meta_data/dict_columns.json','r',encoding='utf-8') as f:  
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/meta_data/dict_columns.json','r',encoding='utf-8') as f:  
         cols = json.load(f)
         for col in cols:
             if col in df.columns: df[col] = df[col].fillna('{}')
 
-    with open('/home/dhkim/winery/code/data/meta_data/seq_columns.json','r',encoding='utf-8') as f:  
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/meta_data/seq_columns.json','r',encoding='utf-8') as f:  
         cols = json.load(f)
         for col in cols:
             if col in df.columns: df[col] = df[col].fillna("[]")
 
-    with open('/home/dhkim/winery/code/data/meta_data/float_columns.json','r',encoding='utf-8') as f:  
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/meta_data/float_columns.json','r',encoding='utf-8') as f:  
         cols = json.load(f)
         #col = [c for c in col if '_count' in c]
         #for col in cols:
@@ -97,12 +98,12 @@ def feature_mapper(df, column):
     feature2idx = {f:i for i, f in enumerate(unique_val)}
     idx2feature = {i:f for i, f in enumerate(unique_val)}
 
-    if not os.path.exists('/home/dhkim/winery/code/data/feature_map/'): 
-        os.makedirs('/home/dhkim/winery/code/data/feature_map/')
+    if not os.path.exists('/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/'): 
+        os.makedirs('/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/')
 
-    with open(f'/home/dhkim/winery/code/data/feature_map/{column}2idx.json','w',encoding='utf-8') as f:  
+    with open(f'/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/{column}2idx.json','w',encoding='utf-8') as f:  
         json.dump(feature2idx, f, ensure_ascii=False)
-    with open(f'/home/dhkim/winery/code/data/feature_map/idx2{column}.json','w',encoding='utf-8') as f:  
+    with open(f'/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/idx2{column}.json','w',encoding='utf-8') as f:  
         json.dump(idx2feature, f, ensure_ascii=False)
 
     return feature2idx, idx2feature
@@ -120,18 +121,18 @@ def list_feature_mapper(args, df, column):
     feature2idx = {f:i for i, f in enumerate(unique_val)}
     idx2feature = {i:f for i, f in enumerate(unique_val)}
 
-    if not os.path.exists('/home/dhkim/winery/code/data/feature_map/'): 
-        os.makedirs('/home/dhkim/winery/code/data/feature_map/')
+    if not os.path.exists('/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/'): 
+        os.makedirs('/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/')
 
-    with open(f'/home/dhkim/winery/code/data/feature_map/{column}2idx.json','w',encoding='utf-8') as f:  
+    with open(f'/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/{column}2idx.json','w',encoding='utf-8') as f:  
         json.dump(feature2idx, f, ensure_ascii=False)
-    with open(f'/home/dhkim/winery/code/data/feature_map/idx2{column}.json','w',encoding='utf-8') as f:  
+    with open(f'/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/idx2{column}.json','w',encoding='utf-8') as f:  
         json.dump(idx2feature, f, ensure_ascii=False)
 
     return df, feature2idx, idx2feature
 
 def map_all_single_features(df):
-    with open('/home/dhkim/winery/code/data/meta_data/string_columns.json','r',encoding='utf-8') as f:  
+    with open('/home/dhkim/server_front/winery_AI/winery/code/data/meta_data/string_columns.json','r',encoding='utf-8') as f:  
         single_category_columns = json.load(f)
 
     for c in single_category_columns:
@@ -165,12 +166,12 @@ def note_mapper(df, note_col):
     feature2idx = {f:i for i, f in enumerate(unique_val)}
     idx2feature = {i:f for i, f in enumerate(unique_val)}
 
-    if not os.path.exists('/home/dhkim/winery/code/data/feature_map/'): 
-        os.makedirs('/home/dhkim/winery/code/data/feature_map/')
+    if not os.path.exists('/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/'): 
+        os.makedirs('/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/')
 
-    with open(f'/home/dhkim/winery/code/data/feature_map/{note}2idx.json','w',encoding='utf-8') as f:  
+    with open(f'/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/{note}2idx.json','w',encoding='utf-8') as f:  
         json.dump(feature2idx, f, ensure_ascii=False)
-    with open(f'/home/dhkim/winery/code/data/feature_map/idx2{note}.json','w',encoding='utf-8') as f:  
+    with open(f'/home/dhkim/server_front/winery_AI/winery/code/data/feature_map/idx2{note}.json','w',encoding='utf-8') as f:  
         json.dump(idx2feature, f, ensure_ascii=False)
 
     return feature2idx, idx2feature
@@ -528,8 +529,8 @@ def find_most_sim_item(df : DataFrame, to_fill_wine_id: int, index : faiss.Index
     return df
 
 ##data_to_normal(data,'email','timestamp','rating','wine_id')
-def data_to_normal(data,user_id,timestamp,rating,wine_id):
-    grouped_data = data.groupby(user_id)[rating].agg(['mean', 'std','count'])
+def data_to_normal(data, group_col, timestamp,rating,wine_id):
+    grouped_data = data.groupby(group_col)[rating].agg(['mean', 'std','count'])
 
     # 여러개 구매한 유저
     other_user = grouped_data[(grouped_data['count']>=5) & (grouped_data['std'] != 0)]
@@ -538,16 +539,16 @@ def data_to_normal(data,user_id,timestamp,rating,wine_id):
 
     other_userlist = list(other_user.index)
 
-    other_user_data = data[data[user_id].isin(other_userlist)].sort_values(by=user_id)
+    other_user_data = data[data[group_col].isin(other_userlist)].sort_values(by=group_col)
     other_user_data
 
-    other_data = pd.merge(other_user_data,other_user, on =user_id,how='left')
+    other_data = pd.merge(other_user_data,other_user, on =group_col,how='left')
 
     other_data = other_data.set_index(other_user_data.index)
 
     other_data['scaled_rating'] = (other_data[rating]-other_data['mean'])/other_data['std']
     print(other_data['scaled_rating'].quantile(0.75))
-    result = other_data[[user_id,timestamp,'scaled_rating',wine_id]]
+    result = other_data[[group_col,timestamp,'scaled_rating',wine_id]]
     result.rename(columns = {'scaled_rating':'rating'})
     return result
 
@@ -555,13 +556,52 @@ def data_to_normal(data,user_id,timestamp,rating,wine_id):
 def get_data_from_bucket():
     bucket_name = 'input_features'    
     item_data_source_blob_name = 'item_data.csv'
-    inter_data_source_blob_name = 'inter.csv'
-    destination_folder = '/home/dhkim/winery/data'    
+    #inter_data_source_blob_name = 'inter.csv'
+    destination_folder = '/home/dhkim/server_front/winery_AI/winery/data'    
 
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     item_blob = bucket.blob(item_data_source_blob_name)
-    inter_blob = bucket.blob(inter_data_source_blob_name)
+    #inter_blob = bucket.blob(inter_data_source_blob_name)
 
     item_blob.download_to_filename(os.path.join(destination_folder, item_data_source_blob_name))
-    inter_blob.download_to_filename(os.path.join(destination_folder, inter_data_source_blob_name))
+    #inter_blob.download_to_filename(os.path.join(destination_folder, inter_data_source_blob_name))
+
+
+def get_GBQ_table_session(client, dataset_id, table_id):
+
+    project_id = "polished-cocoa-404816"
+    
+    parent = f"projects/{project_id}"
+
+    requested_session =bigquery_storage_v1.types.ReadSession(
+        table=f"projects/{project_id}/datasets/{dataset_id}/tables/{table_id}",
+        data_format=bigquery_storage_v1.types.DataFormat.ARROW)
+
+    session = client.create_read_session(parent=parent, read_session=requested_session)
+    
+    return session
+
+def table2df(dataset_id, table_id):
+
+    client = bigquery_storage_v1.BigQueryReadClient()
+
+    session = get_GBQ_table_session(client = client, dataset_id= dataset_id, table_id = table_id)
+    
+    stream = session.streams[0]  # TODO: Also read any other streams.
+    datas = []
+    for stream in tqdm(session.streams):
+        try:
+            data = client.read_rows(stream.name).to_arrow().to_pandas()
+            print(len(data))
+            datas.append(data)
+        except Exception as e:
+            continue
+
+    result_df = pd.concat(datas, ignore_index=True)
+
+    return result_df
+
+if __name__ == "__main__":
+
+    table2df("inter", "user_item")

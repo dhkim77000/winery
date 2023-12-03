@@ -1,5 +1,5 @@
 # 수정필요 ->
-data_path: /home/dhkim/winery/dataset/
+data_path: /home/dhkim/server_front/winery_AI/winery/dataset/
 
 additional_feat_suffix: [itememb]
 USER_ID_FIELD: email
