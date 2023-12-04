@@ -46,13 +46,16 @@ def main(args):
 
     wine_vectors = []
     for vector in item_data['vectors']: wine_vectors.append(vector)
-    wine_vectors = np.array(wine_vectors)
+    wine_vectors = np.array(wine_vectors).astype(np.float32)
 
-    wine_ids = list(item_data.index) #####wine id 
     vector_dimension = wine_vectors.shape[1]
 
     index = faiss.IndexFlatIP(vector_dimension)
     index = faiss.IndexIDMap2(index)
+
+    wine_ids = list(item_data.index) #####wine id 
+    wine_ids = np.array(wine_ids).astype(np.int64)
+
     index.add_with_ids(wine_vectors, wine_ids)
 
     user_data = pd.read_csv("/home/dhkim/server_front/winery_AI/winery/dataset/train_data/train_data.user", 
@@ -73,8 +76,9 @@ def main(args):
 
     K = args.rank_K
 
-    model_path = 'saved/'+args.saved_model
-    model_name = model_path[6:-4].split('-')[0]
+    model_path = os.path.join('saved/', args.saved_model)
+   
+    model_name = model_path.split("/")[-1].split('-')[0]
 
     print(model_path,model_name)
     if model_name in general_model :
@@ -193,7 +197,7 @@ def main(args):
     elif model_name in sequence_model or model_name in context_aware_model:
         # config, model, dataset 불러오기
         # user, item id -> token 변환 array
-
+        pdb.set_trace()
         checkpoint = torch.load(model_path)
         config = checkpoint['config']
         config['dataset'] = 'train_data'
