@@ -10,6 +10,7 @@ from args import parse_args
 from logging import getLogger
 import torch
 import gc
+import pickle
 from utils import candid2recbole, bayesian_average, string2array, data2bucket
 
 from recbole.model.general_recommender.multivae import MultiVAE
@@ -76,9 +77,12 @@ def main(args):
 
     K = args.rank_K
 
-    model_path = os.path.join('saved/', args.saved_model)
+    model_path = os.path.join('/Recbole/saved/', args.saved_model)
    
     model_name = model_path.split("/")[-1].split('-')[0]
+
+    with open('/home/dhkim/server_front/winery_AI/winery/data/dummy_userID.pkl', 'rb') as file:
+        dummy_users = pickle.load(file)
 
     print(model_path,model_name)
     if model_name in general_model :
@@ -247,80 +251,81 @@ def main(args):
         model.load_state_dict(checkpoint['state_dict'])
         model.load_other_parameter(checkpoint.get('other_parameter'))
         model.eval()
-        print("create dataset done!")
+        print("Model loaded!")
 
         with torch.no_grad():
             for data in tbar:
-
-                if max(data) > len(user_id2token):
-                    data = [item for item in data if item <= user_len]
-                    data = torch.tensor(data)
-                # interaction 생성
-                interaction = dict()
-                interaction = Interaction(interaction)
-                interaction[user_id] = data
-                interaction = interaction.to(device)
-                interaction = interaction.repeat_interleave(dataset.item_num)
-                interaction.update(
-                    test_data.dataset.get_item_feature().to(device).repeat(len(data))
-                )
-
-                # user item별 score 예측
-                score = model.predict(interaction)
-                score = score.view(-1, item_len)
-
-                rating_pred = score.cpu().data.numpy().copy()
-
-                user_index = data.numpy()
-                user_inter_count = user_data.loc[int(user_id2token[user_index[0]]), 'count:float']
-
-                idx = matrix[user_index].toarray() > 0
-
                 
-                candid_item_ids = candid2recbole(item_data, 
-                                                user_inter_count, 
-                                                inter_per_user,
-                                                popular,
-                                                index)
-                
-                candid_item_idx = []
-                for item_id in candid_item_ids: candid_item_idx.append(item_id2idx[str(item_id)])
-                
-
-                mask = np.zeros(rating_pred.shape[1], dtype=bool)
-                mask[candid_item_idx] = True
-                mask = mask[np.newaxis, :]
-                rating_pred[~mask] = -np.inf
-                rating_pred[idx] = -np.inf
-                rating_pred[:, 0] = -np.inf
-                ind = np.argpartition(rating_pred, -K)[:, -K:]
-
-                arr_ind = rating_pred[np.arange(len(rating_pred))[:, None], ind]
-
-                arr_ind_argsort = np.argsort(arr_ind)[np.arange(len(rating_pred)), ::-1]
-
-                batch_pred_list = ind[
-                    np.arange(len(rating_pred))[:, None], arr_ind_argsort
-                ]
-                
-                if pred_list is None:
-                    pred_list = batch_pred_list
-                    user_list = user_index
-                else:
-                    pred_list = np.append(pred_list, batch_pred_list, axis=0)
-                    user_list = np.append(
-                        user_list, user_index, axis=0
+                ##Dummy user가 아닌 유저만 업데이트 진행
+                if data not in dummy_users:
+                        
+                    if max(data) > len(user_id2token):
+                        data = [item for item in data if item <= user_len]
+                        data = torch.tensor(data)
+                    # interaction 생성
+                    interaction = dict()
+                    interaction = Interaction(interaction)
+                    interaction[user_id] = data
+                    interaction = interaction.to(device)
+                    interaction = interaction.repeat_interleave(dataset.item_num)
+                    interaction.update(
+                        test_data.dataset.get_item_feature().to(device).repeat(len(data))
                     )
-                del batch_pred_list, user_index, rating_pred, arr_ind, arr_ind_argsort, mask, candid_item_idx
-                del interaction, user_inter_count, score
-                gc.collect()
-#             result = []
-#             for user, pred in zip(user_list, pred_list):
-#                 for item in pred:
-#                     result.append((int(user_id2token[user]), int(item_id2token[item])))
 
-            
-            user_id2token[user_list[0]]
+                    # user item별 score 예측
+                    score = model.predict(interaction)
+                    score = score.view(-1, item_len)
+
+                    rating_pred = score.cpu().data.numpy().copy()
+
+                    user_index = data.numpy()
+                    user_inter_count = user_data.loc[int(user_id2token[user_index[0]]), 'count:float']
+
+                    idx = matrix[user_index].toarray() > 0
+
+                    
+                    candid_item_ids = candid2recbole(item_data, 
+                                                    user_inter_count, 
+                                                    inter_per_user,
+                                                    popular,
+                                                    index)
+                    
+                    candid_item_idx = []
+                    for item_id in candid_item_ids: candid_item_idx.append(item_id2idx[str(item_id)])
+                    
+
+                    mask = np.zeros(rating_pred.shape[1], dtype=bool)
+                    mask[candid_item_idx] = True
+                    mask = mask[np.newaxis, :]
+                    rating_pred[~mask] = -np.inf
+                    rating_pred[idx] = -np.inf
+                    rating_pred[:, 0] = -np.inf
+                    ind = np.argpartition(rating_pred, -K)[:, -K:]
+
+                    arr_ind = rating_pred[np.arange(len(rating_pred))[:, None], ind]
+
+                    arr_ind_argsort = np.argsort(arr_ind)[np.arange(len(rating_pred)), ::-1]
+
+                    batch_pred_list = ind[
+                        np.arange(len(rating_pred))[:, None], arr_ind_argsort
+                    ]
+                    
+                    if pred_list is None:
+                        pred_list = batch_pred_list
+                        user_list = user_index
+                    else:
+                        pred_list = np.append(pred_list, batch_pred_list, axis=0)
+                        user_list = np.append(
+                            user_list, user_index, axis=0
+                        )
+                    del batch_pred_list, user_index, rating_pred, arr_ind, arr_ind_argsort, mask, candid_item_idx
+                    del interaction, user_inter_count, score
+                    gc.collect()
+
+    #             result = []
+    #             for user, pred in zip(user_list, pred_list):
+    #                 for item in pred:
+    #                     result.append((int(user_id2token[user]), int(item_id2token[item])))
 
 
             # Token화된 유저 이메일을 실제 이메일로 전환

@@ -9,7 +9,7 @@ import pandas as pd
 import pdb
 import gc
 from tqdm import tqdm
-import umap
+import umap.umap_ as umap
 from collections import Counter
 from sklearn.metrics import silhouette_score
 

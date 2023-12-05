@@ -45,7 +45,7 @@ def parse_args():
     #sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(models_path, x)), reverse=True)
     #most_recent_model = sorted_files[0]
 
-    parser.add_argument("--saved_model" , default = '/home/dhkim/server_front/winery_AI/winery/saved/DCN-latest.pth', type=str,help ="use model")
+    parser.add_argument("--saved_model" , default = '/home/dhkim/server_front/winery_AI/winery/Recbole/saved/DCN-latest.pth', type=str,help ="use model")
     args = parser.parse_args()
 
     return args
