@@ -15,7 +15,7 @@ def read_last_date(log_path):
             lines = log_file.readlines()
             if lines:
                 last_line = lines[-1].strip()
-                return last_line.split([1])
+                return last_line.split()[1]
     except FileNotFoundError:
         print("Log file not found.")
     except Exception as e:

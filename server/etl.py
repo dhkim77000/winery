@@ -7,6 +7,12 @@ import pandas as pd
 from datetime import datetime
 import argparse
 import os
+import json
+from database import get_db
+from crud import update_wine_list_by_email
+
+from google.cloud import storage
+
 from utils import (read_last_date, 
                    write_ETL_log, 
                    parallel_push, 
@@ -46,10 +52,42 @@ def get_inter_update(collection, log_path):
 
     return update 
 
+def get_data_from_bucket():
+
+    storage_client = storage.Client()
+
+    bucket_name = 'recommendation_update'    
+
+    bucket = storage_client.bucket(bucket_name)
+    blobs = list(bucket.list_blobs())
+    # 가장 최근에 업로드된 객체 찾기
+    latest_blob = max(blobs, key=lambda x: x.time_created)
+
+    destination_folder = '/home/dhkim/server_front/winery_server'    
+    
+    update = bucket.blob(latest_blob)
+
+    destination_path = os.path.join(destination_folder, 'update.json')
+
+    # 파일 다운로드
+    update.download_to_filename(destination_path)
+
+
+def update_recommendation():
+    get_data_from_bucket()
+    with open("/home/dhkim/server_front/winery_server/update.json", 'r') as f:
+        updates = json.load(f)
+
+    db = get_db()
+
+    for email in updates:
+        wine_list = updates[email]
+        update_wine_list_by_email(db, email, wine_list)
 
 
 
-def main():
+def push_logs():
+    
     log_path = '/home/dhkim/server_front/winery_server/server/ETL_log.txt'
     
     collection = get_mongo_db().interaction
@@ -65,13 +103,19 @@ def main():
     push_data_GBQ(client, table_ref, update)
 
 
+def main(args):
+    if args.mode =='push':
+        push_logs()
+
+    elif args.mode == 'update':
+        update_recommendation()
+
 
 if __name__ == "__main__":
+    
     parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "--parallel", action="store_true", help="Whether to parallelize process"
-    )
+    parser.add_argument("--mode", default='push', type=str)
     args = parser.parse_args()
-    main()
+
+    main(args)
     

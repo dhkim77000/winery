@@ -7,7 +7,6 @@ import pandas as pd
 import numpy as np
 import joblib
 import ast
-from joblib import Parallel, delayed
 import json
 import os
 from tqdm import tqdm
@@ -144,7 +143,7 @@ def prepare_dataset(args):
     if args.expand_notes:
         item_data.to_csv('/opt/ml/wine/data/item_data_expand.csv', encoding='utf-8-sig', index=False)
     else:
-        item_data.to_csv('/opt/ml/wine/data/item_data.csv', encoding='utf-8-sig', index=False)
+        item_data.to_csv('/opt/ml/wine/data/item.csv', encoding='utf-8-sig', index=False)
 
     inter.to_csv('/opt/ml/wine/data/inter.csv', encoding='utf-8-sig', index=False)
 
@@ -160,7 +159,7 @@ def prepare_dataset(args):
     train_rating = pd.merge(inter.loc[:,['email','user_rating','timestamp','wine_id']],item_data.loc[:, 'wine_id'],on = 'wine_id', how = 'inner')
 
     train_rating.to_csv('/opt/ml/wine/data/train_rating.csv', encoding='utf-8', index=False)
-    user_data.to_csv('/opt/ml/wine/data/user_data.csv', encoding='utf-8', index=False)
+    user_data.to_csv('/opt/ml/wine/data/user.csv', encoding='utf-8', index=False)
 
     return train_rating, user_data, item_data
 
@@ -169,8 +168,8 @@ def load_data_file():
     
     try:
         train_data = pd.read_csv(os.path.join(data_path, 'train_rating.csv'), encoding = 'utf-8-sig')
-        user_data = pd.read_csv(os.path.join(data_path, 'user_data.csv'), encoding = 'utf-8-sig')
-        item_data = pd.read_csv(os.path.join(data_path, 'item_data.csv'), encoding = 'utf-8-sig')
+        user_data = pd.read_csv(os.path.join(data_path, 'user.csv'), encoding = 'utf-8-sig')
+        item_data = pd.read_csv(os.path.join(data_path, 'item.csv'), encoding = 'utf-8-sig')
     
     except:
         print('No files found, prepare dataste')

@@ -224,15 +224,14 @@ async def set_user_mbti(db: connection, data, topK, min_p, max_p):
         return False
     
 
-async def update_wine_list_by_email(db: connection, db_user):
-    new_wine_list = db_user.wine_list
-    email = db_user.email
+async def update_wine_list_by_email(db: connection, email, wine_list):
+
     update_query = """
     UPDATE "user"
     SET wine_list = %s
     WHERE email = %s;
     """
-    values = (new_wine_list, email)
+    values = (wine_list, email)
 
     # 쿼리 실행
     with db.cursor() as cur:
