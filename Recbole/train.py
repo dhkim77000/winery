@@ -46,14 +46,15 @@ def main(args):
     print(f"It took {t/60:.2f} mins")
     print(result)
 
-    files = os.listdir('/home/dhkim/server_front/winery_AI/winery/Recbole/saved')
-    files = [file for file in files if os.path.isfile(os.path.join('/home/dhkim/server_front/winery_AI/winery/Recbole/saved', file))]
+    saved_folder = '/home/dhkim/server_front/winery_AI/winery/saved'
+    files = os.listdir(saved_folder)
+    files = [file for file in files if os.path.isfile(os.path.join(saved_folder, file))]
     
-    sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join('/home/dhkim/server_front/winery_AI/winery/Recbole/saved', x)), reverse=True)
+    sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(saved_folder, x)), reverse=True)
+    pdb.set_trace()
+    most_recent_model = os.path.join(saved_folder, sorted_files[0])
 
-    most_recent_model = os.path.join('/home/dhkim/server_front/winery_AI/winery/Recbole/saved', sorted_files[0])
-
-    shutil.copyfile(most_recent_model,  os.path.join('/home/dhkim/server_front/winery_AI/winery/Recbole/saved', 'DCN-latest.pth'))
+    shutil.copy2(most_recent_model,  os.path.join(saved_folder, 'DCN-latest.pth'))
     os.remove(most_recent_model)
 
 

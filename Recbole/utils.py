@@ -10,7 +10,7 @@ from datetime import datetime
 
 def data2bucket():
     current_time = datetime.now()
-    bucket_name = 'rank_info_db2model'    
+    bucket_name = 'recommendation_update'    
     source_file_name = '/home/dhkim/server_front/winery_AI/winery/output/inference.json'
     destination_blob_name = f'{current_time}_inference.json'
   

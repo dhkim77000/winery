@@ -77,7 +77,7 @@ def main(args):
 
     K = args.rank_K
 
-    model_path = os.path.join('/Recbole/saved/', args.saved_model)
+    model_path = os.path.join('/home/dhkim/server_front/winery_AI/winery/saved', args.model_name + '-latest.pth')
    
     model_name = model_path.split("/")[-1].split('-')[0]
 
@@ -201,7 +201,7 @@ def main(args):
     elif model_name in sequence_model or model_name in context_aware_model:
         # config, model, dataset 불러오기
         # user, item id -> token 변환 array
-        pdb.set_trace()
+
         checkpoint = torch.load(model_path)
         config = checkpoint['config']
         config['dataset'] = 'train_data'
