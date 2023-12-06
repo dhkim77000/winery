@@ -25,7 +25,7 @@ with DAG(
 
     t1 = BashOperator(
     task_id="update",
-    bash_command="python /home/dhkim/server_front/winery_server/server/etl.py --push",
+    bash_command="python /home/dhkim/server_front/winery_server/server/etl.py --mode push",
     dag=dag,
     )
  

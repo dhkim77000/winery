@@ -17,6 +17,8 @@ psycopg2 = "^2.9.9"
 tqdm = "^4.66.1"
 pandas = "2.0"
 pyarrow = "^14.0.1"
+fastapi = "^0.104.1"
+passlib = "^1.7.4"
 
 
 [build-system]
