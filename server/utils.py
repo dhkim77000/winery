@@ -15,7 +15,7 @@ def read_last_date(log_path):
             lines = log_file.readlines()
             if lines:
                 last_line = lines[-1].strip()
-                return last_line.split()[1]
+                return int(last_line.split()[1])
     except FileNotFoundError:
         print("Log file not found.")
     except Exception as e:
@@ -23,10 +23,10 @@ def read_last_date(log_path):
     return -1
 
 
-def write_ETL_log(log_path, time, unix_time):
+def write_ETL_log(log_path, time, unix_time, num_update):
     try:
         with open(log_path, 'a') as log_file:
-            log_file.write(f"Execution: {unix_time} {time.strftime('%Y-%m-%d %H:%M')}\n")
+            log_file.write(f"Execution[{num_update}]: {unix_time} {time.strftime('%Y-%m-%d %H:%M')}, \n")
     except Exception as e:
         print(f"Error writing to log file: {e}")
 

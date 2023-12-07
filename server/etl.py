@@ -8,8 +8,9 @@ from datetime import datetime
 import argparse
 import os
 import json
-from database import get_db
+from database import get_conn
 from crud import update_wine_list_by_email
+import asyncio
 
 from google.cloud import storage
 
@@ -47,68 +48,76 @@ def get_inter_update(collection, log_path):
                        "wine_id":wine_ids,
                        "rating":ratings})
 
+    if len(update) > 0:
+        write_ETL_log(log_path, current_time, current_time_unix, len(update))
+        return update 
+    else:
+        return None
 
-    write_ETL_log(log_path, current_time, current_time_unix)
-
-    return update 
+def set_credenitial():
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/home/dhkim/server_front/winery_server/airflow/polished-cocoa-404816-b981d3d391d9.json"
 
 def get_data_from_bucket():
-
+    set_credenitial()
     storage_client = storage.Client()
 
     bucket_name = 'recommendation_update'    
 
     bucket = storage_client.bucket(bucket_name)
     blobs = list(bucket.list_blobs())
-    # 가장 최근에 업로드된 객체 찾기
-    latest_blob = max(blobs, key=lambda x: x.time_created)
 
-    destination_folder = '/home/dhkim/server_front/winery_server'    
-    
-    update = bucket.blob(latest_blob)
+    if len(blobs) != 0:
 
-    destination_path = os.path.join(destination_folder, 'update.json')
+        # 가장 최근에 업로드된 객체 찾기
+        latest_blob = max(blobs, key=lambda x: x.time_created).name
 
-    # 파일 다운로드
-    update.download_to_filename(destination_path)
+        destination_folder = '/home/dhkim/server_front/winery_server'    
+        
+        update = bucket.blob(latest_blob)
+
+        destination_path = os.path.join(destination_folder, 'update.json')
+
+        # 파일 다운로드
+        update.download_to_filename(destination_path)
 
 
-def update_recommendation():
+async def update_recommendation():
     get_data_from_bucket()
     with open("/home/dhkim/server_front/winery_server/update.json", 'r') as f:
         updates = json.load(f)
 
-    db = get_db()
+    db = get_conn()
 
     for email in updates:
         wine_list = updates[email]
-        update_wine_list_by_email(db, email, wine_list)
+        await update_wine_list_by_email(db, email, wine_list)
 
 
 
 def push_logs():
-    
+    set_credenitial()
     log_path = '/home/dhkim/server_front/winery_server/server/ETL_log.txt'
     
     collection = get_mongo_db().interaction
     update = get_inter_update(collection, log_path)
-    print(f"Updating {len(update)} interactions")
+    if update is not None:
+        print(f"Updating {len(update)} interactions")
 
-    #if args.parallel:
-    #   num_cpu = os.cpu_count()
-    #    parallel_push(update, num_cpu)
-    
-    client = get_GBQ_client()
-    table_ref = get_GBQ_table_ref('inter', 'user_item')
-    push_data_GBQ(client, table_ref, update)
+        #if args.parallel:
+        #   num_cpu = os.cpu_count()
+        #    parallel_push(update, num_cpu)
+        
+        client = get_GBQ_client()
+        table_ref = get_GBQ_table_ref('inter', 'user_item')
+        push_data_GBQ(client, table_ref, update)
 
 
-def main(args):
+async def main(args):
     if args.mode =='push':
         push_logs()
 
     elif args.mode == 'update':
-        update_recommendation()
+        await update_recommendation()
 
 
 if __name__ == "__main__":
@@ -117,5 +126,5 @@ if __name__ == "__main__":
     parser.add_argument("--mode", default='push', type=str)
     args = parser.parse_args()
 
-    main(args)
+    asyncio.run(main(args))
     
