@@ -8,7 +8,11 @@ import numpy as np
 from google.cloud import storage
 from datetime import datetime
 
+def set_credenitial():
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/home/dhkim/server_front/winery_server/airflow/polished-cocoa-404816-b981d3d391d9.json"
+
 def data2bucket():
+    set_credenitial()
     current_time = datetime.now()
     bucket_name = 'recommendation_update'    
     source_file_name = '/home/dhkim/server_front/winery_AI/winery/output/inference.json'

@@ -81,8 +81,8 @@ def main(args):
    
     model_name = model_path.split("/")[-1].split('-')[0]
 
-    with open('/home/dhkim/server_front/winery_AI/winery/data/dummy_userID.pkl', 'rb') as file:
-        dummy_users = pickle.load(file)
+    with open('/home/dhkim/server_front/winery_AI/winery/data/real_userID.pkl', 'rb') as file:
+        real_users = pickle.load(file)
 
     print(model_path,model_name)
     if model_name in general_model :
@@ -174,27 +174,7 @@ def main(args):
                 result.append((int(user_id2token[user]), int(item_id2token[item])))
              #데이터 저장
         sub = pd.DataFrame(result, columns=["user", "item"])
-        print(len(sub))
-#          # train load
-#         train = pd.read_csv("/opt/ml/input/data/train/train_ratings.csv")
-#         # indexing save
-#         uidx2user = {k:v for k,v in enumerate(sorted(set(train.user)))}
-#         iidx2item = {k:v for k,v in enumerate(sorted(set(train.item)))}
 
-#         sub.user = sub.user.map(uidx2user)
-#         sub.item = sub.item.map(iidx2item)
-
-#         sub = afterprocessing(args,sub,train)
-#         # SAVE OUTPUT
-#         output_dir = os.getcwd()+'/output/'
-#         write_path = os.path.join(output_dir, f"{model_name}.csv")
-#         if not os.path.exists(output_dir):
-#             os.makedirs(output_dir)
-#         with open(write_path, 'w', encoding='utf8') as w:
-#             print("writing prediction : {}".format(write_path))
-#             w.write("user,item\n")
-#             for id, p in sub.values:
-#                 w.write('{},{}\n'.format(id,p))
         print('inference done!')  
         
         
@@ -211,10 +191,17 @@ def main(args):
 
         user_id = config['USER_ID_FIELD']
         item_id = config['ITEM_ID_FIELD']
-        user_id2token = dataset.field2id_token[user_id]
-        item_id2token = dataset.field2id_token[item_id]
+        #user_id2token = dataset.field2id_token[user_id]
 
-        user_id2idx = {user_id: i for i, user_id in enumerate(user_id2token)}
+        user_id2token = dataset.field2token_id[user_id]
+        del user_id2token['[PAD]']
+        token2user_id = {value: key for key, value in user_id2token.items()}
+
+        item_id2token = dataset.field2token_id[item_id]
+        del item_id2token['[PAD]']
+
+        token2item_id = {value: key for key, value in item_id2token.items()}
+        #user_id2idx = {user_id: i for i, user_id in enumerate(user_id2token)}
         item_id2idx = {item_id: i for i, item_id in enumerate(item_id2token)}
 
         # device 설정
@@ -225,8 +212,11 @@ def main(args):
         user_count = len(user_id2token)
         remainder = user_count % batch_size
         padding_size = batch_size - remainder if remainder != 0 else 0
-        all_user_list = torch.arange(1, user_count + padding_size+1).reshape(-1, batch_size)
-        user_id2token = user_id2token[1:]
+        #all_user_list = torch.arange(1, user_count + padding_size+1).reshape(-1, batch_size)
+
+        #모든 user의 토큰화되지 않은 user_id
+        all_user_list = torch.tensor(list(map(int, user_id2token.keys()))).reshape(-1, batch_size)
+    
         # user, item 길이
         user_len = len(user_id2token)
         item_len = len(item_id2token)
@@ -253,19 +243,24 @@ def main(args):
         model.eval()
         print("Model loaded!")
 
+        #data = user_id NOT TOKENED User ID
         with torch.no_grad():
             for data in tbar:
                 
-                ##Dummy user가 아닌 유저만 업데이트 진행
-                if data not in dummy_users:
-                        
-                    if max(data) > len(user_id2token):
-                        data = [item for item in data if item <= user_len]
-                        data = torch.tensor(data)
+                ##real user 유저만 업데이트 진행
+                
+                _user_id  = data.item()
+                user_token = user_id2token[str(_user_id)]
+                if _user_id in real_users:
+                    
+                    #if max(data) > len(user_id2token):
+                    #    data = [item for item in data if item <= user_len]
+                    #    data = torch.tensor(data)
                     # interaction 생성
                     interaction = dict()
                     interaction = Interaction(interaction)
-                    interaction[user_id] = data
+                    #interaction[user_id] = data
+                    interaction[user_id] = torch.tensor([user_token])
                     interaction = interaction.to(device)
                     interaction = interaction.repeat_interleave(dataset.item_num)
                     interaction.update(
@@ -274,14 +269,15 @@ def main(args):
 
                     # user item별 score 예측
                     score = model.predict(interaction)
-                    score = score.view(-1, item_len)
+                    #+1 for [PAD]
+                    score = score.view(-1, item_len+1)
 
                     rating_pred = score.cpu().data.numpy().copy()
 
-                    user_index = data.numpy()
-                    user_inter_count = user_data.loc[int(user_id2token[user_index[0]]), 'count:float']
+                    ##index 하려면 토큰화되지 않은 user_id로 접근
+                    user_inter_count = user_data.loc[_user_id, 'count:float']
 
-                    idx = matrix[user_index].toarray() > 0
+                    idx = matrix[user_token].toarray() > 0
 
                     
                     candid_item_ids = candid2recbole(item_data, 
@@ -309,16 +305,17 @@ def main(args):
                     batch_pred_list = ind[
                         np.arange(len(rating_pred))[:, None], arr_ind_argsort
                     ]
-                    
+                    batch_pred_list = np.vectorize(lambda x: int(token2item_id[x]))(batch_pred_list)
+
                     if pred_list is None:
                         pred_list = batch_pred_list
-                        user_list = user_index
+                        user_list = user_token
                     else:
                         pred_list = np.append(pred_list, batch_pred_list, axis=0)
                         user_list = np.append(
-                            user_list, user_index, axis=0
+                            user_list, user_token, axis=0
                         )
-                    del batch_pred_list, user_index, rating_pred, arr_ind, arr_ind_argsort, mask, candid_item_idx
+                    del batch_pred_list, user_token, rating_pred, arr_ind, arr_ind_argsort, mask, candid_item_idx
                     del interaction, user_inter_count, score
                     gc.collect()
 
@@ -329,13 +326,18 @@ def main(args):
 
 
             # Token화된 유저 이메일을 실제 이메일로 전환
-            user_list = [idx2user[str(user_id2token[user_idx])] for user_idx in user_list]
+
+            if isinstance(user_list, int): user_list = [user_list]
+
+            user_list = [idx2user[str(token2user_id[user_token])] for user_token in user_list]
     
             # user_list를 key로, pred_list를 value로 갖는 dictionary 생성
             data_dict = {user_email: pred_list[i].tolist() for i, user_email in enumerate(user_list)}
 
             # JSON 데이터를 파일에 저장
             output_foler = '/home/dhkim/server_front/winery_AI/winery/output'
+            if not os.path.exists(output_foler):
+                os.makedirs(output_foler)
 
             filename = "inference.json"  # 원하는 파일 경로와 이름 설정
             with open(os.path.join(output_foler, filename), 'w') as f:

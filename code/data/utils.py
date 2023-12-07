@@ -602,13 +602,13 @@ def table2df(dataset_id, table_id):
 
     return result_df
 
-def is_dummyuser(email):
+def is_realuser(email):
     # 정규 표현식을 사용하여 이메일 형식 검사
     pattern = r'^\d+@'
     match = re.match(pattern, email)
 
     # @ 앞에 숫자만 있는 경우 True 반환
-    return bool(match)
+    return not bool(match)
 
 if __name__ == "__main__":
 

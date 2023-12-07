@@ -205,16 +205,16 @@ def save_atomic_file(train_data, user_data, item_data):
 
     item_data['wine_id'] = item_data['wine_id'].astype(int).astype('category')
 
-    user_data['dummy'] = user_data['email'].apply(is_dummyuser)
-    
+    user_data['real'] = user_data['email'].apply(is_realuser)
+
     user_data['email'] = user_data['email'].map(user2idx)
     user_data['email'] = user_data['email'].astype(int).astype('category')
 
     
-    with open('/home/dhkim/server_front/winery_AI/winery/data/dummy_userID.pkl', 'wb') as f:
-        pickle.dump(set(user_data[user_data['dummy']]['email']), f)
+    with open('/home/dhkim/server_front/winery_AI/winery/data/real_userID.pkl', 'wb') as f:
+        pickle.dump(set(user_data[user_data['real']]['email']), f)
 
-    user_data.drop('dummy', axis = 1, inplace = True)
+    user_data.drop('real', axis = 1, inplace = True)
 
     train_data.columns = to_recbole_columns(train_data.columns)
     user_data.columns = to_recbole_columns(user_data.columns)
